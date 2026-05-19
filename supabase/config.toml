@@ -1,0 +1,2 @@
+[functions.analyze-trash]
+verify_jwt = true
