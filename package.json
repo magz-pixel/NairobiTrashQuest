@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "setup:check": "node scripts/setup-check.mjs",
-    "seed:demo": "node scripts/seed-demo.mjs"
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "db:realtime": "node scripts/run-sql.mjs supabase/migrations/002_realtime.sql",
+    "db:seed": "node scripts/run-sql.mjs scripts/seed-demo-reports.sql"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

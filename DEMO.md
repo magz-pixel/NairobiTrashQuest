@@ -39,11 +39,27 @@ npm run seed:demo
 
 ## Deploy (Vercel)
 
+**Option A — CLI**
+
 ```bash
 npx vercel login
 npx vercel --prod
 ```
 
-Set environment variables in Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_DEMO_MODE=true` (or `VITE_GEMINI_API_KEY`).
+**Option B — Dashboard**
 
-Add the Vercel URL to Supabase redirect URLs (see above).
+1. Push this repo to GitHub.
+2. Go to [vercel.com/new](https://vercel.com/new) → Import the repo.
+3. Framework: Vite (or use existing `vercel.json`).
+4. Environment variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_DEMO_MODE` = `true` (or `VITE_GEMINI_API_KEY` for live AI)
+5. Deploy, then add your `https://….vercel.app` URL to Supabase redirect URLs (see above).
+
+**SQL via CLI** (after `npx supabase login`):
+
+```bash
+npm run db:realtime
+npm run db:seed
+```
