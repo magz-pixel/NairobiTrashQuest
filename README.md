@@ -43,8 +43,11 @@ Gamified PWA for tracking urban pollution hotspots on a live heatmap and verifyi
 4. **Run**
 
    ```bash
+   npm run setup:check
    npm run dev
    ```
+
+   See [DEMO.md](DEMO.md) for demo-day checklist (auth URLs, seed data, Vercel).
 
 ## Features
 
