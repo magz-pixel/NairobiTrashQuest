@@ -10,7 +10,7 @@ interface AuthGateProps {
 }
 
 export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
-  const { user, loading, signInWithEmail } = useAuth()
+  const { user, loading, signInWithEmail, signInWithGoogle } = useAuth()
   const [showSignIn, setShowSignIn] = useState(false)
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<string | null>(null)
@@ -36,6 +36,18 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
     }
   }
 
+  const handleGoogle = async () => {
+    setSubmitting(true)
+    setMessage(null)
+    try {
+      await signInWithGoogle()
+      onAuthenticated?.()
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Google sign-in failed')
+      setSubmitting(false)
+    }
+  }
+
   return (
     <>
       <div
@@ -51,6 +63,24 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
           <p className="mb-3 text-sm text-white/70">
             Join the cleanup game. Earn impact points by verifying cleared hotspots.
           </p>
+
+          <Button
+            type="button"
+            className="w-full"
+            disabled={submitting}
+            onClick={handleGoogle}
+          >
+            Continue with Google
+          </Button>
+
+          <div className="my-3 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/40">
+              or
+            </span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+
           <input
             type="email"
             value={email}
@@ -67,7 +97,7 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
             disabled={!email || submitting}
             onClick={handleSignIn}
           >
-            {submitting ? 'Sending…' : 'Send magic link'}
+            {submitting ? 'Sending…' : 'Send magic link (email)'}
           </Button>
         </Card>
       </Modal>
