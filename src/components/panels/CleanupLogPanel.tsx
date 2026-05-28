@@ -136,6 +136,10 @@ export function CleanupLogPanel({
                     <p className="mt-2 text-[10px] text-white/40">
                       Hours×10 + KG×5 + Eco×20 (Eco is 0–5)
                     </p>
+                    <p className="mt-2 text-[10px] text-white/45">
+                      Photo uploads use the Supabase Storage bucket{' '}
+                      <span className="font-semibold">cleanup-media</span>.
+                    </p>
                   </Card>
 
                   <Card className="bg-black/40">

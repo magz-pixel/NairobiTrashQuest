@@ -134,6 +134,9 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-white/45">
                   Create post
                 </p>
+                <p className="mt-2 text-[10px] text-white/45">
+                  Uploads require the Supabase Storage bucket <span className="font-semibold">cleanup-media</span>.
+                </p>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}

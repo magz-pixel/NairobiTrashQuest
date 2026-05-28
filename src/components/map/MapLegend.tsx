@@ -7,7 +7,7 @@ const GRADIENT_CSS = Object.entries(HEAT_GRADIENT)
 
 export function MapLegend() {
   return (
-    <div className="map-legend pointer-events-auto absolute bottom-[calc(env(safe-area-inset-bottom)+72px)] right-3 z-[1000] rounded-xl border border-white/10 bg-black/70 p-3 backdrop-blur-md md:bottom-4 md:right-4">
+    <div className="map-legend pointer-events-auto absolute bottom-[calc(env(safe-area-inset-bottom)+60px)] right-3 z-[1000] rounded-xl border border-white/10 bg-black/70 p-3 backdrop-blur-md md:bottom-4 md:right-4">
       <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/50">
         Pollution intensity
       </p>

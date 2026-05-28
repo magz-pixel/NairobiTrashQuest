@@ -6,13 +6,15 @@ const BADGE_LABELS = {
   guardian: 'Guardian',
 } as const
 
-export function ProfileBadge() {
+export function ProfileBadge({ className = '' }: { className?: string }) {
   const { user, profile, signOut, loading } = useAuth()
 
   if (loading || !user) return null
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[var(--neon-clean)]/25 bg-black/70 px-3 py-2 text-sm shadow-[0_0_20px_rgba(57,255,20,0.08)] backdrop-blur-md">
+    <div
+      className={`flex items-center gap-3 rounded-xl border border-[var(--neon-clean)]/25 bg-black/70 px-3 py-2 text-sm shadow-[0_0_20px_rgba(57,255,20,0.08)] backdrop-blur-md ${className}`}
+    >
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--neon-clean)]/15 font-[family-name:var(--font-display)] text-xs font-bold text-[var(--neon-clean)]">
         {(profile?.badge_level ?? 'S')[0].toUpperCase()}
       </div>

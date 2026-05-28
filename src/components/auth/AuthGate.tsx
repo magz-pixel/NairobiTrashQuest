@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
@@ -18,6 +18,13 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
 
   if (loading) return null
 
+  useEffect(() => {
+    if (!showSignIn) return
+    if (!user) return
+    setShowSignIn(false)
+    onAuthenticated?.()
+  }, [onAuthenticated, showSignIn, user])
+
   if (user) {
     return <>{children}</>
   }
@@ -28,7 +35,6 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
     try {
       await signInWithEmail(email)
       setMessage('Check your email for the magic link.')
-      onAuthenticated?.()
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Sign in failed')
     } finally {
@@ -41,7 +47,7 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
     setMessage(null)
     try {
       await signInWithGoogle()
-      onAuthenticated?.()
+      setShowSignIn(false)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Google sign-in failed')
       setSubmitting(false)
