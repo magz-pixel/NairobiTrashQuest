@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer } from 'react-leaflet'
+import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import type { Report } from '../../types/database'
 import { HeatmapLayer } from './HeatmapLayer'
 import { ZoomGatedMarkers } from './ZoomGatedMarkers'
@@ -8,9 +8,22 @@ const NAIROBI_CENTER: [number, number] = [-1.286389, 36.817223]
 interface MapViewProps {
   reports: Report[]
   heatPoints: [number, number, number][]
+  onInteract?: () => void
 }
 
-export function MapView({ reports, heatPoints }: MapViewProps) {
+function MapInteractor({ onInteract }: { onInteract?: () => void }) {
+  useMapEvents({
+    click() {
+      onInteract?.()
+    },
+    dragstart() {
+      onInteract?.()
+    },
+  })
+  return null
+}
+
+export function MapView({ reports, heatPoints, onInteract }: MapViewProps) {
   return (
     <MapContainer
       center={NAIROBI_CENTER}
@@ -18,6 +31,7 @@ export function MapView({ reports, heatPoints }: MapViewProps) {
       className="h-full w-full"
       zoomControl={false}
     >
+      <MapInteractor onInteract={onInteract} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"

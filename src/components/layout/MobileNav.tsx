@@ -19,7 +19,10 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
     <nav className="pointer-events-auto fixed inset-x-0 bottom-0 z-[1300] border-t border-white/10 bg-black/75 backdrop-blur-xl md:hidden">
       <div
         className="mx-auto flex max-w-lg items-stretch justify-between px-2"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: 'calc(var(--mobile-nav-height, 64px) + env(safe-area-inset-bottom))',
+        }}
       >
         {NAV.map((item) => {
           const active = activeTab === item.id

@@ -117,12 +117,25 @@ export function HomePage() {
             </div>
           }
         >
-          <MapView reports={reports} heatPoints={heatPoints} />
+          <MapView
+            reports={reports}
+            heatPoints={heatPoints}
+            onInteract={() => {
+              setActivePanel(null)
+              setActiveTab('map')
+            }}
+          />
         </Suspense>
         {header}
         <MapLegend />
 
-        <div className="pointer-events-none absolute bottom-[calc(env(safe-area-inset-bottom)+60px)] left-2 z-[1000] md:bottom-4 md:left-4">
+        <div
+          className="pointer-events-none absolute left-2 z-[1000] md:bottom-4 md:left-4"
+          style={{
+            bottom:
+              'calc(env(safe-area-inset-bottom) + var(--mobile-nav-height, 64px) + 8px)',
+          }}
+        >
           <div className="pointer-events-auto flex flex-col gap-2 sm:flex-row">
             <AuthGate onAuthenticated={openReport}>
               <button

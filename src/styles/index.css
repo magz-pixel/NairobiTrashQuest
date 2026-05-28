@@ -10,6 +10,7 @@
   --border-glow: rgba(57, 255, 20, 0.16);
   --hud-line: rgba(255, 255, 255, 0.12);
   --hud-surface: rgba(0, 0, 0, 0.55);
+  --mobile-nav-height: 64px;
   --font-display: 'Orbitron', system-ui, sans-serif;
   font-family: 'Rajdhani', system-ui, 'Segoe UI', sans-serif;
   color: var(--text-sharp);
