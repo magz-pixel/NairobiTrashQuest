@@ -17,7 +17,11 @@ function toNumber(value: string): number {
   return Number.isFinite(n) ? n : 0
 }
 
-export function CleanupLogPanel({ open, onClose, onLogged }: CleanupLogPanelProps) {
+export function CleanupLogPanel({
+  open,
+  onClose,
+  onLogged,
+}: CleanupLogPanelProps) {
   const { user } = useAuth()
   const beforeInputRef = useRef<HTMLInputElement>(null)
   const afterInputRef = useRef<HTMLInputElement>(null)
@@ -99,7 +103,7 @@ export function CleanupLogPanel({ open, onClose, onLogged }: CleanupLogPanelProp
             onClick={onClose}
           />
           <motion.aside
-            className="absolute right-0 top-0 z-[1200] flex h-full w-full max-w-md flex-col border-l border-[var(--neon-clean)]/20 bg-[var(--bg-charcoal)]/98 shadow-[-8px_0_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            className="absolute z-[1200] flex w-full flex-col border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -220,7 +224,9 @@ export function CleanupLogPanel({ open, onClose, onLogged }: CleanupLogPanelProp
             </div>
 
             <div className="border-t border-white/10 p-4">
-              {status && <p className="mb-2 text-xs text-[var(--neon-clean)]">{status}</p>}
+              {status && (
+                <p className="mb-2 text-xs text-[var(--neon-clean)]">{status}</p>
+              )}
               <Button
                 type="button"
                 className="w-full"

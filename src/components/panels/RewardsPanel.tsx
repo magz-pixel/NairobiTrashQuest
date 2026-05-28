@@ -29,7 +29,7 @@ export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
             onClick={onClose}
           />
           <motion.aside
-            className="absolute right-0 top-0 z-[1200] flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[-8px_0_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            className="absolute z-[1200] flex w-full flex-col border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -53,9 +53,7 @@ export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-white">{reward.name}</p>
-                      <p className="mt-1 text-xs text-white/45">
-                        Required tokens
-                      </p>
+                      <p className="mt-1 text-xs text-white/45">Required tokens</p>
                     </div>
                     <div className="text-right">
                       <p className="font-[family-name:var(--font-display)] text-2xl font-bold text-[var(--neon-clean)]">

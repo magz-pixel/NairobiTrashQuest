@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { GameSidebar, type GameTab } from './GameSidebar'
+import { MobileNav } from './MobileNav'
 
 export type { GameTab }
 
@@ -24,17 +25,20 @@ export function GameShell({
 }: GameShellProps) {
   return (
     <div className="flex h-[100dvh] w-full overflow-hidden bg-[var(--bg-deep)]">
-      <GameSidebar
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        hotspotCount={hotspotCount}
-        loading={loading}
-      />
-      <div className="relative flex min-w-0 flex-1 flex-col">
+      <div className="hidden md:block">
+        <GameSidebar
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          hotspotCount={hotspotCount}
+          loading={loading}
+        />
+      </div>
+      <div className="relative flex min-w-0 flex-1 flex-col pb-[calc(env(safe-area-inset-bottom)+64px)] md:pb-0">
         {header}
         <main className="relative min-h-0 flex-1">{children}</main>
         {panel}
       </div>
+      <MobileNav activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   )
 }

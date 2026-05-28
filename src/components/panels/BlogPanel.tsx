@@ -60,10 +60,18 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
       const baseId = crypto.randomUUID()
 
       if (beforeFile) {
-        beforeUrl = await uploadCleanupMedia(user.id, `${baseId}-post-before`, beforeFile)
+        beforeUrl = await uploadCleanupMedia(
+          user.id,
+          `${baseId}-post-before`,
+          beforeFile,
+        )
       }
       if (afterFile) {
-        afterUrl = await uploadCleanupMedia(user.id, `${baseId}-post-after`, afterFile)
+        afterUrl = await uploadCleanupMedia(
+          user.id,
+          `${baseId}-post-after`,
+          afterFile,
+        )
       }
 
       const { error } = await supabase.from('posts').insert({
@@ -103,7 +111,7 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
             onClick={onClose}
           />
           <motion.aside
-            className="absolute right-0 top-0 z-[1200] flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[-8px_0_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            className="absolute z-[1200] flex w-full flex-col border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -139,10 +147,18 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
                   className="mt-2 h-24 w-full resize-none rounded-lg border border-white/15 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-[var(--neon-clean)]/60"
                 />
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Button variant="ghost" type="button" onClick={() => beforeRef.current?.click()}>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => beforeRef.current?.click()}
+                  >
                     Before photo
                   </Button>
-                  <Button variant="ghost" type="button" onClick={() => afterRef.current?.click()}>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    onClick={() => afterRef.current?.click()}
+                  >
                     After photo
                   </Button>
                   <input
@@ -164,7 +180,9 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
                   {beforeFile ? `Before: ${beforeFile.name}` : 'Before: none'} ·{' '}
                   {afterFile ? `After: ${afterFile.name}` : 'After: none'}
                 </div>
-                {status && <p className="mt-2 text-xs text-[var(--neon-clean)]">{status}</p>}
+                {status && (
+                  <p className="mt-2 text-xs text-[var(--neon-clean)]">{status}</p>
+                )}
                 <Button
                   type="button"
                   className="mt-3 w-full"

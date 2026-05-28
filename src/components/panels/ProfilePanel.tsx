@@ -44,7 +44,7 @@ export function ProfilePanel({ open, onClose }: ProfilePanelProps) {
             onClick={onClose}
           />
           <motion.aside
-            className="absolute right-0 top-0 z-[1200] flex h-full w-full max-w-md flex-col border-l border-[var(--neon-clean)]/20 bg-[var(--bg-charcoal)]/98 shadow-[-8px_0_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            className="absolute z-[1200] flex w-full flex-col border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -65,9 +65,7 @@ export function ProfilePanel({ open, onClose }: ProfilePanelProps) {
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {!user ? (
                 <Card className="bg-black/40">
-                  <p className="text-sm text-white/70">
-                    Sign in to view your profile.
-                  </p>
+                  <p className="text-sm text-white/70">Sign in to view your profile.</p>
                 </Card>
               ) : (
                 <>

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useActiveReports } from '../hooks/useActiveReports'
 import { useHeatmapPoints } from '../hooks/useHeatmapPoints'
 import { AuthGate } from '../components/auth/AuthGate'
@@ -25,55 +25,29 @@ export function HomePage() {
   const { reports, loading, refetch } = useActiveReports()
   const heatPoints = useHeatmapPoints(reports)
   const [activeTab, setActiveTab] = useState<GameTab>('map')
+  const [activePanel, setActivePanel] = useState<GameTab | null>(null)
   const [reportOpen, setReportOpen] = useState(false)
   const [clearOpen, setClearOpen] = useState(false)
-  const [eventsOpen, setEventsOpen] = useState(false)
-  const [missionsOpen, setMissionsOpen] = useState(false)
-  const [blogOpen, setBlogOpen] = useState(false)
-  const [logOpen, setLogOpen] = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
-  const [rewardsOpen, setRewardsOpen] = useState(false)
 
   const realReports = reports.filter((r) => !isDemoReport(r))
 
-  useEffect(() => {
-    if (activeTab === 'report') {
+  const handleTab = (tab: GameTab) => {
+    setActiveTab(tab)
+    if (tab === 'map') return
+    if (tab === 'report') {
       setReportOpen(true)
-      setActiveTab('map')
+      return
     }
-    if (activeTab === 'clear') {
+    if (tab === 'clear') {
       setClearOpen(true)
-      setActiveTab('map')
+      return
     }
-    if (activeTab === 'events') {
-      setEventsOpen(true)
-      setActiveTab('map')
-    }
-    if (activeTab === 'missions') {
-      setMissionsOpen(true)
-      setActiveTab('map')
-    }
-    if (activeTab === 'blog') {
-      setBlogOpen(true)
-      setActiveTab('map')
-    }
-    if (activeTab === 'log') {
-      setLogOpen(true)
-      setActiveTab('map')
-    }
-    if (activeTab === 'profile') {
-      setProfileOpen(true)
-      setActiveTab('map')
-    }
-    if (activeTab === 'rewards') {
-      setRewardsOpen(true)
-      setActiveTab('map')
-    }
-  }, [activeTab])
+    setActivePanel((prev) => (prev === tab ? null : tab))
+  }
 
   const header = (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] flex items-start justify-between p-4 pl-2 md:pl-4">
-      <div className="pointer-events-auto rounded-xl border border-white/10 bg-black/60 px-4 py-2 backdrop-blur-md">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] flex items-start justify-between p-3 pl-2 md:p-4 md:pl-4">
+      <div className="pointer-events-auto rounded-xl border border-white/10 bg-black/60 px-3 py-2 backdrop-blur-md md:px-4">
         <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-wide text-white md:text-lg">
           Pollution radar
         </h1>
@@ -95,7 +69,7 @@ export function HomePage() {
   return (
     <GameShell
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTab}
       hotspotCount={reports.length}
       loading={loading}
       header={null}
@@ -113,7 +87,7 @@ export function HomePage() {
         {header}
         <MapLegend />
 
-        <div className="pointer-events-none absolute bottom-4 left-2 z-[1000] md:left-4">
+        <div className="pointer-events-none absolute bottom-[calc(env(safe-area-inset-bottom)+72px)] left-2 z-[1000] md:bottom-4 md:left-4">
           <div className="pointer-events-auto flex flex-col gap-2 sm:flex-row">
             <AuthGate onAuthenticated={() => setReportOpen(true)}>
               <button
@@ -137,12 +111,12 @@ export function HomePage() {
         </div>
       </div>
 
-      <EventsPanel open={eventsOpen} onClose={() => setEventsOpen(false)} />
-      <MissionsPanel open={missionsOpen} onClose={() => setMissionsOpen(false)} />
-      <BlogPanel open={blogOpen} onClose={() => setBlogOpen(false)} />
-      <CleanupLogPanel open={logOpen} onClose={() => setLogOpen(false)} onLogged={refetch} />
-      <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} />
-      <RewardsPanel open={rewardsOpen} onClose={() => setRewardsOpen(false)} />
+      <EventsPanel open={activePanel === 'events'} onClose={() => setActivePanel(null)} />
+      <MissionsPanel open={activePanel === 'missions'} onClose={() => setActivePanel(null)} />
+      <BlogPanel open={activePanel === 'blog'} onClose={() => setActivePanel(null)} />
+      <CleanupLogPanel open={activePanel === 'log'} onClose={() => setActivePanel(null)} onLogged={refetch} />
+      <ProfilePanel open={activePanel === 'profile'} onClose={() => setActivePanel(null)} />
+      <RewardsPanel open={activePanel === 'rewards'} onClose={() => setActivePanel(null)} />
 
       {user && (
         <>
