@@ -1,19 +1,22 @@
 import { Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import type { Report } from '../../types/database'
+import { severityToColor } from '../../lib/heatmap'
 
-function severityIcon(severity: number) {
-  const color = severity >= 7 ? '#ff4500' : '#39ff14'
+function dotIcon(severity: number) {
+  const color = severityToColor(severity)
+  const size = severity >= 7 ? 10 : 8
   return L.divIcon({
     className: '',
-    html:
-      '<div style="width:14px;height:14px;border-radius:50%;background:' +
-      color +
-      ';box-shadow:0 0 10px ' +
-      color +
-      ';border:2px solid #fff"></' + 'div>',
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      background:${color};
+      border-radius:50%;
+      box-shadow:0 0 8px ${color};
+      border:1.5px solid rgba(255,255,255,0.7);
+    "></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   })
 }
 
@@ -25,7 +28,7 @@ export function ReportMarker({ report }: ReportMarkerProps) {
   return (
     <Marker
       position={[report.latitude, report.longitude]}
-      icon={severityIcon(report.severity_score)}
+      icon={dotIcon(report.severity_score)}
     >
       <Popup>
         <div className="text-sm text-black">

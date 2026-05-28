@@ -85,6 +85,6 @@ console.log('  1. Authentication → URL Configuration')
 console.log('     Site URL: http://localhost:5173 (or your Vercel URL)')
 console.log('     Redirect URLs: http://localhost:5173, https://your-app.vercel.app')
 console.log('  2. SQL Editor → run supabase/migrations/002_realtime.sql')
-console.log('  3. Optional: scripts/seed-demo-reports.sql (replace YOUR_USER_ID)')
+console.log('  3. Optional: scripts/seed-demo-reports.sql (after first sign-in)')
 
 process.exit(ok ? 0 : 1)

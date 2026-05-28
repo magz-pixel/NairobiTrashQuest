@@ -48,3 +48,28 @@ export interface ClearVerification {
   matches_location: boolean
   confidence: number
 }
+
+export interface CleanupLog {
+  id: string
+  user_id: string
+  hours: number
+  kg: number
+  eco_multiplier: number
+  impact_points: number
+  location_text: string | null
+  latitude: number | null
+  longitude: number | null
+  before_image_url: string | null
+  after_image_url: string | null
+  created_at: string
+}
+
+export interface Post {
+  id: string
+  user_id: string
+  title: string
+  body: string
+  before_image_url: string | null
+  after_image_url: string | null
+  created_at: string
+}

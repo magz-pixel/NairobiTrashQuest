@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { mergeWithDemoReports } from '../lib/demoReports'
 import { supabase } from '../lib/supabase'
 import type { Report } from '../types/database'
 
@@ -20,12 +21,12 @@ export function useActiveReports() {
       return
     }
 
-    setReports(
-      (data ?? []).map((row) => ({
-        ...row,
-        ai_tags: Array.isArray(row.ai_tags) ? row.ai_tags : [],
-      })) as Report[],
-    )
+    const live = (data ?? []).map((row) => ({
+      ...row,
+      ai_tags: Array.isArray(row.ai_tags) ? row.ai_tags : [],
+    })) as Report[]
+
+    setReports(mergeWithDemoReports(live))
   }, [])
 
   useEffect(() => {

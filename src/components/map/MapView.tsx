@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
 import type { Report } from '../../types/database'
 import { HeatmapLayer } from './HeatmapLayer'
-import { ReportMarker } from './ReportMarker'
+import { ZoomGatedMarkers } from './ZoomGatedMarkers'
 
 const NAIROBI_CENTER: [number, number] = [-1.286389, 36.817223]
 
@@ -23,9 +23,7 @@ export function MapView({ reports, heatPoints }: MapViewProps) {
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
       {heatPoints.length > 0 && <HeatmapLayer points={heatPoints} />}
-      {reports.map((report) => (
-        <ReportMarker key={report.id} report={report} />
-      ))}
+      <ZoomGatedMarkers reports={reports} minZoom={15} />
     </MapContainer>
   )
 }

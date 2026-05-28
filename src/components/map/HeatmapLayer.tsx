@@ -1,13 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet.heat'
-
-const HEAT_GRADIENT = {
-  0.2: '#39ff14',
-  0.5: '#ffaa00',
-  1.0: '#ff4500',
-}
+import {
+  HEAT_GRADIENT,
+  heatBlurForZoom,
+  heatMaxForZoom,
+  heatRadiusForZoom,
+} from '../../lib/heatmap'
 
 interface HeatmapLayerProps {
   points: [number, number, number][]
@@ -15,15 +15,25 @@ interface HeatmapLayerProps {
 
 export function HeatmapLayer({ points }: HeatmapLayerProps) {
   const map = useMap()
+  const [zoom, setZoom] = useState(() => map.getZoom())
+
+  useEffect(() => {
+    const onZoom = () => setZoom(map.getZoom())
+    map.on('zoomend', onZoom)
+    return () => {
+      map.off('zoomend', onZoom)
+    }
+  }, [map])
 
   useEffect(() => {
     if (points.length === 0) return
 
     const layer = L.heatLayer(points, {
-      radius: 28,
-      blur: 18,
-      maxZoom: 17,
-      max: 10,
+      radius: heatRadiusForZoom(zoom),
+      blur: heatBlurForZoom(zoom),
+      maxZoom: 18,
+      max: heatMaxForZoom(zoom),
+      minOpacity: zoom < 14 ? 0.2 : 0.14,
       gradient: HEAT_GRADIENT,
     })
     layer.addTo(map)
@@ -31,7 +41,7 @@ export function HeatmapLayer({ points }: HeatmapLayerProps) {
     return () => {
       map.removeLayer(layer)
     }
-  }, [map, points])
+  }, [map, points, zoom])
 
   return null
 }

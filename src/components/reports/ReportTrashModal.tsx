@@ -35,6 +35,7 @@ export function ReportTrashModal({
   const [preview, setPreview] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [cameraOn, setCameraOn] = useState(false)
+  const [manualSeverity, setManualSeverity] = useState(5)
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const streamRef = useRef<MediaStream | null>(null)
@@ -94,6 +95,11 @@ export function ReportTrashModal({
         return
       }
 
+      const severity = Math.min(
+        10,
+        Math.max(1, Math.round(manualSeverity || analysis.severity)),
+      )
+
       setStatus('Getting location…')
       const position = await getCurrentPosition()
       const reportId = crypto.randomUUID()
@@ -105,7 +111,7 @@ export function ReportTrashModal({
         user_id: user.id,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        severity_score: Math.min(10, Math.max(1, Math.round(analysis.severity))),
+        severity_score: severity,
         status: 'active',
         image_url: imageUrl,
         ai_tags: analysis.tags,
@@ -129,6 +135,7 @@ export function ReportTrashModal({
     stopCamera()
     setPreview(null)
     setFile(null)
+    setManualSeverity(5)
     setStatus(null)
     onClose()
   }
@@ -172,6 +179,28 @@ export function ReportTrashModal({
             className="hidden"
             onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
           />
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/30 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-semibold text-white/70">
+              Intensity (your rating)
+            </p>
+            <p className="text-xs font-bold text-[var(--neon-clean)]">
+              {manualSeverity}/10
+            </p>
+          </div>
+          <input
+            type="range"
+            min={1}
+            max={10}
+            value={manualSeverity}
+            onChange={(e) => setManualSeverity(Number(e.target.value))}
+            className="w-full accent-[var(--neon-clean)]"
+          />
+          <p className="mt-2 text-[10px] text-white/45">
+            AI helps tag the report; your rating controls the heatmap shading.
+          </p>
         </div>
 
         {status && <p className="text-xs text-[var(--neon-clean)]">{status}</p>}
