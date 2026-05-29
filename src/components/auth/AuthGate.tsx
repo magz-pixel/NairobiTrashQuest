@@ -16,14 +16,14 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  if (loading) return null
-
   useEffect(() => {
     if (!showSignIn) return
     if (!user) return
     setShowSignIn(false)
     onAuthenticated?.()
   }, [onAuthenticated, showSignIn, user])
+
+  if (loading) return null
 
   if (user) {
     return <>{children}</>
