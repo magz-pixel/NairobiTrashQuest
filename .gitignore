@@ -28,3 +28,4 @@ dist-ssr
 NUL
 
 .vercel
+supabase/.temp
