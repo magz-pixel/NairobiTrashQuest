@@ -26,6 +26,7 @@ Project: `momkbsgfypjfujkhrtxb` → https://supabase.com/dashboard/project/momkb
    - `supabase/migrations/003_gamification_and_blog.sql`
    - `supabase/migrations/004a_report_status_enum.sql` **run first** (enum values must commit separately)
    - `supabase/migrations/004_civic_lifecycle.sql` **run second**
+   - `supabase/migrations/005_officials_seed.sql` (MCA/MP placeholders)
    - `scripts/seed-demo-reports.sql` (after you sign in once in the app)
 
 ## AI for reports

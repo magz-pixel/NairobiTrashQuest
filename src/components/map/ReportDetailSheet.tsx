@@ -1,18 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getSessionId } from '../../lib/session'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
-import {
-  assignWard,
-  complaintMailto,
-  daysSince,
-  severityLabel,
-} from '../../lib/wards'
+import { assignWard, daysSince, severityLabel } from '../../lib/wards'
 import { isDemoReport } from '../../lib/demoReports'
 import type { Report } from '../../types/database'
 import { Button } from '../ui/Button'
+import { AccountabilityFlow } from './AccountabilityFlow'
 
 interface ReportDetailSheetProps {
   report: Report | null
@@ -32,29 +28,10 @@ export function ReportDetailSheet({
   const { user } = useAuth()
   const [status, setStatus] = useState<string | null>(null)
   const [seenCount, setSeenCount] = useState(0)
-  const [officials, setOfficials] = useState<{ name: string; role: string; contact_email: string | null }[]>([])
-
-  useEffect(() => {
-    if (!report?.ward_id) {
-      setOfficials([])
-      return
-    }
-    supabase
-      .from('ward_officials')
-      .select('officials(name, role, contact_email)')
-      .eq('ward_id', report.ward_id)
-      .then(({ data }) => {
-        const rows = (data ?? []) as unknown as {
-          officials: { name: string; role: string; contact_email: string | null } | null
-        }[]
-        setOfficials(
-          rows.map((r) => r.officials).filter((o): o is { name: string; role: string; contact_email: string | null } => !!o),
-        )
-      })
-  }, [report?.ward_id])
 
   if (!report) return null
 
+  const demo = isDemoReport(report)
   const ward = report.area_name
     ? { areaName: report.area_name, wardId: report.ward_id }
     : assignWard(report.latitude, report.longitude)
@@ -62,7 +39,7 @@ export function ReportDetailSheet({
   const displaySeen = seenCount || report.seen_count
 
   const handleSeen = async () => {
-    if (isDemoReport(report)) {
+    if (demo) {
       setSeenCount((c) => c + 1)
       setStatus('Thanks — marked as seen.')
       return
@@ -83,7 +60,7 @@ export function ReportDetailSheet({
   }
 
   const handleFlag = async () => {
-    if (isDemoReport(report)) {
+    if (demo) {
       setStatus('Flag recorded (demo).')
       return
     }
@@ -129,6 +106,11 @@ export function ReportDetailSheet({
                 <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] uppercase text-white/60">
                   {report.status.replace('_', ' ')}
                 </span>
+                {demo && (
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-300">
+                    Demo
+                  </span>
+                )}
               </div>
               <button type="button" onClick={onClose} className="text-white/50">
                 ✕
@@ -170,36 +152,12 @@ export function ReportDetailSheet({
               </div>
             </div>
 
-            <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
-                Accountability
-              </p>
-              <p className="mt-1 text-sm font-semibold text-white">
-                {ward?.areaName ?? 'Nairobi'} ward
-              </p>
-              {officials.length > 0 ? (
-                <ul className="mt-2 space-y-1">
-                  {officials.map((o) => (
-                    <li key={o.name} className="text-xs text-white/60">
-                      {o.name} · {o.role}
-                      {o.contact_email && (
-                        <a href={`mailto:${o.contact_email}`} className="ml-1 text-[var(--neon-clean)]">
-                          Contact
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-white/50">NCC Environment · Sub-county admin</p>
-              )}
-              <a
-                href={complaintMailto(ward?.areaName ?? 'Nairobi', report.id)}
-                className="mt-2 inline-block text-xs text-[var(--neon-clean)]"
-              >
-                File a complaint →
-              </a>
-            </div>
+            <AccountabilityFlow
+              wardId={ward?.wardId ?? report.ward_id}
+              areaName={ward?.areaName ?? 'Nairobi'}
+              reportId={report.id}
+              isDemo={demo}
+            />
 
             {status && <p className="mt-2 text-xs text-[var(--neon-clean)]">{status}</p>}
 

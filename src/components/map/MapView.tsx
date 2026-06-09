@@ -1,16 +1,13 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import type { Report } from '../../types/database'
-import { HeatmapLayer } from './HeatmapLayer'
 import { ClusterLayer } from './ClusterLayer'
 
 const NAIROBI_CENTER: [number, number] = [-1.286389, 36.817223]
 
 interface MapViewProps {
   reports: Report[]
-  heatPoints: [number, number, number][]
   onInteract?: () => void
   onSelectReport: (report: Report) => void
-  showHeatmap?: boolean
   lightBasemap?: boolean
 }
 
@@ -28,10 +25,8 @@ function MapInteractor({ onInteract }: { onInteract?: () => void }) {
 
 export function MapView({
   reports,
-  heatPoints,
   onInteract,
   onSelectReport,
-  showHeatmap = true,
   lightBasemap = false,
 }: MapViewProps) {
   const tileUrl = lightBasemap
@@ -50,7 +45,6 @@ export function MapView({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url={tileUrl}
       />
-      {showHeatmap && heatPoints.length > 0 && <HeatmapLayer points={heatPoints} />}
       <ClusterLayer reports={reports} onSelectReport={onSelectReport} />
     </MapContainer>
   )

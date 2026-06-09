@@ -1,7 +1,7 @@
 import type { Report } from '../types/database'
 import { generateDemoReports } from './generateDemoReports'
 
-export const DEMO_REPORTS: Report[] = generateDemoReports(200)
+export const DEMO_REPORTS: Report[] = generateDemoReports()
 
 export function isDemoReport(report: Report): boolean {
   return report.id.startsWith('demo-')
@@ -12,8 +12,6 @@ export const showDemoData =
 
 export function mergeWithDemoReports(live: Report[]): Report[] {
   if (!showDemoData) return live
-  const liveIds = new Set(live.map((r) => r.id))
-  const demos = DEMO_REPORTS.filter((d) => !liveIds.has(d.id))
-  if (live.length === 0) return demos
-  return [...live, ...demos]
+  if (live.length > 0) return live
+  return DEMO_REPORTS
 }

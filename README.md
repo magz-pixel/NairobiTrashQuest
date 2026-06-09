@@ -26,6 +26,7 @@ Gamified PWA for tracking urban pollution hotspots on a live heatmap, civic repo
    - [`supabase/migrations/003_gamification_and_blog.sql`](supabase/migrations/003_gamification_and_blog.sql)
    - [`supabase/migrations/004a_report_status_enum.sql`](supabase/migrations/004a_report_status_enum.sql) **run first**
    - [`supabase/migrations/004_civic_lifecycle.sql`](supabase/migrations/004_civic_lifecycle.sql) **run second**
+   - [`supabase/migrations/005_officials_seed.sql`](supabase/migrations/005_officials_seed.sql) (MCA/MP placeholders for accountability flow)
 
    Or via CLI: `npm run db:migrate` (requires `SUPABASE_SERVICE_ROLE_KEY`).
 

@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useReports } from '../hooks/useReports'
-import { useHeatmapPoints } from '../hooks/useHeatmapPoints'
 import { useReportStats } from '../hooks/useReportStats'
 import { AuthGate } from '../components/auth/AuthGate'
 import { ProfileBadge } from '../components/auth/ProfileBadge'
@@ -44,7 +43,6 @@ export function HomePage() {
     statusFilter,
   )
   const stats = useReportStats(allReports)
-  const heatPoints = useHeatmapPoints(mapReports)
   const [activeTab, setActiveTab] = useState<GameTab>('map')
   const [activePanel, setActivePanel] = useState<GameTab | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('map')
@@ -265,7 +263,6 @@ export function HomePage() {
             >
               <MapView
                 reports={mapReports}
-                heatPoints={heatPoints}
                 lightBasemap={lightMap}
                 onSelectReport={selectReport}
                 onInteract={() => {
