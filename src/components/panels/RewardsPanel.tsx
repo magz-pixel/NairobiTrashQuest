@@ -1,12 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
 import { Card } from '../ui/Card'
+import { Button } from '../ui/Button'
 
 const REWARDS = [
-  { name: 'Heavy-duty gloves', tokens: 120, status: 'coming_soon' as const },
-  { name: 'Trash bags pack', tokens: 80, status: 'coming_soon' as const },
-  { name: 'Reflective vest', tokens: 200, status: 'coming_soon' as const },
-  { name: 'Airtime top-up', tokens: 150, status: 'coming_soon' as const },
-  { name: 'Cleanup squad banner', tokens: 400, status: 'coming_soon' as const },
+  { name: 'Heavy-duty gloves', tokens: 120 },
+  { name: 'Trash bags pack', tokens: 80 },
+  { name: 'Reflective vest', tokens: 200 },
+  { name: 'Airtime top-up', tokens: 150 },
+  { name: 'Cleanup squad banner', tokens: 400 },
 ]
 
 interface RewardsPanelProps {
@@ -15,6 +19,32 @@ interface RewardsPanelProps {
 }
 
 export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
+  const { user, profile, refreshProfile } = useAuth()
+  const [status, setStatus] = useState<string | null>(null)
+
+  const requestRedemption = async (name: string, cost: number) => {
+    if (!user) {
+      setStatus('Sign in to redeem.')
+      return
+    }
+    if ((profile?.total_impact_points ?? 0) < cost) {
+      setStatus(`Need ${cost} tokens (you have ${profile?.total_impact_points ?? 0}).`)
+      return
+    }
+    const { error } = await supabase.from('reward_redemptions').insert({
+      user_id: user.id,
+      reward_name: name,
+      token_cost: cost,
+      status: 'pending',
+    })
+    if (error) {
+      setStatus(error.message)
+      return
+    }
+    setStatus(`Requested "${name}". Admin will fulfill manually.`)
+    await refreshProfile()
+  }
+
   return (
     <AnimatePresence>
       {open && (
@@ -43,7 +73,7 @@ export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
                 Rewards
               </h2>
               <p className="mt-1 text-sm text-white/50">
-                Catalog preview. Cash out is disabled for now.
+                Balance: {profile?.total_impact_points ?? 0} tokens
               </p>
             </div>
 
@@ -53,24 +83,20 @@ export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-white">{reward.name}</p>
-                      <p className="mt-1 text-xs text-white/45">Required tokens</p>
+                      <p className="mt-1 text-xs text-white/45">{reward.tokens} tokens</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-[family-name:var(--font-display)] text-2xl font-bold text-[var(--neon-clean)]">
-                        {reward.tokens}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-wider text-white/40">
-                        coming soon
-                      </p>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={!user}
+                      onClick={() => requestRedemption(reward.name, reward.tokens)}
+                    >
+                      Request
+                    </Button>
                   </div>
                 </Card>
               ))}
-              <Card className="bg-black/40">
-                <p className="text-xs text-white/55">
-                  Admin will enable redemption once the pilot group stabilizes.
-                </p>
-              </Card>
+              {status && <p className="text-xs text-[var(--neon-clean)]">{status}</p>}
             </div>
           </motion.aside>
         </>
@@ -78,4 +104,3 @@ export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
     </AnimatePresence>
   )
 }
-

@@ -21,7 +21,11 @@ Project: `momkbsgfypjfujkhrtxb` → https://supabase.com/dashboard/project/momkb
      - `https://YOUR-APP.vercel.app`
 
 2. **SQL Editor** — run in order if not already applied:
+   - `supabase/migrations/001_initial_schema.sql`
    - `supabase/migrations/002_realtime.sql`
+   - `supabase/migrations/003_gamification_and_blog.sql`
+   - `supabase/migrations/004a_report_status_enum.sql` **run first** (enum values must commit separately)
+   - `supabase/migrations/004_civic_lifecycle.sql` **run second**
    - `scripts/seed-demo-reports.sql` (after you sign in once in the app)
 
 ## AI for reports

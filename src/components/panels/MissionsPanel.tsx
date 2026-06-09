@@ -1,25 +1,14 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
+import type { Mission, UserMission } from '../../types/database'
 import { Card } from '../ui/Card'
 
-const MISSIONS = [
-  {
-    title: 'First Scan',
-    desc: 'Report your first trash hotspot',
-    reward: '+50 XP',
-    done: false,
-  },
-  {
-    title: 'Zone Defender',
-    desc: 'Verify 1 cleanup within 50m',
-    reward: '+100 XP',
-    done: false,
-  },
-  {
-    title: 'Heat Hunter',
-    desc: 'Clear a critical (9+) zone',
-    reward: 'Ranger badge',
-    done: false,
-  },
+const FALLBACK_MISSIONS: Mission[] = [
+  { id: 'first-scan', title: 'First Scan', description: 'Report your first trash hotspot', reward_points: 50, target_count: 1, mission_type: 'report', active: true },
+  { id: 'zone-defender', title: 'Zone Defender', description: 'Verify 1 cleanup within 50m', reward_points: 100, target_count: 1, mission_type: 'verify', active: true },
+  { id: 'heat-hunter', title: 'Heat Hunter', description: 'Log 1 cleanup session', reward_points: 75, target_count: 1, mission_type: 'cleanup_log', active: true },
 ]
 
 interface MissionsPanelProps {
@@ -28,6 +17,30 @@ interface MissionsPanelProps {
 }
 
 export function MissionsPanel({ open, onClose }: MissionsPanelProps) {
+  const { user } = useAuth()
+  const [missions, setMissions] = useState<Mission[]>(FALLBACK_MISSIONS)
+  const [progress, setProgress] = useState<UserMission[]>([])
+
+  useEffect(() => {
+    if (!open) return
+    supabase
+      .from('missions')
+      .select('*')
+      .eq('active', true)
+      .then(({ data }) => {
+        if (data && data.length > 0) setMissions(data as Mission[])
+      })
+    if (!user) return
+    supabase
+      .from('user_missions')
+      .select('*')
+      .eq('user_id', user.id)
+      .then(({ data }) => setProgress((data ?? []) as UserMission[]))
+  }, [open, user])
+
+  const progressFor = (missionId: string) =>
+    progress.find((p) => p.mission_id === missionId)
+
   return (
     <AnimatePresence>
       {open && (
@@ -57,22 +70,32 @@ export function MissionsPanel({ open, onClose }: MissionsPanelProps) {
               </h2>
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
-              {MISSIONS.map((m) => (
-                <Card key={m.title} className="border-white/10 bg-black/40">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-semibold text-white">{m.title}</h3>
-                      <p className="mt-1 text-sm text-white/60">{m.desc}</p>
+              {missions.map((m) => {
+                const p = progressFor(m.id)
+                const done = !!p?.completed_at
+                const pct = p
+                  ? Math.min(100, Math.round((p.progress / m.target_count) * 100))
+                  : 0
+                return (
+                  <Card key={m.id} className="border-white/10 bg-black/40">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-semibold text-white">{m.title}</h3>
+                        <p className="mt-1 text-sm text-white/60">{m.description}</p>
+                        <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
+                          <div
+                            className="h-full rounded-full bg-[var(--neon-clean)]"
+                            style={{ width: `${done ? 100 : pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="shrink-0 rounded-md bg-[var(--neon-clean)]/15 px-2 py-1 text-xs font-bold text-[var(--neon-clean)]">
+                        {done ? 'Done' : `+${m.reward_points} XP`}
+                      </span>
                     </div>
-                    <span className="shrink-0 rounded-md bg-[var(--neon-clean)]/15 px-2 py-1 text-xs font-bold text-[var(--neon-clean)]">
-                      {m.reward}
-                    </span>
-                  </div>
-                </Card>
-              ))}
-              <p className="text-center text-xs text-white/35">
-                Complete scans & clears to unlock rewards
-              </p>
+                  </Card>
+                )
+              })}
             </div>
           </motion.aside>
         </>

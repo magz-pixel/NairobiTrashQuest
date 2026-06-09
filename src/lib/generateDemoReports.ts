@@ -1,4 +1,5 @@
 import type { Report } from '../types/database'
+import { demoReportDefaults } from './reportDefaults'
 
 const DEMO_USER = '00000000-0000-4000-8000-000000000001'
 
@@ -103,20 +104,22 @@ export function generateDemoReports(count = 200, seed = 42): Report[] {
     const hoursAgo = rng() * 48
     const created = new Date(now - hoursAgo * 3_600_000).toISOString()
     idx += 1
-    reports.push({
-      id: `demo-${String(idx).padStart(3, '0')}`,
-      user_id: DEMO_USER,
-      latitude: lat,
-      longitude: lng,
-      severity_score: pickSeverity(rng, cluster.bias),
-      status: 'active',
-      image_url: IMAGE_POOL[idx % IMAGE_POOL.length],
-      ai_tags: [...TAG_POOL[idx % TAG_POOL.length]],
-      cleared_image_url: null,
-      cleared_at: null,
-      created_at: created,
-      updated_at: created,
-    })
+    reports.push(
+      demoReportDefaults({
+        id: `demo-${String(idx).padStart(3, '0')}`,
+        user_id: DEMO_USER,
+        latitude: lat,
+        longitude: lng,
+        severity_score: pickSeverity(rng, cluster.bias),
+        status: 'active',
+        image_url: IMAGE_POOL[idx % IMAGE_POOL.length],
+        ai_tags: [...TAG_POOL[idx % TAG_POOL.length]],
+        cleared_image_url: null,
+        cleared_at: null,
+        created_at: created,
+        updated_at: created,
+      }),
+    )
   }
 
   for (let i = 0; i < scatterCount; i++) {
@@ -126,20 +129,22 @@ export function generateDemoReports(count = 200, seed = 42): Report[] {
     const hoursAgo = rng() * 48
     const created = new Date(now - hoursAgo * 3_600_000).toISOString()
     idx += 1
-    reports.push({
-      id: `demo-${String(idx).padStart(3, '0')}`,
-      user_id: DEMO_USER,
-      latitude: lat,
-      longitude: lng,
-      severity_score: pickSeverity(rng, 0),
-      status: 'active',
-      image_url: IMAGE_POOL[idx % IMAGE_POOL.length],
-      ai_tags: [...TAG_POOL[idx % TAG_POOL.length]],
-      cleared_image_url: null,
-      cleared_at: null,
-      created_at: created,
-      updated_at: created,
-    })
+    reports.push(
+      demoReportDefaults({
+        id: `demo-${String(idx).padStart(3, '0')}`,
+        user_id: DEMO_USER,
+        latitude: lat,
+        longitude: lng,
+        severity_score: pickSeverity(rng, 0),
+        status: 'active',
+        image_url: IMAGE_POOL[idx % IMAGE_POOL.length],
+        ai_tags: [...TAG_POOL[idx % TAG_POOL.length]],
+        cleared_image_url: null,
+        cleared_at: null,
+        created_at: created,
+        updated_at: created,
+      }),
+    )
   }
 
   return reports

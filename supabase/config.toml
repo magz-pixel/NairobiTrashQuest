@@ -1,2 +1,11 @@
 [functions.analyze-trash]
 verify_jwt = true
+
+[functions.public-stats]
+verify_jwt = false
+
+[functions.weekly-digest]
+verify_jwt = false
+
+[functions.whatsapp-webhook]
+verify_jwt = false

@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
 import { uploadCleanupMedia } from '../../lib/uploads'
+import { bumpMissionProgress } from '../../lib/missions'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 
@@ -65,16 +66,33 @@ export function CleanupLogPanel({
       }
 
       setStatus('Writing cleanup log…')
+
+      let latitude: number | null = null
+      let longitude: number | null = null
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 }),
+        )
+        latitude = pos.coords.latitude
+        longitude = pos.coords.longitude
+      } catch {
+        /* optional GPS */
+      }
+
       const { error } = await supabase.from('cleanup_logs').insert({
         user_id: user.id,
         hours: toNumber(hours),
         kg: toNumber(kg),
         eco_multiplier: eco,
         location_text: locationText || null,
+        latitude,
+        longitude,
         before_image_url: beforeUrl,
         after_image_url: afterUrl,
       })
       if (error) throw error
+
+      await bumpMissionProgress(user.id, 'cleanup_log')
 
       setStatus('Logged! Tokens awarded.')
       onLogged?.()

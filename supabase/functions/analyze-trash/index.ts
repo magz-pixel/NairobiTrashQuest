@@ -7,8 +7,23 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
-const TRASH_PROMPT = `Analyze if this image contains significant trash or pollution in an urban environment.
-Return ONLY valid JSON with no markdown: {"is_trash": boolean, "severity": number 1-10, "tags": string[]}`
+const MODERATION_PROMPT = `You are moderating photos for a civic trash-reporting app in Nairobi.
+Return ONLY valid JSON with no markdown:
+{
+  "is_safe": boolean,
+  "is_trash": boolean,
+  "severity": number 1-10,
+  "tags": string[],
+  "confidence": number 0-1,
+  "moderation_action": "approve" | "review" | "reject",
+  "moderation_note": string
+}
+Rules:
+- is_safe=false for NSFW, violence, hate, or non-street photos (selfies, memes, screenshots)
+- is_trash=false if the image is not genuine urban trash/pollution
+- moderation_action=approve when is_safe and is_trash and confidence>=0.85
+- moderation_action=review when uncertain or confidence 0.5-0.84
+- moderation_action=reject when not safe or clearly not trash`
 
 const CLEAR_PROMPT = `Compare these two images of the same urban location (before and after cleanup).
 Return ONLY valid JSON with no markdown: {"is_cleared": boolean, "matches_location": boolean, "confidence": number 0-1}`
@@ -62,7 +77,7 @@ serve(async (req) => {
     }
 
     const result = await model.generateContent([
-      TRASH_PROMPT,
+      MODERATION_PROMPT,
       {
         inlineData: {
           data: body.imageBase64,

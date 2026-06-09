@@ -1,4 +1,10 @@
-export type ReportStatus = 'active' | 'verified_cleared'
+export type ReportStatus =
+  | 'pending'
+  | 'active'
+  | 'verified_cleared'
+  | 'flagged'
+  | 'rejected'
+
 export type BadgeLevel = 'scout' | 'ranger' | 'guardian'
 
 export interface Profile {
@@ -6,13 +12,14 @@ export interface Profile {
   username: string
   total_impact_points: number
   badge_level: BadgeLevel
+  is_admin?: boolean
   created_at: string
   updated_at: string
 }
 
 export interface Report {
   id: string
-  user_id: string
+  user_id: string | null
   latitude: number
   longitude: number
   severity_score: number
@@ -21,8 +28,51 @@ export interface Report {
   ai_tags: string[]
   cleared_image_url: string | null
   cleared_at: string | null
+  waste_type: string | null
+  seen_count: number
+  flag_count: number
+  approved_at: string | null
+  rejected_reason: string | null
+  ward_id: string | null
+  area_name: string | null
+  is_anonymous: boolean
   created_at: string
   updated_at: string
+}
+
+export interface Ward {
+  id: string
+  name: string
+  sub_county: string
+  constituency: string | null
+}
+
+export interface Official {
+  id: string
+  name: string
+  role: string
+  contact_email: string | null
+  contact_phone: string | null
+  photo_url: string | null
+}
+
+export interface Mission {
+  id: string
+  title: string
+  description: string
+  reward_points: number
+  target_count: number
+  mission_type: 'report' | 'verify' | 'cleanup_log' | 'corroborate'
+  active: boolean
+}
+
+export interface UserMission {
+  id: string
+  user_id: string
+  mission_id: string
+  progress: number
+  completed_at: string | null
+  created_at: string
 }
 
 export interface Event {
@@ -41,6 +91,9 @@ export interface TrashAnalysis {
   is_trash: boolean
   severity: number
   tags: string[]
+  is_safe?: boolean
+  confidence?: number
+  moderation_action?: 'approve' | 'review' | 'reject'
 }
 
 export interface ClearVerification {
@@ -73,3 +126,16 @@ export interface Post {
   after_image_url: string | null
   created_at: string
 }
+
+export interface ReportStats {
+  total: number
+  active: number
+  resolved: number
+  pending: number
+  flagged: number
+  resolutionRate: number
+  worstAreas: { area: string; count: number }[]
+}
+
+export type SeverityFilter = 'all' | 'low' | 'moderate' | 'high' | 'critical'
+export type StatusFilter = 'all' | 'active' | 'pending' | 'verified_cleared' | 'flagged'

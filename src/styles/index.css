@@ -93,8 +93,9 @@ body,
   transform: rotate(45deg);
 }
 
-.leaflet-container {
-  z-index: 0;
+.cluster-marker {
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Mobile polish */

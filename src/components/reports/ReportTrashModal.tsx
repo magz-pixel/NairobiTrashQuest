@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { analyzeTrashImage, uploadReportImage } from '../../lib/gemini'
+import { assignWard } from '../../lib/wards'
+import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
@@ -104,6 +106,7 @@ export function ReportTrashModal({
       const position = await getCurrentPosition()
       const reportId = crypto.randomUUID()
       const imageUrl = await uploadReportImage(user.id, reportId, file)
+      const ward = assignWard(position.coords.latitude, position.coords.longitude)
 
       setStatus('Saving report…')
       const { error } = await supabase.from('reports').insert({
@@ -115,9 +118,14 @@ export function ReportTrashModal({
         status: 'active',
         image_url: imageUrl,
         ai_tags: analysis.tags,
+        ward_id: ward?.wardId ?? null,
+        area_name: ward?.areaName ?? null,
+        waste_type: analysis.tags[0] ?? 'Mixed waste',
       })
 
       if (error) throw error
+
+      await bumpMissionProgress(user.id, 'report')
 
       setStatus('Hotspot added to the map!')
       onReported()

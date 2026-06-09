@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { findNearestActiveReport } from '../../lib/geo'
 import { verifyClearedImage } from '../../lib/gemini'
+import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
 import type { Report } from '../../types/database'
 import { Button } from '../ui/Button'
@@ -97,6 +98,7 @@ export function ClearTrashModal({
 
       if (updateError) throw updateError
 
+      await bumpMissionProgress(user.id, 'verify')
       await refreshProfile()
       setStatus(`Cleared! +${Math.max(10, nearest.severity_score * 5)} impact points`)
       onCleared()
