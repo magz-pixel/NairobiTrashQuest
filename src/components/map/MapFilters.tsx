@@ -23,6 +23,9 @@ const STATUS: { value: StatusFilter; label: string }[] = [
   { value: 'flagged', label: 'Flagged' },
 ]
 
+const selectClass =
+  'rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-1.5 text-xs text-[var(--text-primary)] shadow-[var(--shadow-sm)]'
+
 export function MapFilters({
   severity,
   status,
@@ -34,7 +37,7 @@ export function MapFilters({
       <select
         value={severity}
         onChange={(e) => onSeverityChange(e.target.value as SeverityFilter)}
-        className="rounded-lg border border-white/15 bg-black/70 px-2 py-1.5 text-xs text-white backdrop-blur-md"
+        className={selectClass}
       >
         {SEVERITY.map((o) => (
           <option key={o.value} value={o.value}>
@@ -45,7 +48,7 @@ export function MapFilters({
       <select
         value={status}
         onChange={(e) => onStatusChange(e.target.value as StatusFilter)}
-        className="rounded-lg border border-white/15 bg-black/70 px-2 py-1.5 text-xs text-white backdrop-blur-md"
+        className={selectClass}
       >
         {STATUS.map((o) => (
           <option key={o.value} value={o.value}>

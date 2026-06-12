@@ -1,14 +1,19 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import type { Report } from '../../types/database'
 import { ClusterLayer } from './ClusterLayer'
+import { ReportPulseLayer } from './ReportPulseLayer'
 
 const NAIROBI_CENTER: [number, number] = [-1.286389, 36.817223]
+
+const LIGHT_TILE =
+  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 
 interface MapViewProps {
   reports: Report[]
   onInteract?: () => void
   onSelectReport: (report: Report) => void
-  lightBasemap?: boolean
+  pulseAt?: { latitude: number; longitude: number } | null
+  onPulseDone?: () => void
 }
 
 function MapInteractor({ onInteract }: { onInteract?: () => void }) {
@@ -27,12 +32,9 @@ export function MapView({
   reports,
   onInteract,
   onSelectReport,
-  lightBasemap = false,
+  pulseAt,
+  onPulseDone,
 }: MapViewProps) {
-  const tileUrl = lightBasemap
-    ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-
   return (
     <MapContainer
       center={NAIROBI_CENTER}
@@ -42,10 +44,17 @@ export function MapView({
     >
       <MapInteractor onInteract={onInteract} />
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url={tileUrl}
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        url={LIGHT_TILE}
       />
       <ClusterLayer reports={reports} onSelectReport={onSelectReport} />
+      {pulseAt && (
+        <ReportPulseLayer
+          latitude={pulseAt.latitude}
+          longitude={pulseAt.longitude}
+          onDone={onPulseDone}
+        />
+      )}
     </MapContainer>
   )
 }

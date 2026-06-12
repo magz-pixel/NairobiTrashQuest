@@ -11,7 +11,7 @@ export function Card({ children, className = '' }: CardProps) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-xl border border-white/10 bg-[var(--bg-charcoal)] p-4 shadow-lg backdrop-blur-md ${className}`}
+      className={`rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-sm)] ${className}`}
     >
       {children}
     </motion.div>

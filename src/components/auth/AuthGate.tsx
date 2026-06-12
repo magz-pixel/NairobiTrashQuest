@@ -66,7 +66,7 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
       </div>
       <Modal open={showSignIn} onClose={() => setShowSignIn(false)} title="Sign in to play">
         <Card className="border-0 bg-transparent p-0 shadow-none">
-          <p className="mb-3 text-sm text-white/70">
+          <p className="mb-3 text-sm text-[var(--text-primary)]">
             Join the cleanup game. Earn impact points by verifying cleared hotspots.
           </p>
 
@@ -81,7 +81,7 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
 
           <div className="my-3 flex items-center gap-3">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/40">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               or
             </span>
             <div className="h-px flex-1 bg-white/10" />
@@ -92,10 +92,10 @@ export function AuthGate({ children, onAuthenticated }: AuthGateProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@email.com"
-            className="mb-3 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:border-[var(--neon-clean)]"
+            className="mb-3 w-full rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]"
           />
           {message && (
-            <p className="mb-2 text-xs text-[var(--neon-clean)]">{message}</p>
+            <p className="mb-2 text-xs text-[var(--brand-teal)]">{message}</p>
           )}
           <Button
             type="button"

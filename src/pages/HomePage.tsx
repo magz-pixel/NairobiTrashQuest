@@ -2,10 +2,8 @@ import { lazy, Suspense, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useReports } from '../hooks/useReports'
 import { useReportStats } from '../hooks/useReportStats'
-import { AuthGate } from '../components/auth/AuthGate'
 import { ProfileBadge } from '../components/auth/ProfileBadge'
 import { GameShell, type GameTab } from '../components/layout/GameShell'
-import { BottomReportDock } from '../components/layout/BottomReportDock'
 import { DigestBanner } from '../components/layout/DigestBanner'
 import { MapStatsBar } from '../components/map/MapStatsBar'
 import { MapFilters } from '../components/map/MapFilters'
@@ -20,11 +18,12 @@ import { ProfilePanel } from '../components/panels/ProfilePanel'
 import { RewardsPanel } from '../components/panels/RewardsPanel'
 import { AnalyticsPanel } from '../components/panels/AnalyticsPanel'
 import { AdminReviewPanel } from '../components/panels/AdminReviewPanel'
+import { AdminDrawer } from '../components/panels/AdminDrawer'
 import { ReportTrashModal } from '../components/reports/ReportTrashModal'
 import { QuickReportModal } from '../components/reports/QuickReportModal'
 import { ClearTrashModal } from '../components/reports/ClearTrashModal'
 import { isDemoReport, showDemoData } from '../lib/demoReports'
-import { exportReportsCsv, exportReportsGeoJson, getLocale, publicStatsUrl, setLocale, t, whatsappReportUrl } from '../lib/i18n'
+import { getLocale, setLocale, t, whatsappReportUrl } from '../lib/i18n'
 import { useAuth } from '../hooks/useAuth'
 import type { Report, SeverityFilter, StatusFilter } from '../types/database'
 
@@ -52,7 +51,8 @@ export function HomePage() {
   const [clearOpen, setClearOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
-  const [lightMap, setLightMap] = useState(false)
+  const [adminDrawerOpen, setAdminDrawerOpen] = useState(false)
+  const [pulseAt, setPulseAt] = useState<{ latitude: number; longitude: number } | null>(null)
   const [, setLocaleTick] = useState(0)
 
   const realReports = allReports.filter((r) => !isDemoReport(r))
@@ -65,6 +65,7 @@ export function HomePage() {
     setSelectedReport(null)
     setAnalyticsOpen(false)
     setAdminOpen(false)
+    setAdminDrawerOpen(false)
   }
 
   const openQuickReport = () => {
@@ -131,20 +132,27 @@ export function HomePage() {
     setSelectedReport(report)
   }
 
+  const handleReported = (coords?: { id: string; latitude: number; longitude: number }) => {
+    refetch()
+    if (coords) {
+      setPulseAt({ latitude: coords.latitude, longitude: coords.longitude })
+    }
+  }
+
   const hudTop = (
     <div
-      className="pointer-events-none absolute inset-x-0 z-[1000] space-y-2 px-2 md:px-4"
+      className="pointer-events-none absolute inset-x-0 z-[1000] space-y-2 px-4"
       style={{ top: 'calc(env(safe-area-inset-top) + 8px)' }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="space-y-2">
           <div className="pointer-events-auto flex items-center gap-2">
-            <h1 className="font-[family-name:var(--font-display)] text-sm font-bold text-white md:text-base">
+            <h1 className="text-sm font-semibold text-[var(--text-primary)] md:text-base">
               Nairobi Trash Locator
             </h1>
             <button
               type="button"
-              className="pointer-events-auto rounded border border-white/15 px-2 py-0.5 text-[10px] text-white/60"
+              className="pointer-events-auto rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
               onClick={() => {
                 setLocale(getLocale() === 'en' ? 'sw' : 'en')
                 setLocaleTick((n) => n + 1)
@@ -152,6 +160,16 @@ export function HomePage() {
             >
               {getLocale() === 'en' ? 'SW' : 'EN'}
             </button>
+            {profile?.is_admin && (
+              <button
+                type="button"
+                onClick={() => setAdminDrawerOpen(true)}
+                className="pointer-events-auto rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
+                aria-label="Admin tools"
+              >
+                ⚙
+              </button>
+            )}
           </div>
           <MapStatsBar stats={stats} loading={loading} />
           <MapFilters
@@ -170,74 +188,35 @@ export function HomePage() {
         <button
           type="button"
           onClick={() => setViewMode('map')}
-          className={`rounded-lg px-3 py-1 text-xs font-semibold ${viewMode === 'map' ? 'bg-[var(--neon-clean)]/20 text-[var(--neon-clean)]' : 'bg-black/50 text-white/55'}`}
+          className={`rounded-lg px-3 py-1 text-xs font-semibold shadow-[var(--shadow-sm)] ${
+            viewMode === 'map'
+              ? 'border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 text-[var(--brand-teal)]'
+              : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
+          }`}
         >
           {t('map')}
         </button>
         <button
           type="button"
           onClick={() => setViewMode('list')}
-          className={`rounded-lg px-3 py-1 text-xs font-semibold ${viewMode === 'list' ? 'bg-[var(--neon-clean)]/20 text-[var(--neon-clean)]' : 'bg-black/50 text-white/55'}`}
+          className={`rounded-lg px-3 py-1 text-xs font-semibold shadow-[var(--shadow-sm)] ${
+            viewMode === 'list'
+              ? 'border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 text-[var(--brand-teal)]'
+              : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
+          }`}
         >
           {t('list')}
         </button>
-        <button
-          type="button"
-          onClick={() => setLightMap((v) => !v)}
-          className="rounded-lg bg-black/50 px-3 py-1 text-xs text-white/55"
-        >
-          {lightMap ? 'Dark map' : 'Light map'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setAnalyticsOpen(true)}
-          className="rounded-lg bg-black/50 px-3 py-1 text-xs text-white/55"
-        >
-          {t('analytics')}
-        </button>
-        <button
-          type="button"
-          onClick={() => exportReportsCsv(allReports)}
-          className="rounded-lg bg-black/50 px-3 py-1 text-xs text-white/55"
-        >
-          {t('dataExport')}
-        </button>
-        <button
-          type="button"
-          onClick={() => exportReportsGeoJson(allReports)}
-          className="rounded-lg bg-black/50 px-3 py-1 text-xs text-white/55"
-        >
-          {t('geoExport')}
-        </button>
-        {publicStatsUrl() && (
-          <a
-            href={publicStatsUrl()}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-lg bg-black/50 px-3 py-1 text-xs text-white/55"
-          >
-            {t('publicApi')}
-          </a>
-        )}
         <a
           href={whatsappReportUrl()}
           target="_blank"
           rel="noreferrer"
-          className="rounded-lg bg-green-900/40 px-3 py-1 text-xs text-green-400"
+          className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-green-700 shadow-[var(--shadow-sm)]"
         >
           {t('whatsappReport')}
         </a>
-        {profile?.is_admin && (
-          <button
-            type="button"
-            onClick={() => setAdminOpen(true)}
-            className="rounded-lg bg-amber-900/40 px-3 py-1 text-xs text-amber-300"
-          >
-            Admin
-          </button>
-        )}
         {showDemoData && !loading && realReports.length === 0 && (
-          <span className="text-[10px] text-[var(--neon-clean)]">· demo data</span>
+          <span className="text-[10px] font-medium text-[var(--text-muted)]">· demo data</span>
         )}
       </div>
     </div>
@@ -247,23 +226,23 @@ export function HomePage() {
     <GameShell
       activeTab={activeTab}
       onTabChange={handleTab}
-      hotspotCount={mapReports.length}
-      loading={loading}
-      header={null}
+      onReport={openQuickReport}
+      reportLabel={t('reportTrash')}
     >
       <div className="relative h-full w-full">
         {viewMode === 'map' ? (
           <>
             <Suspense
               fallback={
-                <div className="flex h-full items-center justify-center font-[family-name:var(--font-display)] text-[var(--neon-clean)]">
-                  Loading radar…
+                <div className="flex h-full items-center justify-center text-[var(--brand-teal)]">
+                  Loading map…
                 </div>
               }
             >
               <MapView
                 reports={mapReports}
-                lightBasemap={lightMap}
+                pulseAt={pulseAt}
+                onPulseDone={() => setPulseAt(null)}
                 onSelectReport={selectReport}
                 onInteract={() => {
                   setActivePanel(null)
@@ -273,40 +252,16 @@ export function HomePage() {
             </Suspense>
             {hudTop}
             <MapLegend />
-            <div
-              className="pointer-events-none absolute right-2 z-[1000] hidden md:block"
-              style={{
-                bottom:
-                  'calc(env(safe-area-inset-bottom) + var(--mobile-nav-height, 64px) + 8px)',
-              }}
-            >
-              <div className="pointer-events-auto flex flex-col gap-2">
-                <button type="button" onClick={openScan} className="game-action-btn game-action-btn--scan">
-                  ⊕ {t('reportTrash')}
-                </button>
-                <AuthGate onAuthenticated={openClear}>
-                  <button
-                    type="button"
-                    onClick={() => user && openClear()}
-                    className="game-action-btn game-action-btn--clear"
-                  >
-                    ✓ {t('verifyClear')}
-                  </button>
-                </AuthGate>
-              </div>
-            </div>
           </>
         ) : (
           <>
             {hudTop}
-            <div className="h-full pt-44">
+            <div className="h-full bg-[var(--bg-app)] pt-44">
               <ReportListView reports={reports} onSelect={selectReport} />
             </div>
           </>
         )}
       </div>
-
-      <BottomReportDock onReport={openQuickReport} label={t('reportTrash')} />
 
       <ReportDetailSheet
         report={selectedReport}
@@ -322,7 +277,15 @@ export function HomePage() {
       <QuickReportModal
         open={quickReportOpen}
         onClose={() => setQuickReportOpen(false)}
-        onReported={refetch}
+        onReported={handleReported}
+      />
+
+      <AdminDrawer
+        open={adminDrawerOpen}
+        onClose={() => setAdminDrawerOpen(false)}
+        reports={allReports}
+        onOpenModeration={() => setAdminOpen(true)}
+        onOpenAnalytics={() => setAnalyticsOpen(true)}
       />
 
       <AnalyticsPanel open={analyticsOpen} onClose={() => setAnalyticsOpen(false)} stats={stats} />

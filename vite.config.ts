@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'Nairobi Trash Locator',
         short_name: 'TrashLocator',
         description: 'Gamified urban pollution hotspot tracker',
-        theme_color: '#0a0a0b',
-        background_color: '#0a0a0b',
+        theme_color: '#F7F7F5',
+        background_color: '#F7F7F5',
         display: 'standalone',
         start_url: '/',
         icons: [

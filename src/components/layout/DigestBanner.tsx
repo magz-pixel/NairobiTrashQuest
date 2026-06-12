@@ -17,24 +17,24 @@ export function DigestBanner() {
   }
 
   return (
-    <div className="pointer-events-auto rounded-lg border border-[var(--neon-clean)]/20 bg-black/70 px-3 py-2 backdrop-blur-md">
-      <p className="text-[10px] text-white/55">Join the Monday cleanup digest</p>
+    <div className="pointer-events-auto hidden max-w-[200px] rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 shadow-[var(--shadow-sm)] sm:block">
+      <p className="text-[10px] text-[var(--text-muted)]">Monday cleanup digest</p>
       <div className="mt-1 flex gap-1">
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@email.com"
-          className="min-w-0 flex-1 rounded border border-white/15 bg-black/40 px-2 py-1 text-xs text-white"
+          className="min-w-0 flex-1 rounded border border-[var(--border-subtle)] bg-white px-2 py-1 text-xs text-[var(--text-primary)]"
         />
         <button
           type="button"
           onClick={subscribe}
-          className="shrink-0 rounded bg-[var(--neon-clean)]/20 px-2 py-1 text-[10px] font-bold text-[var(--neon-clean)]"
+          className="shrink-0 rounded bg-[var(--brand-teal)] px-2 py-1 text-[10px] font-semibold text-white"
         >
           Join
         </button>
       </div>
-      {status && <p className="mt-1 text-[10px] text-[var(--neon-clean)]">{status}</p>}
+      {status && <p className="mt-1 text-[10px] text-[var(--brand-teal)]">{status}</p>}
     </div>
   )
 }

@@ -10,7 +10,7 @@ import { Modal } from '../ui/Modal'
 interface QuickReportModalProps {
   open: boolean
   onClose: () => void
-  onReported: () => void
+  onReported: (report?: { id: string; latitude: number; longitude: number }) => void
 }
 
 function getCurrentPosition(): Promise<GeolocationPosition> {
@@ -110,7 +110,11 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
           ? 'Submitted! Pending review before it appears on the map.'
           : 'Report live on the map. Thank you!',
       )
-      onReported()
+      onReported({
+        id: reportId,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      })
       setTimeout(handleClose, 900)
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed to submit')
@@ -121,13 +125,13 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
 
   return (
     <Modal open={open} onClose={handleClose} title="Report trash (30 sec)">
-      <p className="mb-3 text-sm text-white/60">
+      <p className="mb-3 text-sm text-[var(--text-muted)]">
         No login needed. Photo + location only.
       </p>
       {preview ? (
         <img src={preview} alt="Preview" className="mb-3 aspect-video w-full rounded-lg object-cover" />
       ) : (
-        <div className="mb-3 flex aspect-video items-center justify-center rounded-lg border border-dashed border-white/20 bg-black/40 text-sm text-white/50">
+        <div className="mb-3 flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-gray-50 text-sm text-[var(--text-muted)]">
           Take or upload a photo
         </div>
       )}
@@ -147,10 +151,10 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
           setPreview(URL.createObjectURL(f))
         }}
       />
-      <div className="mb-3 rounded-xl border border-white/10 bg-black/30 p-3">
+      <div className="mb-3 rounded-xl border border-[var(--border-subtle)] bg-gray-50 p-3">
         <div className="mb-2 flex justify-between text-xs">
-          <span className="text-white/60">Intensity</span>
-          <span className="font-bold text-[var(--neon-clean)]">{severity}/10</span>
+          <span className="text-[var(--text-muted)]">Intensity</span>
+          <span className="font-bold text-[var(--brand-teal)]">{severity}/10</span>
         </div>
         <input
           type="range"
@@ -158,10 +162,10 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
           max={10}
           value={severity}
           onChange={(e) => setSeverity(Number(e.target.value))}
-          className="w-full accent-[var(--neon-clean)]"
+          className="w-full accent-[var(--brand-teal)]"
         />
       </div>
-      {status && <p className="mb-2 text-xs text-[var(--neon-clean)]">{status}</p>}
+      {status && <p className="mb-2 text-xs text-[var(--brand-teal)]">{status}</p>}
       <Button type="button" className="w-full" disabled={!file || submitting} onClick={handleSubmit}>
         {submitting ? 'Submitting…' : 'Submit report'}
       </Button>

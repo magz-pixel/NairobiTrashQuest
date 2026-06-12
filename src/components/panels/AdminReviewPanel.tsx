@@ -49,25 +49,25 @@ export function AdminReviewPanel({ open, onClose, onReviewed }: AdminReviewPanel
         <>
           <motion.button
             type="button"
-            className="fixed inset-0 z-[1100] bg-black/50"
+            className="fixed inset-0 z-[1100] bg-black/30"
             onClick={onClose}
           />
           <motion.aside
-            className="fixed right-0 top-0 z-[1200] flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[var(--bg-charcoal)]"
+            className="fixed right-0 top-0 z-[1200] flex h-full w-full max-w-md flex-col border-l border-[var(--border-subtle)] bg-[var(--bg-surface)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
           >
-            <div className="border-b border-white/10 p-4">
-              <h2 className="font-bold text-white">Moderation queue</h2>
-              <p className="text-xs text-white/50">{pending.length} pending</p>
+            <div className="border-b border-[var(--border-subtle)] p-4">
+              <h2 className="font-bold text-[var(--text-primary)]">Moderation queue</h2>
+              <p className="text-xs text-[var(--text-muted)]">{pending.length} pending</p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {loading && <p className="text-sm text-white/50">Loading…</p>}
+              {loading && <p className="text-sm text-[var(--text-muted)]">Loading…</p>}
               {pending.map((r) => (
-                <div key={r.id} className="rounded-xl border border-white/10 bg-black/40 p-3">
+                <div key={r.id} className="rounded-xl border border-[var(--border-subtle)] bg-gray-50 p-3">
                   <img src={r.image_url} alt="" className="mb-2 aspect-video w-full rounded-lg object-cover" />
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-[var(--text-muted)]">
                     Severity {r.severity_score} · {r.area_name ?? 'Unknown'}
                   </p>
                   <div className="mt-2 flex gap-2">
@@ -81,7 +81,7 @@ export function AdminReviewPanel({ open, onClose, onReviewed }: AdminReviewPanel
                 </div>
               ))}
               {!loading && pending.length === 0 && (
-                <p className="text-sm text-white/50">Queue empty.</p>
+                <p className="text-sm text-[var(--text-muted)]">Queue empty.</p>
               )}
             </div>
           </motion.aside>

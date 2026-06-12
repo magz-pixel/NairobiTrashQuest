@@ -135,33 +135,33 @@ export function AccountabilityFlow({
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-3">
+    <div className="mt-4 rounded-xl border border-[var(--border-subtle)] bg-gray-50 p-3">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
           Accountability chain
         </p>
         {isDemo && (
-          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-300">
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-700">
             Demo officials
           </span>
         )}
       </div>
 
-      <ol className="relative space-y-0 border-l-2 border-[var(--neon-clean)]/30 pl-4">
+      <ol className="relative space-y-0 border-l-2 border-[var(--brand-teal)]/30 pl-4">
         {steps.map((step, i) => (
           <li key={`${step.label}-${i}`} className="relative pb-4 last:pb-0">
             <span
-              className="absolute -left-[calc(0.5rem+5px)] top-0.5 flex h-2.5 w-2.5 rounded-full bg-[var(--neon-clean)] ring-2 ring-[var(--bg-charcoal)]"
+              className="absolute -left-[calc(0.5rem+5px)] top-0.5 flex h-2.5 w-2.5 rounded-full bg-[var(--brand-teal)] ring-2 ring-white"
               aria-hidden
             />
-            <p className="text-[10px] font-bold uppercase tracking-wide text-white/40">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-muted)]">
               {step.label}
             </p>
-            <p className="text-sm font-semibold text-white">{step.detail}</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">{step.detail}</p>
             {step.contactEmail && (
               <a
                 href={`mailto:${step.contactEmail}`}
-                className="text-[10px] text-[var(--neon-clean)]"
+                className="text-[10px] text-[var(--brand-teal)]"
               >
                 Contact →
               </a>
@@ -172,7 +172,7 @@ export function AccountabilityFlow({
 
       <a
         href={complaintMailto(areaName, reportId)}
-        className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-[var(--neon-clean)]/30 bg-[var(--neon-clean)]/10 px-3 py-2 text-xs font-semibold text-[var(--neon-clean)]"
+        className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-teal)]"
       >
         File a complaint with responsible officials →
       </a>

@@ -86,45 +86,45 @@ export function ReportDetailSheet({
           <motion.button
             type="button"
             aria-label="Close detail"
-            className="fixed inset-0 z-[1400] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[1400] bg-black/30 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
           <motion.div
-            className="fixed inset-x-0 bottom-0 z-[1500] max-h-[88dvh] overflow-y-auto rounded-t-2xl border-t border-white/10 bg-[var(--bg-charcoal)] p-4 md:inset-x-auto md:right-4 md:top-4 md:max-w-md md:rounded-xl md:border"
+            className="fixed inset-x-0 bottom-0 z-[1500] max-h-[88dvh] overflow-y-auto rounded-t-2xl border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-[var(--shadow-md)] md:inset-x-auto md:right-4 md:top-4 md:max-w-md md:rounded-xl md:border"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
           >
             <div className="mb-3 flex items-start justify-between gap-2">
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-full bg-red-600/20 px-2 py-0.5 text-[10px] font-bold uppercase text-red-400">
+                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--urgent-orange-deep)]">
                   {severityLabel(report.severity_score)}
                 </span>
-                <span className="rounded-full border border-white/20 px-2 py-0.5 text-[10px] uppercase text-white/60">
+                <span className="rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] uppercase text-[var(--text-muted)]">
                   {report.status.replace('_', ' ')}
                 </span>
                 {demo && (
-                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-300">
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700">
                     Demo
                   </span>
                 )}
               </div>
-              <button type="button" onClick={onClose} className="text-white/50">
+              <button type="button" onClick={onClose} className="text-[var(--text-muted)]">
                 ✕
               </button>
             </div>
 
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-white">
+            <h2 className="text-xl font-semibold text-[var(--text-primary)]">
               {ward?.areaName ?? 'Hotspot'}
             </h2>
             <a
               href={directionsUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-1 inline-block text-xs text-[var(--neon-clean)]"
+              className="mt-1 inline-block text-xs text-[var(--brand-teal)]"
             >
               Get directions →
             </a>
@@ -136,19 +136,19 @@ export function ReportDetailSheet({
             />
 
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-lg bg-black/40 p-2">
-                <p className="font-bold text-white">1</p>
-                <p className="text-[10px] text-white/45">Reports</p>
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
+                <p className="font-bold text-[var(--text-primary)]">1</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Reports</p>
               </div>
-              <div className="rounded-lg bg-black/40 p-2">
-                <p className="font-bold text-white">{daysSince(report.created_at)}</p>
-                <p className="text-[10px] text-white/45">Days</p>
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
+                <p className="font-bold text-[var(--text-primary)]">{daysSince(report.created_at)}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Days</p>
               </div>
-              <div className="rounded-lg bg-black/40 p-2">
-                <p className="truncate text-xs font-bold text-white">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
+                <p className="truncate text-xs font-bold text-[var(--text-primary)]">
                   {report.waste_type ?? 'Mixed'}
                 </p>
-                <p className="text-[10px] text-white/45">Waste type</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Waste type</p>
               </div>
             </div>
 
@@ -159,7 +159,7 @@ export function ReportDetailSheet({
               isDemo={demo}
             />
 
-            {status && <p className="mt-2 text-xs text-[var(--neon-clean)]">{status}</p>}
+            {status && <p className="mt-2 text-xs text-[var(--brand-teal)]">{status}</p>}
 
             <div className="mt-4 flex flex-col gap-2">
               <Button type="button" variant="ghost" onClick={handleSeen}>

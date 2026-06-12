@@ -120,13 +120,13 @@ export function ClearTrashModal({
   return (
     <Modal open={open} onClose={handleClose} title="Verify cleared">
       <div className="space-y-3">
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-[var(--text-primary)]">
           Upload a photo of the cleaned area. AI will match it to the nearest active hotspot.
         </p>
         {preview ? (
           <img src={preview} alt="Cleared preview" className="aspect-video w-full rounded-lg object-cover" />
         ) : (
-          <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-white/20 bg-black/40 text-sm text-white/50">
+          <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-gray-50 text-sm text-[var(--text-muted)]">
             After photo required
           </div>
         )}
@@ -145,7 +145,7 @@ export function ClearTrashModal({
           className="hidden"
           onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
         />
-        {status && <p className="text-xs text-[var(--neon-clean)]">{status}</p>}
+        {status && <p className="text-xs text-[var(--brand-teal)]">{status}</p>}
         <Button
           type="button"
           variant="primary"

@@ -59,46 +59,46 @@ export function EventsPanel({ open, onClose }: EventsPanelProps) {
           <motion.button
             type="button"
             aria-label="Close events"
-            className="absolute inset-0 z-[1100] bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 z-[1100] bg-black/30 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
           <motion.aside
-            className="absolute z-[1200] flex w-full flex-col border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
+            className="absolute z-[1200] flex w-full flex-col border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
           >
-            <div className="border-b border-white/10 p-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--neon-clean)]">
+            <div className="border-b border-[var(--border-subtle)] p-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-teal)]">
                 Community
               </p>
-              <h2 className="font-[family-name:var(--font-display)] text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
                 Cleanup events
               </h2>
-              <p className="mt-1 text-sm text-white/50">
+              <p className="mt-1 text-sm text-[var(--text-muted)]">
                 Squad up and reclaim Nairobi block by block.
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
               {loading ? (
-                <p className="text-sm text-white/50">Loading events…</p>
+                <p className="text-sm text-[var(--text-muted)]">Loading events…</p>
               ) : (
                 <ul className="space-y-3">
                   {events.map((event) => (
                     <li key={event.id}>
-                      <Card className="border-[var(--neon-clean)]/10 bg-black/40">
-                        <h3 className="font-semibold text-[var(--neon-clean)]">
+                      <Card className="border-[var(--brand-teal)]/10 bg-gray-50">
+                        <h3 className="font-semibold text-[var(--brand-teal)]">
                           {event.title}
                         </h3>
-                        <p className="mt-1 text-xs text-white/50">
+                        <p className="mt-1 text-xs text-[var(--text-muted)]">
                           {new Date(event.event_date).toLocaleString()} ·{' '}
                           {event.location}
                         </p>
-                        <p className="mt-2 text-sm text-white/80">
+                        <p className="mt-2 text-sm text-[var(--text-primary)]/80">
                           {event.description}
                         </p>
                       </Card>

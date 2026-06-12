@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
-import { CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
+import { Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import type { Report } from '../../types/database'
-import { clusterColor, clusterReports, formatClusterCount } from '../../lib/clusters'
+import {
+  clusterColor,
+  clusterReports,
+  clusterSize,
+  formatClusterCount,
+  pinSize,
+} from '../../lib/clusters'
 
 interface ClusterLayerProps {
   reports: Report[]
@@ -10,16 +16,33 @@ interface ClusterLayerProps {
 }
 
 function clusterIcon(count: number, color: string) {
-  const size = count > 99 ? 44 : count > 9 ? 38 : 32
+  const size = clusterSize(count)
   return L.divIcon({
     className: 'cluster-marker',
     html: `<div style="
       width:${size}px;height:${size}px;
       background:${color};color:#fff;
       border-radius:50%;display:flex;align-items:center;justify-content:center;
-      font-weight:700;font-size:12px;border:2px solid rgba(255,255,255,0.85);
-      box-shadow:0 2px 8px rgba(0,0,0,0.45);
+      font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:${size > 40 ? 14 : 12}px;
+      border:2px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,0.2);
     ">${formatClusterCount(count)}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  })
+}
+
+function pinIcon(severity: number) {
+  const size = pinSize(severity)
+  const color = clusterColor(severity)
+  return L.divIcon({
+    className: 'cluster-marker',
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      background:${color};border-radius:50%;
+      border:2px solid #fff;
+      box-shadow:0 2px 6px rgba(0,0,0,0.25);
+    "></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   })
@@ -45,16 +68,10 @@ export function ClusterLayer({ reports, onSelectReport }: ClusterLayerProps) {
         if (cluster.count === 1) {
           const r = cluster.reports[0]
           return (
-            <CircleMarker
+            <Marker
               key={r.id}
-              center={[r.latitude, r.longitude]}
-              radius={8}
-              pathOptions={{
-                color: clusterColor(r.severity_score),
-                fillColor: clusterColor(r.severity_score),
-                fillOpacity: 0.85,
-                weight: 2,
-              }}
+              position={[r.latitude, r.longitude]}
+              icon={pinIcon(r.severity_score)}
               eventHandlers={{ click: () => onSelectReport(r) }}
             />
           )
@@ -66,11 +83,16 @@ export function ClusterLayer({ reports, onSelectReport }: ClusterLayerProps) {
             position={[cluster.latitude, cluster.longitude]}
             icon={clusterIcon(cluster.count, clusterColor(cluster.maxSeverity))}
             eventHandlers={{
-              click: () => onSelectReport(cluster.reports[0]),
+              click: () => {
+                map.setView([cluster.latitude, cluster.longitude], zoom + 1)
+                if (zoom >= 13) onSelectReport(cluster.reports[0])
+              },
             }}
           >
             <Popup>
-              <span className="text-sm">{cluster.count} reports in this area</span>
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                {cluster.count} reports in this area
+              </span>
             </Popup>
           </Marker>
         )

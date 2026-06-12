@@ -59,10 +59,19 @@ export function formatClusterCount(n: number): string {
   return String(n)
 }
 
+/** Orange gradient: light orange (low) → burnt orange (critical). */
 export function clusterColor(severity: number): string {
-  if (severity >= 9) return '#cc0000'
-  if (severity >= 7) return '#ff3300'
-  if (severity >= 5) return '#ffcc00'
-  if (severity >= 3) return '#7cb342'
-  return '#3d6b2a'
+  if (severity >= 9) return '#c2410c'
+  if (severity >= 7) return '#ea580c'
+  if (severity >= 5) return '#f97316'
+  if (severity >= 3) return '#fdba74'
+  return '#fed7aa'
+}
+
+export function clusterSize(count: number): number {
+  return Math.min(56, 28 + count * 4)
+}
+
+export function pinSize(severity: number): number {
+  return Math.min(20, 12 + Math.floor(severity / 2))
 }

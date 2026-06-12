@@ -1,4 +1,4 @@
-import type { GameTab } from './GameShell'
+import type { GameTab } from './GameSidebar'
 
 interface MobileNavProps {
   activeTab: GameTab
@@ -6,9 +6,8 @@ interface MobileNavProps {
 }
 
 const NAV: { id: GameTab; label: string; icon: string }[] = [
-  { id: 'map', label: 'Radar', icon: '◎' },
-  { id: 'report', label: 'Scan', icon: '⊕' },
-  { id: 'clear', label: 'Clear', icon: '✓' },
+  { id: 'map', label: 'Map', icon: '◎' },
+  { id: 'report', label: 'Report', icon: '⊕' },
   { id: 'log', label: 'Log', icon: '⧗' },
   { id: 'blog', label: 'Feed', icon: '✎' },
   { id: 'profile', label: 'Me', icon: '☺' },
@@ -16,9 +15,9 @@ const NAV: { id: GameTab; label: string; icon: string }[] = [
 
 export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
   return (
-    <nav className="pointer-events-auto fixed inset-x-0 bottom-0 z-[1300] border-t border-white/10 bg-black/75 backdrop-blur-xl md:hidden">
+    <nav className="pointer-events-auto fixed inset-x-0 bottom-0 z-[1300] border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] md:hidden">
       <div
-        className="mx-auto flex max-w-lg items-stretch justify-between px-2"
+        className="mx-auto flex max-w-lg items-stretch justify-between px-4"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
           height: 'calc(var(--mobile-nav-height, 64px) + env(safe-area-inset-bottom))',
@@ -31,14 +30,15 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
               key={item.id}
               type="button"
               onClick={() => onTabChange(item.id)}
-              className={`flex w-full flex-col items-center gap-1 py-3 text-xs ${
-                active ? 'text-[var(--neon-clean)]' : 'text-white/55'
+              className={`relative flex w-full flex-col items-center justify-center gap-0.5 py-2 text-xs ${
+                active ? 'text-[var(--brand-teal)]' : 'text-[var(--text-muted)]'
               }`}
             >
-              <span className="font-[family-name:var(--font-display)] text-lg leading-none">
-                {item.icon}
-              </span>
-              <span className="text-[10px] font-semibold">{item.label}</span>
+              {active && (
+                <span className="absolute top-1 h-1 w-1 rounded-full bg-[var(--brand-teal)]" />
+              )}
+              <span className="text-lg leading-none">{item.icon}</span>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           )
         })}
@@ -46,4 +46,3 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
     </nav>
   )
 }
-

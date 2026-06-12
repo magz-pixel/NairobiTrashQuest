@@ -156,7 +156,7 @@ export function ReportTrashModal({
         ) : preview ? (
           <img src={preview} alt="Preview" className="aspect-video w-full rounded-lg object-cover" />
         ) : (
-          <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-white/20 bg-black/40 text-sm text-white/50">
+          <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-gray-50 text-sm text-[var(--text-muted)]">
             Capture or upload a photo
           </div>
         )}
@@ -189,12 +189,12 @@ export function ReportTrashModal({
           />
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-black/30 p-3">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-black/30 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-semibold text-white/70">
+            <p className="text-xs font-semibold text-[var(--text-primary)]">
               Intensity (your rating)
             </p>
-            <p className="text-xs font-bold text-[var(--neon-clean)]">
+            <p className="text-xs font-bold text-[var(--brand-teal)]">
               {manualSeverity}/10
             </p>
           </div>
@@ -204,14 +204,14 @@ export function ReportTrashModal({
             max={10}
             value={manualSeverity}
             onChange={(e) => setManualSeverity(Number(e.target.value))}
-            className="w-full accent-[var(--neon-clean)]"
+            className="w-full accent-[var(--brand-teal)]"
           />
-          <p className="mt-2 text-[10px] text-white/45">
+          <p className="mt-2 text-[10px] text-[var(--text-muted)]">
             AI helps tag the report; your rating controls the heatmap shading.
           </p>
         </div>
 
-        {status && <p className="text-xs text-[var(--neon-clean)]">{status}</p>}
+        {status && <p className="text-xs text-[var(--brand-teal)]">{status}</p>}
 
         <Button
           type="button"

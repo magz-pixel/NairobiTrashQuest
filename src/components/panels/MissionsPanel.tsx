@@ -48,24 +48,24 @@ export function MissionsPanel({ open, onClose }: MissionsPanelProps) {
           <motion.button
             type="button"
             aria-label="Close quests"
-            className="absolute inset-0 z-[1100] bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 z-[1100] bg-black/30 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
           <motion.aside
-            className="absolute z-[1200] flex w-full flex-col border-white/10 bg-[var(--bg-charcoal)]/98 shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
+            className="absolute z-[1200] flex w-full flex-col border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[0_-20px_60px_rgba(0,0,0,0.65)] backdrop-blur-xl max-md:inset-x-0 max-md:bottom-0 max-md:h-[92dvh] max-md:rounded-t-2xl max-md:border-t md:right-0 md:top-0 md:h-full md:max-w-md md:rounded-none md:border-l md:shadow-[-8px_0_40px_rgba(0,0,0,0.5)]"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
           >
-            <div className="border-b border-white/10 p-5">
+            <div className="border-b border-[var(--border-subtle)] p-5">
               <p className="text-xs font-semibold uppercase tracking-wider text-[var(--lava-hot)]">
                 Daily quests
               </p>
-              <h2 className="font-[family-name:var(--font-display)] text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
                 Missions
               </h2>
             </div>
@@ -77,19 +77,19 @@ export function MissionsPanel({ open, onClose }: MissionsPanelProps) {
                   ? Math.min(100, Math.round((p.progress / m.target_count) * 100))
                   : 0
                 return (
-                  <Card key={m.id} className="border-white/10 bg-black/40">
+                  <Card key={m.id} className="border-[var(--border-subtle)] bg-gray-50">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-semibold text-white">{m.title}</h3>
-                        <p className="mt-1 text-sm text-white/60">{m.description}</p>
+                        <h3 className="font-semibold text-[var(--text-primary)]">{m.title}</h3>
+                        <p className="mt-1 text-sm text-[var(--text-muted)]">{m.description}</p>
                         <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
                           <div
-                            className="h-full rounded-full bg-[var(--neon-clean)]"
+                            className="h-full rounded-full bg-[var(--brand-teal)]"
                             style={{ width: `${done ? 100 : pct}%` }}
                           />
                         </div>
                       </div>
-                      <span className="shrink-0 rounded-md bg-[var(--neon-clean)]/15 px-2 py-1 text-xs font-bold text-[var(--neon-clean)]">
+                      <span className="shrink-0 rounded-md bg-[var(--brand-teal)]/15 px-2 py-1 text-xs font-bold text-[var(--brand-teal)]">
                         {done ? 'Done' : `+${m.reward_points} XP`}
                       </span>
                     </div>

@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth'
+import { XpProgressRing } from '../profile/XpProgressRing'
 
 const BADGE_LABELS = {
   scout: 'Scout',
@@ -13,16 +14,20 @@ export function ProfileBadge({ className = '' }: { className?: string }) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border border-[var(--neon-clean)]/25 bg-black/70 px-3 py-2 text-sm shadow-[0_0_20px_rgba(57,255,20,0.08)] backdrop-blur-md ${className}`}
+      className={`flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-sm shadow-[var(--shadow-sm)] ${className}`}
     >
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--neon-clean)]/15 font-[family-name:var(--font-display)] text-xs font-bold text-[var(--neon-clean)]">
-        {(profile?.badge_level ?? 'S')[0].toUpperCase()}
-      </div>
-      <div>
-        <p className="font-[family-name:var(--font-display)] text-sm font-bold text-white">
-          {profile?.username ?? 'Player'}
+      <XpProgressRing
+        xp={profile?.total_impact_points ?? 0}
+        badgeLevel={profile?.badge_level ?? 'scout'}
+        username={profile?.username}
+        size={40}
+        compact
+      />
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+          {profile?.username ?? 'User'}
         </p>
-        <p className="text-xs text-[var(--neon-clean)]">
+        <p className="text-xs text-[var(--text-muted)]">
           {profile ? BADGE_LABELS[profile.badge_level] : 'Scout'} ·{' '}
           {profile?.total_impact_points ?? 0} XP
         </p>
@@ -30,7 +35,7 @@ export function ProfileBadge({ className = '' }: { className?: string }) {
       <button
         type="button"
         onClick={() => signOut()}
-        className="text-xs text-white/50 hover:text-white"
+        className="shrink-0 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       >
         Sign out
       </button>

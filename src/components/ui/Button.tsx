@@ -14,11 +14,10 @@ interface ButtonProps {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-[var(--neon-clean)] text-black hover:shadow-[0_0_20px_var(--neon-clean)]',
-  danger:
-    'bg-[var(--lava-hot)] text-white hover:shadow-[0_0_20px_var(--lava-hot)]',
+    'bg-[var(--brand-teal)] text-white hover:bg-[var(--brand-teal-hover)] shadow-sm',
+  danger: 'bg-[var(--urgent-orange-deep)] text-white hover:opacity-90 shadow-sm',
   ghost:
-    'bg-transparent border border-white/20 text-[var(--text-sharp)] hover:border-[var(--neon-clean)]',
+    'bg-transparent border border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]',
 }
 
 export function Button({
@@ -32,9 +31,9 @@ export function Button({
   return (
     <motion.button
       type={type}
-      whileHover={disabled ? undefined : { scale: 1.05 }}
-      whileTap={disabled ? undefined : { scale: 0.95 }}
-      className={`rounded-lg px-4 py-2 text-sm font-semibold transition-shadow disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${className}`}
+      whileHover={disabled ? undefined : { scale: 1.02 }}
+      whileTap={disabled ? undefined : { scale: 0.98 }}
+      className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${className}`}
       disabled={disabled}
       onClick={onClick}
     >
