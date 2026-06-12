@@ -78,7 +78,13 @@ export function useReports(
   }, [allReports, severityFilter, statusFilter])
 
   const mapReports = useMemo(
-    () => reports.filter((r) => r.status === 'active' || r.status === 'flagged'),
+    () =>
+      reports.filter(
+        (r) =>
+          r.status === 'active' ||
+          r.status === 'flagged' ||
+          r.status === 'verified_cleared',
+      ),
     [reports],
   )
 

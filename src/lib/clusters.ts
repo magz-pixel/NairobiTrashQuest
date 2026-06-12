@@ -68,6 +68,16 @@ export function clusterColor(severity: number): string {
   return '#fed7aa'
 }
 
+const CLEARED_PIN_COLOR = '#0d9488'
+
+/** Pin color by status; cleared spots use brand teal regardless of severity. */
+export function pinColor(severity: number, status: string): string {
+  if (status === 'verified_cleared') return CLEARED_PIN_COLOR
+  return clusterColor(severity)
+}
+
+export { CLEARED_PIN_COLOR }
+
 export function clusterSize(count: number): number {
   return Math.min(56, 28 + count * 4)
 }

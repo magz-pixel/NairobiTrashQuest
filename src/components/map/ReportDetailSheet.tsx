@@ -37,6 +37,8 @@ export function ReportDetailSheet({
     : assignWard(report.latitude, report.longitude)
 
   const displaySeen = seenCount || report.seen_count
+  const isCleared =
+    report.status === 'verified_cleared' && Boolean(report.cleared_image_url)
 
   const handleSeen = async () => {
     if (demo) {
@@ -100,11 +102,17 @@ export function ReportDetailSheet({
           >
             <div className="mb-3 flex items-start justify-between gap-2">
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--urgent-orange-deep)]">
-                  {severityLabel(report.severity_score)}
-                </span>
+                {isCleared ? (
+                  <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--brand-teal)]">
+                    Resolved
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--urgent-orange-deep)]">
+                    {severityLabel(report.severity_score)}
+                  </span>
+                )}
                 <span className="rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] uppercase text-[var(--text-muted)]">
-                  {report.status.replace('_', ' ')}
+                  {report.status.replaceAll('_', ' ')}
                 </span>
                 {demo && (
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700">
@@ -129,11 +137,48 @@ export function ReportDetailSheet({
               Get directions →
             </a>
 
-            <img
-              src={report.image_url}
-              alt="Report evidence"
-              className="mt-3 aspect-video w-full rounded-xl object-cover"
-            />
+            {isCleared ? (
+              <div className="mt-3">
+                {report.cleared_at && (
+                  <p className="mb-2 text-xs text-[var(--brand-teal)]">
+                    Cleaned {daysSince(report.cleared_at)} days ago
+                  </p>
+                )}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Before
+                    </p>
+                    <img
+                      src={report.image_url}
+                      alt="Before cleanup"
+                      className="aspect-video w-full rounded-xl object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      After
+                    </p>
+                    <img
+                      src={report.cleared_image_url!}
+                      alt="After cleanup"
+                      className="aspect-video w-full rounded-xl object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  Current condition
+                </p>
+                <img
+                  src={report.image_url}
+                  alt="Current condition at hotspot"
+                  className="aspect-video w-full rounded-xl object-cover"
+                />
+              </div>
+            )}
 
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
@@ -165,7 +210,7 @@ export function ReportDetailSheet({
               <Button type="button" variant="ghost" onClick={handleSeen}>
                 👍 I've seen this ({displaySeen})
               </Button>
-              {userLoggedIn && onVerify && (
+              {userLoggedIn && onVerify && report.status !== 'verified_cleared' && (
                 <Button type="button" onClick={onVerify}>
                   ✓ Verify cleanup
                 </Button>

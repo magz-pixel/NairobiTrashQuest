@@ -1,4 +1,4 @@
-import { clusterColor } from '../../lib/clusters'
+import { CLEARED_PIN_COLOR, clusterColor } from '../../lib/clusters'
 
 const SEVERITY_STOPS = [
   { label: 'Low', severity: 2 },
@@ -26,6 +26,18 @@ export function MapLegend() {
             {label}
           </li>
         ))}
+      </ul>
+      <p className="mb-2 mt-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+        Status
+      </p>
+      <ul className="space-y-1.5">
+        <li className="flex items-center gap-2 text-[10px] text-[var(--text-primary)]">
+          <span
+            className="inline-block h-3 w-3 rounded-full border border-white shadow-sm"
+            style={{ backgroundColor: CLEARED_PIN_COLOR }}
+          />
+          Cleared / resolved
+        </li>
       </ul>
       <p className="mt-2 text-[10px] text-[var(--text-muted)]">Zoom in for individual pins</p>
     </div>

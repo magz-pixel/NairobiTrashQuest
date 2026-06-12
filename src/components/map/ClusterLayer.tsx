@@ -7,6 +7,7 @@ import {
   clusterReports,
   clusterSize,
   formatClusterCount,
+  pinColor,
   pinSize,
 } from '../../lib/clusters'
 
@@ -32,9 +33,9 @@ function clusterIcon(count: number, color: string) {
   })
 }
 
-function pinIcon(severity: number) {
+function pinIcon(severity: number, status: string) {
   const size = pinSize(severity)
-  const color = clusterColor(severity)
+  const color = pinColor(severity, status)
   return L.divIcon({
     className: 'cluster-marker',
     html: `<div style="
@@ -71,7 +72,7 @@ export function ClusterLayer({ reports, onSelectReport }: ClusterLayerProps) {
             <Marker
               key={r.id}
               position={[r.latitude, r.longitude]}
-              icon={pinIcon(r.severity_score)}
+              icon={pinIcon(r.severity_score, r.status)}
               eventHandlers={{ click: () => onSelectReport(r) }}
             />
           )
