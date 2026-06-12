@@ -9,8 +9,15 @@ import { registerSW } from 'virtual:pwa-register'
 registerSW({
   immediate: true,
   onNeedRefresh() {
-    // Force-refresh to avoid a stale cached shell showing a black screen.
     window.location.reload()
+  },
+  onRegisteredSW(_swUrl, registration) {
+    registration?.addEventListener('updatefound', () => {
+      const worker = registration.installing
+      worker?.addEventListener('statechange', () => {
+        if (worker.state === 'activated') window.location.reload()
+      })
+    })
   },
   onOfflineReady() {},
 })
