@@ -1,9 +1,8 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import type { Report } from '../../types/database'
+import { marketConfig } from '../../lib/marketConfig'
 import { ClusterLayer } from './ClusterLayer'
 import { ReportPulseLayer } from './ReportPulseLayer'
-
-const NAIROBI_CENTER: [number, number] = [-1.286389, 36.817223]
 
 const LIGHT_TILE =
   'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
@@ -37,8 +36,8 @@ export function MapView({
 }: MapViewProps) {
   return (
     <MapContainer
-      center={NAIROBI_CENTER}
-      zoom={13}
+      center={marketConfig.mapCenter}
+      zoom={marketConfig.mapZoom}
       className="h-full w-full"
       zoomControl={false}
     >

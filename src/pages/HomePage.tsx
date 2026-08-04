@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom'
 import { useReports } from '../hooks/useReports'
 import { useReportStats } from '../hooks/useReportStats'
 import { ProfileBadge } from '../components/auth/ProfileBadge'
+import { SignInButton } from '../components/auth/SignInButton'
 import { GameShell, type GameTab } from '../components/layout/GameShell'
 import { DigestBanner } from '../components/layout/DigestBanner'
 import { MapStatsBar } from '../components/map/MapStatsBar'
@@ -24,12 +25,22 @@ import { QuickReportModal } from '../components/reports/QuickReportModal'
 import { ClearTrashModal } from '../components/reports/ClearTrashModal'
 import { isDemoReport, showDemoData } from '../lib/demoReports'
 import { getLocale, setLocale, t, whatsappReportUrl } from '../lib/i18n'
+import { marketConfig } from '../lib/marketConfig'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import type { Report, SeverityFilter, StatusFilter } from '../types/database'
 
 const MapView = lazy(() =>
   import('../components/map/MapView').then((m) => ({ default: m.MapView })),
 )
+
+function MapJoinButton() {
+  return (
+    <div className="pointer-events-auto">
+      <SignInButton label="Join / Sign in" className="min-h-[48px] shadow-[var(--shadow-sm)]" />
+    </div>
+  )
+}
 
 type ViewMode = 'map' | 'list'
 
@@ -56,6 +67,15 @@ export function HomePage() {
   const [, setLocaleTick] = useState(0)
 
   const realReports = allReports.filter((r) => !isDemoReport(r))
+  const activeHotspots = realReports.filter(
+    (r) => r.status === 'active' || r.status === 'flagged',
+  )
+
+  const viewExistingReport = (report: Report) => {
+    setQuickReportOpen(false)
+    setReportOpen(false)
+    selectReport(report)
+  }
 
   const closePanelsAndModals = () => {
     setActivePanel(null)
@@ -147,8 +167,14 @@ export function HomePage() {
       <div className="flex items-start justify-between gap-2">
         <div className="space-y-2">
           <div className="pointer-events-auto flex items-center gap-2">
+            <Link
+              to="/"
+              className="rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
+            >
+              Fix Nairobi
+            </Link>
             <h1 className="text-sm font-semibold text-[var(--text-primary)] md:text-base">
-              Nairobi Trash Locator
+              {marketConfig.appName}
             </h1>
             <button
               type="button"
@@ -181,6 +207,7 @@ export function HomePage() {
         </div>
         <div className="flex flex-col items-end gap-2">
           <ProfileBadge className="pointer-events-auto min-h-[48px]" />
+          {!user && <MapJoinButton />}
           <DigestBanner />
         </div>
       </div>
@@ -228,6 +255,7 @@ export function HomePage() {
       onTabChange={handleTab}
       onReport={openQuickReport}
       reportLabel={t('reportTrash')}
+      userLoggedIn={!!user}
     >
       <div className="relative h-full w-full">
         {viewMode === 'map' ? (
@@ -278,6 +306,8 @@ export function HomePage() {
         open={quickReportOpen}
         onClose={() => setQuickReportOpen(false)}
         onReported={handleReported}
+        activeReports={activeHotspots}
+        onViewExistingReport={viewExistingReport}
       />
 
       <AdminDrawer
@@ -300,8 +330,25 @@ export function HomePage() {
 
       {user && (
         <>
-          <ReportTrashModal open={reportOpen} onClose={() => { setReportOpen(false); setActiveTab('map') }} onReported={refetch} />
-          <ClearTrashModal open={clearOpen} onClose={() => { setClearOpen(false); setActiveTab('map') }} activeReports={realReports.filter((r) => r.status === 'active')} onCleared={refetch} />
+          <ReportTrashModal
+            open={reportOpen}
+            onClose={() => {
+              setReportOpen(false)
+              setActiveTab('map')
+            }}
+            onReported={refetch}
+            activeReports={activeHotspots}
+            onViewExistingReport={viewExistingReport}
+          />
+          <ClearTrashModal
+            open={clearOpen}
+            onClose={() => {
+              setClearOpen(false)
+              setActiveTab('map')
+            }}
+            activeReports={activeHotspots}
+            onCleared={refetch}
+          />
         </>
       )}
     </GameShell>

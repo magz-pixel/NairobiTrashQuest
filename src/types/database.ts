@@ -38,6 +38,10 @@ export interface Report {
   is_anonymous: boolean
   created_at: string
   updated_at: string
+  /** Demo / Ramani Taka only — crowd-funded cleanup goal (TZS). */
+  funding_goal_tzs?: number
+  funding_raised_tzs?: number
+  funding_contributors?: number
 }
 
 export interface Ward {
@@ -84,6 +88,17 @@ export interface Event {
   longitude: number | null
   event_date: string
   organizer_id: string
+  created_at: string
+}
+
+export type EventRsvpStatus = 'going' | 'attended' | 'cancelled'
+
+export interface EventRsvp {
+  id: string
+  event_id: string
+  user_id: string
+  status: EventRsvpStatus
+  points_awarded: number
   created_at: string
 }
 
@@ -139,3 +154,42 @@ export interface ReportStats {
 
 export type SeverityFilter = 'all' | 'low' | 'moderate' | 'high' | 'critical'
 export type StatusFilter = 'all' | 'active' | 'pending' | 'verified_cleared' | 'flagged'
+
+export type FundEntryKind = 'donation' | 'expense'
+
+export interface FundEntry {
+  id: string
+  kind: FundEntryKind
+  amount_kes: number
+  donor_or_payee: string
+  note: string | null
+  voided: boolean
+  created_by: string | null
+  created_at: string
+}
+
+export interface RaceRegistration {
+  id: string
+  event_slug: string
+  full_name: string
+  phone: string
+  email: string
+  team_name: string | null
+  ticket_code: string
+  user_id: string | null
+  created_at: string
+}
+
+export type WasteCategory = 'plastic' | 'organic' | 'mixed' | 'other'
+
+export interface RaceWeightLog {
+  id: string
+  event_slug: string
+  team_name: string
+  kg: number
+  waste_category: WasteCategory
+  logged_by: string | null
+  created_at: string
+}
+
+export const AMAZING_TRASH_RACE_S2 = 'amazing-trash-race-s2'

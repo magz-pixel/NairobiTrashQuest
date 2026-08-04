@@ -1,4 +1,5 @@
 import type { Report } from '../../types/database'
+import { marketConfig } from '../../lib/marketConfig'
 import { daysSince, severityLabel } from '../../lib/wards'
 
 interface ReportListViewProps {
@@ -32,7 +33,7 @@ export function ReportListView({ reports, onSelect }: ReportListViewProps) {
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-[var(--text-primary)]">
-                  {r.area_name ?? 'Nairobi hotspot'}
+                  {r.area_name ?? `${marketConfig.cityName} hotspot`}
                 </p>
                 <p className="text-xs text-[var(--text-muted)]">
                   {severityLabel(r.severity_score)} · {r.status.replace('_', ' ')} ·{' '}

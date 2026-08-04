@@ -15,11 +15,11 @@ export default defineConfig({
         clientsClaim: true,
       },
       manifest: {
-        name: 'Nairobi Trash Locator',
-        short_name: 'TrashLocator',
-        description: 'Gamified urban pollution hotspot tracker',
-        theme_color: '#F7F7F5',
-        background_color: '#F7F7F5',
+        name: 'Fix Nairobi',
+        short_name: 'FixNairobi',
+        description: 'Map trash, race cleanups, publish community funds',
+        theme_color: '#071613',
+        background_color: '#071613',
         display: 'standalone',
         start_url: '/',
         icons: [

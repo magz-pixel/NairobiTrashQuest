@@ -1,4 +1,6 @@
 import type { Report, ReportStatus } from '../types/database'
+import { isRamaniMarket } from './marketConfig'
+import { generateDemoReportsDar } from './generateDemoReportsDar'
 import { demoReportDefaults } from './reportDefaults'
 
 const DEMO_USER = '00000000-0000-4000-8000-000000000001'
@@ -216,7 +218,7 @@ const CURATED_HOTSPOTS: {
   },
 ]
 
-export function generateDemoReports(): Report[] {
+function generateNairobiDemoReports(): Report[] {
   const now = Date.now()
 
   return CURATED_HOTSPOTS.map((spot) => {
@@ -245,4 +247,8 @@ export function generateDemoReports(): Report[] {
       waste_type: spot.waste_type,
     })
   })
+}
+
+export function generateDemoReports(): Report[] {
+  return isRamaniMarket ? generateDemoReportsDar() : generateNairobiDemoReports()
 }

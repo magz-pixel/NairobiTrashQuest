@@ -2,15 +2,20 @@ import { useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { analyzeTrashImage, uploadReportImage } from '../../lib/gemini'
 import { assignWard } from '../../lib/wards'
+import { nearestActiveReport } from '../../lib/nearbyReports'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
+import type { Report } from '../../types/database'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
+import { NearbyReportPrompt } from './NearbyReportPrompt'
 
 interface ReportTrashModalProps {
   open: boolean
   onClose: () => void
   onReported: () => void
+  activeReports?: Report[]
+  onViewExistingReport?: (report: Report) => void
 }
 
 function getCurrentPosition(): Promise<GeolocationPosition> {
@@ -30,6 +35,8 @@ export function ReportTrashModal({
   open,
   onClose,
   onReported,
+  activeReports = [],
+  onViewExistingReport,
 }: ReportTrashModalProps) {
   const { user } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -40,6 +47,8 @@ export function ReportTrashModal({
   const [manualSeverity, setManualSeverity] = useState(5)
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [nearbyDuplicate, setNearbyDuplicate] = useState<Report | null>(null)
+  const [skipDuplicateCheck, setSkipDuplicateCheck] = useState(false)
   const streamRef = useRef<MediaStream | null>(null)
 
   const stopCamera = () => {
@@ -84,7 +93,7 @@ export function ReportTrashModal({
     stopCamera()
   }
 
-  const handleSubmit = async () => {
+  const submitReport = async (forceDuplicate = false) => {
     if (!file || !user) return
     setSubmitting(true)
     setStatus('Analyzing with AI…')
@@ -104,6 +113,21 @@ export function ReportTrashModal({
 
       setStatus('Getting location…')
       const position = await getCurrentPosition()
+
+      if (!forceDuplicate && !skipDuplicateCheck) {
+        const nearby = nearestActiveReport(
+          activeReports,
+          position.coords.latitude,
+          position.coords.longitude,
+        )
+        if (nearby) {
+          setNearbyDuplicate(nearby)
+          setSubmitting(false)
+          setStatus(null)
+          return
+        }
+      }
+
       const reportId = crypto.randomUUID()
       const imageUrl = await uploadReportImage(user.id, reportId, file)
       const ward = assignWard(position.coords.latitude, position.coords.longitude)
@@ -139,18 +163,38 @@ export function ReportTrashModal({
     }
   }
 
+  const handleSubmit = () => submitReport(false)
+
   const handleClose = () => {
     stopCamera()
     setPreview(null)
     setFile(null)
     setManualSeverity(5)
     setStatus(null)
+    setNearbyDuplicate(null)
+    setSkipDuplicateCheck(false)
     onClose()
   }
 
   return (
     <Modal open={open} onClose={handleClose} title="Report trash">
       <div className="space-y-3">
+        {nearbyDuplicate ? (
+          <NearbyReportPrompt
+            report={nearbyDuplicate}
+            onViewExisting={() => {
+              onViewExistingReport?.(nearbyDuplicate)
+              handleClose()
+            }}
+            onReportAnyway={() => {
+              setSkipDuplicateCheck(true)
+              setNearbyDuplicate(null)
+              void submitReport(true)
+            }}
+            onCancel={() => setNearbyDuplicate(null)}
+          />
+        ) : (
+          <>
         {cameraOn ? (
           <video ref={videoRef} className="aspect-video w-full rounded-lg bg-black" muted playsInline />
         ) : preview ? (
@@ -221,6 +265,8 @@ export function ReportTrashModal({
         >
           {submitting ? 'Processing…' : 'Submit report'}
         </Button>
+          </>
+        )}
       </div>
     </Modal>
   )

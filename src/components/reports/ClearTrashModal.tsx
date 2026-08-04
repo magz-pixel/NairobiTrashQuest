@@ -5,6 +5,7 @@ import { verifyClearedImage } from '../../lib/gemini'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
 import type { Report } from '../../types/database'
+import { SignInButton } from '../auth/SignInButton'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 
@@ -87,16 +88,12 @@ export function ClearTrashModal({
         .from('report-images')
         .getPublicUrl(clearedPath)
 
-      const { error: updateError } = await supabase
-        .from('reports')
-        .update({
-          status: 'verified_cleared',
-          cleared_at: new Date().toISOString(),
-          cleared_image_url: urlData.publicUrl,
-        })
-        .eq('id', nearest.id)
+      const { error: rpcError } = await supabase.rpc('verify_report_cleared', {
+        report_uuid: nearest.id,
+        cleared_image: urlData.publicUrl,
+      })
 
-      if (updateError) throw updateError
+      if (rpcError) throw rpcError
 
       await bumpMissionProgress(user.id, 'verify')
       await refreshProfile()
@@ -120,6 +117,15 @@ export function ClearTrashModal({
   return (
     <Modal open={open} onClose={handleClose} title="Verify cleared">
       <div className="space-y-3">
+        {!user ? (
+          <>
+            <p className="text-sm text-[var(--text-primary)]">
+              Sign in to verify a cleanup and earn impact points.
+            </p>
+            <SignInButton className="w-full" />
+          </>
+        ) : (
+          <>
         <p className="text-sm text-[var(--text-primary)]">
           Upload a photo of the cleaned area. AI will match it to the nearest active hotspot.
         </p>
@@ -155,6 +161,8 @@ export function ClearTrashModal({
         >
           {submitting ? 'Verifying…' : 'Submit verification'}
         </Button>
+          </>
+        )}
       </div>
     </Modal>
   )

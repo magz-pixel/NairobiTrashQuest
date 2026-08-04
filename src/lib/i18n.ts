@@ -1,3 +1,5 @@
+import { marketConfig } from './marketConfig'
+
 export type Locale = 'en' | 'sw'
 
 const STRINGS: Record<Locale, Record<string, string>> = {
@@ -13,6 +15,19 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     geoExport: 'Export GeoJSON',
     publicApi: 'Public stats API',
     whatsappReport: 'Report via WhatsApp',
+    contribute: 'Contribute now',
+    goalReached: 'Goal reached — cleanup pending',
+    raisedOf: 'raised of',
+    contributors: 'contributors',
+    mpesaConfirm: 'Confirm payment',
+    contributeTitle: 'Fund this cleanup',
+    phoneLabel: 'Phone number',
+    amountLabel: 'Amount',
+    providerLabel: 'Pay with',
+    sendPayment: 'Send payment',
+    paymentSuccess: 'Contribution received — thank you!',
+    processing: 'Processing…',
+    cancel: 'Cancel',
   },
   sw: {
     reportTrash: 'Ripoti taka',
@@ -26,15 +41,32 @@ const STRINGS: Record<Locale, Record<string, string>> = {
     geoExport: 'Pakua GeoJSON',
     publicApi: 'API ya takwimu',
     whatsappReport: 'Ripoti kupitia WhatsApp',
+    contribute: 'Changia sasa',
+    goalReached: 'Lengo limefikiwa — usafi unatarajiwa',
+    raisedOf: 'imekusanywa kati ya',
+    contributors: 'wachangiaji',
+    mpesaConfirm: 'Thibitisha malipo',
+    contributeTitle: 'Fadhili usafi huu',
+    phoneLabel: 'Nambari ya simu',
+    amountLabel: 'Kiasi',
+    providerLabel: 'Lipa kwa',
+    sendPayment: 'Tuma malipo',
+    paymentSuccess: 'Mchango umepokelewa — asante!',
+    processing: 'Inachakata…',
+    cancel: 'Ghairi',
   },
 }
 
+const localeKey = `ntr_locale_${marketConfig.id}`
+
 let currentLocale: Locale =
-  (localStorage.getItem('ntr_locale') as Locale) || 'en'
+  (localStorage.getItem(localeKey) as Locale) ||
+  (localStorage.getItem('ntr_locale') as Locale) ||
+  marketConfig.defaultLocale
 
 export function setLocale(locale: Locale) {
   currentLocale = locale
-  localStorage.setItem('ntr_locale', locale)
+  localStorage.setItem(localeKey, locale)
 }
 
 export function getLocale(): Locale {
@@ -47,7 +79,7 @@ export function t(key: string): string {
 
 export function whatsappReportUrl(): string {
   const text = encodeURIComponent(
-    'I want to report trash in Nairobi via Nairobi Trash Locator: https://nairobi-trash-quest.vercel.app',
+    `I want to report trash in ${marketConfig.cityName} via ${marketConfig.appName}`,
   )
   return `https://wa.me/?text=${text}`
 }
@@ -84,7 +116,7 @@ export function exportReportsGeoJson(
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'nairobi-trash-reports.geojson'
+  a.download = `${marketConfig.id}-trash-reports.geojson`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -116,7 +148,7 @@ export function exportReportsCsv(
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'nairobi-trash-reports.csv'
+  a.download = `${marketConfig.id}-trash-reports.csv`
   a.click()
   URL.revokeObjectURL(url)
 }

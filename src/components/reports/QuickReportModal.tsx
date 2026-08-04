@@ -3,14 +3,18 @@ import { supabase } from '../../lib/supabase'
 import { assignWard } from '../../lib/wards'
 import { getSessionId } from '../../lib/session'
 import { uploadReportImage, analyzeTrashImage } from '../../lib/gemini'
-import type { TrashAnalysis } from '../../types/database'
+import { nearestActiveReport } from '../../lib/nearbyReports'
+import type { Report, TrashAnalysis } from '../../types/database'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
+import { NearbyReportPrompt } from './NearbyReportPrompt'
 
 interface QuickReportModalProps {
   open: boolean
   onClose: () => void
   onReported: (report?: { id: string; latitude: number; longitude: number }) => void
+  activeReports?: Report[]
+  onViewExistingReport?: (report: Report) => void
 }
 
 function getCurrentPosition(): Promise<GeolocationPosition> {
@@ -28,19 +32,29 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
 
 const AUTO_APPROVE = import.meta.env.VITE_AUTO_APPROVE_REPORTS !== 'false'
 
-export function QuickReportModal({ open, onClose, onReported }: QuickReportModalProps) {
+export function QuickReportModal({
+  open,
+  onClose,
+  onReported,
+  activeReports = [],
+  onViewExistingReport,
+}: QuickReportModalProps) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [severity, setSeverity] = useState(5)
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [nearbyDuplicate, setNearbyDuplicate] = useState<Report | null>(null)
+  const [skipDuplicateCheck, setSkipDuplicateCheck] = useState(false)
 
   const reset = () => {
     setFile(null)
     setPreview(null)
     setSeverity(5)
     setStatus(null)
+    setNearbyDuplicate(null)
+    setSkipDuplicateCheck(false)
   }
 
   const handleClose = () => {
@@ -48,13 +62,28 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
     onClose()
   }
 
-  const handleSubmit = async () => {
+  const submitReport = async (forceDuplicate = false) => {
     if (!file) return
     setSubmitting(true)
     setStatus('Getting location…')
 
     try {
       const position = await getCurrentPosition()
+
+      if (!forceDuplicate && !skipDuplicateCheck) {
+        const nearby = nearestActiveReport(
+          activeReports,
+          position.coords.latitude,
+          position.coords.longitude,
+        )
+        if (nearby) {
+          setNearbyDuplicate(nearby)
+          setSubmitting(false)
+          setStatus(null)
+          return
+        }
+      }
+
       const reportId = crypto.randomUUID()
 
       setStatus('Analyzing photo…')
@@ -123,11 +152,29 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
     }
   }
 
+  const handleSubmit = () => submitReport(false)
+
   return (
     <Modal open={open} onClose={handleClose} title="Report trash (30 sec)">
       <p className="mb-3 text-sm text-[var(--text-muted)]">
         No login needed. Photo + location only.
       </p>
+      {nearbyDuplicate ? (
+        <NearbyReportPrompt
+          report={nearbyDuplicate}
+          onViewExisting={() => {
+            onViewExistingReport?.(nearbyDuplicate)
+            handleClose()
+          }}
+          onReportAnyway={() => {
+            setSkipDuplicateCheck(true)
+            setNearbyDuplicate(null)
+            void submitReport(true)
+          }}
+          onCancel={() => setNearbyDuplicate(null)}
+        />
+      ) : (
+        <>
       {preview ? (
         <img src={preview} alt="Preview" className="mb-3 aspect-video w-full rounded-lg object-cover" />
       ) : (
@@ -169,6 +216,8 @@ export function QuickReportModal({ open, onClose, onReported }: QuickReportModal
       <Button type="button" className="w-full" disabled={!file || submitting} onClick={handleSubmit}>
         {submitting ? 'Submitting…' : 'Submit report'}
       </Button>
+        </>
+      )}
     </Modal>
   )
 }

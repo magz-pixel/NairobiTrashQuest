@@ -3,27 +3,46 @@ import type { GameTab } from './GameSidebar'
 interface MobileNavProps {
   activeTab: GameTab
   onTabChange: (tab: GameTab) => void
+  userLoggedIn?: boolean
 }
 
-const NAV: { id: GameTab; label: string; icon: string }[] = [
+const NAV_BASE: { id: GameTab; label: string; icon: string }[] = [
   { id: 'map', label: 'Map', icon: '◎' },
   { id: 'report', label: 'Report', icon: '⊕' },
+]
+
+const NAV_VERIFY: { id: GameTab; label: string; icon: string } = {
+  id: 'clear',
+  label: 'Verify',
+  icon: '✓',
+}
+
+const NAV_TAIL: { id: GameTab; label: string; icon: string }[] = [
   { id: 'log', label: 'Log', icon: '⧗' },
   { id: 'blog', label: 'Feed', icon: '✎' },
   { id: 'profile', label: 'Me', icon: '☺' },
 ]
 
-export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
+const NAV_TAIL_SIGNED_IN: { id: GameTab; label: string; icon: string }[] = [
+  { id: 'log', label: 'Log', icon: '⧗' },
+  { id: 'profile', label: 'Me', icon: '☺' },
+]
+
+export function MobileNav({ activeTab, onTabChange, userLoggedIn }: MobileNavProps) {
+  const nav = userLoggedIn
+    ? [...NAV_BASE, NAV_VERIFY, ...NAV_TAIL_SIGNED_IN]
+    : [...NAV_BASE, ...NAV_TAIL]
+
   return (
     <nav className="pointer-events-auto fixed inset-x-0 bottom-0 z-[1300] border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] md:hidden">
       <div
-        className="mx-auto flex max-w-lg items-stretch justify-between px-4"
+        className="mx-auto flex max-w-lg items-stretch justify-between px-2"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom)',
           height: 'calc(var(--mobile-nav-height, 64px) + env(safe-area-inset-bottom))',
         }}
       >
-        {NAV.map((item) => {
+        {nav.map((item) => {
           const active = activeTab === item.id
           return (
             <button

@@ -1,10 +1,38 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
+import { CleanupsManagePage } from './pages/CleanupsManagePage'
+import { CleanupsPage } from './pages/CleanupsPage'
+import { FundsManagePage } from './pages/FundsManagePage'
+import { FundsPage } from './pages/FundsPage'
 import { HomePage } from './pages/HomePage'
+import { ImpactMePage } from './pages/ImpactMePage'
+import { LandingPage } from './pages/LandingPage'
+import { MissionPage } from './pages/MissionPage'
+import { RaceAdminPage } from './pages/RaceAdminPage'
+import { RaceLeaderboardPage } from './pages/RaceLeaderboardPage'
+import { RaceMarshalPage } from './pages/RaceMarshalPage'
+import { RaceRegisterPage } from './pages/RaceRegisterPage'
 
 function App() {
   return (
     <ErrorBoundary>
-      <HomePage />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/map" element={<HomePage />} />
+          <Route path="/me" element={<ImpactMePage />} />
+          <Route path="/cleanups" element={<CleanupsPage />} />
+          <Route path="/cleanups/manage" element={<CleanupsManagePage />} />
+          <Route path="/race" element={<RaceRegisterPage />} />
+          <Route path="/race/leaderboard" element={<RaceLeaderboardPage />} />
+          <Route path="/race/marshal" element={<RaceMarshalPage />} />
+          <Route path="/race/admin" element={<RaceAdminPage />} />
+          <Route path="/funds" element={<FundsPage />} />
+          <Route path="/funds/manage" element={<FundsManagePage />} />
+          <Route path="/mission" element={<MissionPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
     </ErrorBoundary>
   )
 }

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#1a1208"/>
+  <rect x="200" y="80" width="240" height="320" rx="36" fill="#0c1f1c" stroke="#f97316" stroke-width="4"/>
+  <circle cx="320" cy="380" r="18" fill="#2dd4bf"/>
+  <text x="40" y="450" fill="#fdba74" font-family="system-ui,sans-serif" font-size="22" font-weight="700">TIKTOK � @fixnairobi</text>
+</svg>

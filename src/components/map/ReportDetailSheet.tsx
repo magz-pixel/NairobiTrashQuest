@@ -4,10 +4,14 @@ import { supabase } from '../../lib/supabase'
 import { getSessionId } from '../../lib/session'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
+import { useDemoFunding } from '../../hooks/useDemoFunding'
 import { assignWard, daysSince, severityLabel } from '../../lib/wards'
 import { isDemoReport } from '../../lib/demoReports'
+import { marketConfig } from '../../lib/marketConfig'
 import type { Report } from '../../types/database'
 import { Button } from '../ui/Button'
+import { CrowdfundPanel } from '../crowdfund/CrowdfundPanel'
+import { ContributeModal } from '../crowdfund/ContributeModal'
 import { AccountabilityFlow } from './AccountabilityFlow'
 
 interface ReportDetailSheetProps {
@@ -28,6 +32,8 @@ export function ReportDetailSheet({
   const { user } = useAuth()
   const [status, setStatus] = useState<string | null>(null)
   const [seenCount, setSeenCount] = useState(0)
+  const [contributeOpen, setContributeOpen] = useState(false)
+  const { funding, contribute } = useDemoFunding(report)
 
   if (!report) return null
 
@@ -39,6 +45,10 @@ export function ReportDetailSheet({
   const displaySeen = seenCount || report.seen_count
   const isCleared =
     report.status === 'verified_cleared' && Boolean(report.cleared_image_url)
+  const showCrowdfund =
+    marketConfig.features.crowdfunding &&
+    report.status === 'active' &&
+    funding != null
 
   const handleSeen = async () => {
     if (demo) {
@@ -197,11 +207,25 @@ export function ReportDetailSheet({
               </div>
             </div>
 
+            {showCrowdfund && funding && (
+              <CrowdfundPanel
+                funding={funding}
+                onContribute={() => setContributeOpen(true)}
+              />
+            )}
+
             <AccountabilityFlow
               wardId={ward?.wardId ?? report.ward_id}
-              areaName={ward?.areaName ?? 'Nairobi'}
+              areaName={ward?.areaName ?? marketConfig.cityName}
               reportId={report.id}
               isDemo={demo}
+            />
+
+            <ContributeModal
+              open={contributeOpen}
+              areaName={ward?.areaName ?? marketConfig.cityName}
+              onClose={() => setContributeOpen(false)}
+              onSuccess={(amount) => contribute(amount)}
             />
 
             {status && <p className="mt-2 text-xs text-[var(--brand-teal)]">{status}</p>}

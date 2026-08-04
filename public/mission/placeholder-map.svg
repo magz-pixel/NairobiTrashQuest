@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#0c1f1c"/>
+  <g stroke="#2dd4bf" stroke-opacity="0.25" stroke-width="2">
+    <path d="M40 80 H600 M40 160 H600 M40 240 H600 M40 320 H600 M40 400 H600"/>
+    <path d="M80 40 V440 M180 40 V440 M320 40 V440 M460 40 V440 M560 40 V440"/>
+  </g>
+  <circle cx="220" cy="200" r="48" fill="#f97316" fill-opacity="0.35"/>
+  <circle cx="400" cy="280" r="36" fill="#2dd4bf" fill-opacity="0.3"/>
+  <text x="40" y="450" fill="#5eead4" font-family="system-ui,sans-serif" font-size="22" font-weight="700">TRASH MAP</text>
+</svg>

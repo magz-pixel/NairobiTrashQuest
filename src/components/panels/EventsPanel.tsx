@@ -80,7 +80,11 @@ export function EventsPanel({ open, onClose }: EventsPanelProps) {
                 Cleanup events
               </h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
-                Squad up and reclaim Nairobi block by block.
+                Squad up and reclaim Nairobi block by block. Full list also on{' '}
+                <a href="/cleanups" className="font-semibold text-[var(--brand-teal)]">
+                  /cleanups
+                </a>
+                .
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4">

@@ -10,6 +10,7 @@ interface GameShellProps {
   onTabChange: (tab: GameTab) => void
   onReport: () => void
   reportLabel?: string
+  userLoggedIn?: boolean
   children: ReactNode
 }
 
@@ -18,6 +19,7 @@ export function GameShell({
   onTabChange,
   onReport,
   reportLabel,
+  userLoggedIn,
   children,
 }: GameShellProps) {
   return (
@@ -29,7 +31,7 @@ export function GameShell({
         <main className="relative min-h-0 flex-1">{children}</main>
       </div>
       <ReportActionBar onReport={onReport} label={reportLabel} />
-      <MobileNav activeTab={activeTab} onTabChange={onTabChange} />
+      <MobileNav activeTab={activeTab} onTabChange={onTabChange} userLoggedIn={userLoggedIn} />
     </div>
   )
 }

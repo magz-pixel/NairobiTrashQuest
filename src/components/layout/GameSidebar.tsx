@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { marketConfig } from '../../lib/marketConfig'
 
 export type GameTab =
   | 'map'
@@ -35,8 +36,11 @@ export function GameSidebar({ activeTab, onTabChange }: GameSidebarProps) {
       aria-label="Main navigation"
     >
       <div className="flex h-14 items-center justify-center border-b border-[var(--border-subtle)]">
-        <span className="text-lg font-bold text-[var(--brand-teal)]" title="Nairobi Trash Locator">
-          N
+        <span
+          className="text-lg font-bold text-[var(--brand-teal)]"
+          title={marketConfig.appName}
+        >
+          {marketConfig.appShortName}
         </span>
       </div>
 

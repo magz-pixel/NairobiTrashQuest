@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
 import type { Profile } from '../../types/database'
+import { SignInButton } from '../auth/SignInButton'
 import { XpProgressRing } from '../profile/XpProgressRing'
 import { Card } from '../ui/Card'
 
@@ -67,7 +68,8 @@ export function ProfilePanel({ open, onClose }: ProfilePanelProps) {
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {!user ? (
                 <Card>
-                  <p className="text-sm text-[var(--text-muted)]">Sign in to view your profile.</p>
+                  <p className="mb-3 text-sm text-[var(--text-muted)]">Sign in to view your profile.</p>
+                  <SignInButton />
                 </Card>
               ) : (
                 <>

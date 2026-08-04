@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
 import { uploadCleanupMedia } from '../../lib/uploads'
 import { bumpMissionProgress } from '../../lib/missions'
+import { SignInButton } from '../auth/SignInButton'
 import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 
@@ -142,7 +143,8 @@ export function CleanupLogPanel({
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {!user ? (
                 <Card className="bg-gray-50">
-                  <p className="text-sm text-[var(--text-primary)]">Sign in to log cleanups.</p>
+                  <p className="mb-3 text-sm text-[var(--text-primary)]">Sign in to log cleanups.</p>
+                  <SignInButton />
                 </Card>
               ) : (
                 <>

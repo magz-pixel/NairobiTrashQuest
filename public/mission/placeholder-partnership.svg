@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#12352f"/>
+  <rect x="80" y="120" width="200" height="200" rx="16" fill="#2dd4bf" fill-opacity="0.25" stroke="#2dd4bf" stroke-width="3"/>
+  <rect x="360" y="120" width="200" height="200" rx="16" fill="#f97316" fill-opacity="0.25" stroke="#f97316" stroke-width="3"/>
+  <path d="M280 220 H360" stroke="#e8f5f1" stroke-width="4" stroke-dasharray="8 6"/>
+  <text x="40" y="450" fill="#e8f5f1" font-family="system-ui,sans-serif" font-size="22" font-weight="700">FIX NAIROBI &amp; XPNC</text>
+</svg>

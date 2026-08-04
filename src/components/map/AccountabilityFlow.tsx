@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { marketConfig } from '../../lib/marketConfig'
 import { complaintMailto } from '../../lib/wards'
 
 export interface AccountabilityStep {
@@ -15,12 +16,8 @@ interface AccountabilityFlowProps {
   isDemo?: boolean
 }
 
-const FALLBACK_STEPS: Omit<AccountabilityStep, 'name'>[] = [
-  { role: 'NCC Environment Desk', contactEmail: 'environment@nairobi.go.ke' },
-  { role: 'Sub-County Administrator', contactEmail: null },
-  { role: 'Ward MCA', contactEmail: null },
-  { role: 'Constituency MP', contactEmail: null },
-]
+const FALLBACK_STEPS: Omit<AccountabilityStep, 'name'>[] =
+  marketConfig.accountabilityFallback
 
 function roleOrder(role: string): number {
   const r = role.toLowerCase()

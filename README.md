@@ -61,6 +61,10 @@ Gamified PWA for tracking urban pollution hotspots on a live heatmap, civic repo
    ```
 
    See [DEMO.md](DEMO.md) for demo-day checklist.
+   See [FIX_NAIROBI.md](FIX_NAIROBI.md) for org homepage, funds ledger, and race registration routes.
+   Share [scripts/PILOT_BRIEF.md](scripts/PILOT_BRIEF.md) with your cleanup group before pilot events.
+   Race week ops: [scripts/RACE_WEEK_CHECKLIST.md](scripts/RACE_WEEK_CHECKLIST.md).
+   Run `npm run pilot:smoke-test` to verify Supabase, storage, and edge function readiness.
 
 ## Features
 

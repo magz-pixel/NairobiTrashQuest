@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
 import { uploadCleanupMedia } from '../../lib/uploads'
 import type { Post } from '../../types/database'
+import { SignInButton } from '../auth/SignInButton'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 
@@ -186,14 +187,20 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
                 {status && (
                   <p className="mt-2 text-xs text-[var(--brand-teal)]">{status}</p>
                 )}
+                {!user ? (
+                  <div className="mt-3">
+                    <SignInButton className="w-full" label="Sign in to post" />
+                  </div>
+                ) : (
                 <Button
                   type="button"
                   className="mt-3 w-full"
-                  disabled={!user || submitting}
+                  disabled={submitting}
                   onClick={submitPost}
                 >
-                  {submitting ? 'Posting…' : user ? 'Post' : 'Sign in to post'}
+                  {submitting ? 'Posting…' : 'Post'}
                 </Button>
+                )}
               </Card>
 
               {loading ? (

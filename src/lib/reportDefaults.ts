@@ -1,4 +1,5 @@
 import type { Report } from '../types/database'
+import { marketConfig } from './marketConfig'
 import { assignWard } from './wards'
 
 const WASTE_TYPES = ['Mixed waste', 'Plastic', 'Organic', 'Construction debris', 'E-waste']
@@ -18,7 +19,15 @@ export function demoReportDefaults(
     Partial<
       Pick<
         Report,
-        'waste_type' | 'seen_count' | 'area_name' | 'ward_id' | 'flag_count' | 'approved_at'
+        | 'waste_type'
+        | 'seen_count'
+        | 'area_name'
+        | 'ward_id'
+        | 'flag_count'
+        | 'approved_at'
+        | 'funding_goal_tzs'
+        | 'funding_raised_tzs'
+        | 'funding_contributors'
       >
     >,
 ): Report {
@@ -33,7 +42,7 @@ export function demoReportDefaults(
     approved_at: partial.approved_at ?? partial.created_at,
     rejected_reason: null,
     ward_id: partial.ward_id ?? ward?.wardId ?? null,
-    area_name: partial.area_name ?? ward?.areaName ?? 'Nairobi',
+    area_name: partial.area_name ?? ward?.areaName ?? marketConfig.cityName,
     is_anonymous: false,
     ...partial,
   }
