@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useReports } from '../hooks/useReports'
+import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useReportStats } from '../hooks/useReportStats'
 import { ProfileBadge } from '../components/auth/ProfileBadge'
 import { SignInButton } from '../components/auth/SignInButton'
@@ -52,6 +53,7 @@ export function HomePage() {
     severityFilter,
     statusFilter,
   )
+  const { activeHotspots: raceMapHotspots } = useRaceHotspots()
   const stats = useReportStats(allReports)
   const [activeTab, setActiveTab] = useState<GameTab>('map')
   const [activePanel, setActivePanel] = useState<GameTab | null>(null)
@@ -269,6 +271,7 @@ export function HomePage() {
             >
               <MapView
                 reports={mapReports}
+                hotspots={raceMapHotspots}
                 pulseAt={pulseAt}
                 onPulseDone={() => setPulseAt(null)}
                 onSelectReport={selectReport}

@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom'
 import { AuthGate } from '../components/auth/AuthGate'
 import { SiteFooter, SiteNav } from '../components/site/SiteNav'
 import { useAuth } from '../hooks/useAuth'
+import {
+  clearLocalRaceHotspot,
+  loadLocalRaceHotspots,
+} from '../lib/raceHotspots'
 import { loadLocalRaceRegistrations, RACE_TEAM_PRESETS } from '../lib/raceRegistration'
 import {
   addLocalRaceWeight,
@@ -12,6 +16,7 @@ import {
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import {
   AMAZING_TRASH_RACE_S2,
+  type RaceHotspot,
   type RaceWeightLog,
   type WasteCategory,
 } from '../types/database'
@@ -21,9 +26,11 @@ function MarshalInner() {
   const [teamName, setTeamName] = useState<string>(RACE_TEAM_PRESETS[0])
   const [kg, setKg] = useState('')
   const [category, setCategory] = useState<WasteCategory>('mixed')
+  const [hotspotId, setHotspotId] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [logs, setLogs] = useState<RaceWeightLog[]>([])
+  const [activeHotspots, setActiveHotspots] = useState<RaceHotspot[]>([])
   const [usingLocal, setUsingLocal] = useState(false)
   const [teamOptions, setTeamOptions] = useState<string[]>([...RACE_TEAM_PRESETS])
 
@@ -31,6 +38,7 @@ function MarshalInner() {
     if (!isSupabaseConfigured) {
       setUsingLocal(true)
       setLogs(loadLocalRaceWeights())
+      setActiveHotspots(loadLocalRaceHotspots().filter((h) => h.status === 'active'))
       const regs = loadLocalRaceRegistrations()
       const fromRegs = [
         ...new Set(regs.map((r) => r.team_name?.trim()).filter(Boolean) as string[]),
@@ -38,25 +46,34 @@ function MarshalInner() {
       setTeamOptions([...new Set([...RACE_TEAM_PRESETS, ...fromRegs])])
       return
     }
-    const [{ data: weights, error }, { data: regs }] = await Promise.all([
-      supabase
-        .from('race_weight_logs')
-        .select('*')
-        .eq('event_slug', AMAZING_TRASH_RACE_S2)
-        .order('created_at', { ascending: false })
-        .limit(40),
-      supabase
-        .from('race_registrations')
-        .select('team_name')
-        .eq('event_slug', AMAZING_TRASH_RACE_S2),
-    ])
-    if (error) {
+    const [{ data: weights, error }, { data: regs }, { data: hotspots, error: hotErr }] =
+      await Promise.all([
+        supabase
+          .from('race_weight_logs')
+          .select('*')
+          .eq('event_slug', AMAZING_TRASH_RACE_S2)
+          .order('created_at', { ascending: false })
+          .limit(40),
+        supabase
+          .from('race_registrations')
+          .select('team_name')
+          .eq('event_slug', AMAZING_TRASH_RACE_S2),
+        supabase
+          .from('race_hotspots')
+          .select('*')
+          .eq('event_slug', AMAZING_TRASH_RACE_S2)
+          .eq('status', 'active')
+          .order('label', { ascending: true }),
+      ])
+    if (error || hotErr) {
       setUsingLocal(true)
       setLogs(loadLocalRaceWeights())
+      setActiveHotspots(loadLocalRaceHotspots().filter((h) => h.status === 'active'))
       return
     }
     setUsingLocal(false)
     setLogs((weights ?? []) as RaceWeightLog[])
+    setActiveHotspots((hotspots ?? []) as RaceHotspot[])
     const fromRegs = [
       ...new Set(
         ((regs ?? []) as { team_name: string | null }[])
@@ -68,7 +85,10 @@ function MarshalInner() {
   }, [])
 
   useEffect(() => {
-    void refresh()
+    const t = window.setTimeout(() => {
+      void refresh()
+    }, 0)
+    return () => window.clearTimeout(t)
   }, [refresh])
 
   const canWrite = Boolean(profile?.is_admin) || usingLocal || !isSupabaseConfigured
@@ -87,18 +107,58 @@ function MarshalInner() {
     setBusy(true)
     setStatus(null)
     try {
+      const selectedHotspot = hotspotId
+        ? activeHotspots.find((h) => h.id === hotspotId)
+        : null
+
       if (usingLocal || !isSupabaseConfigured) {
+        if (hotspotId) {
+          const cleared = clearLocalRaceHotspot(hotspotId, teamName)
+          if (!cleared.ok) {
+            throw new Error(
+              cleared.reason === 'already_cleared'
+                ? 'That hotspot was already cleared by another team.'
+                : 'Hotspot not found.',
+            )
+          }
+        }
         addLocalRaceWeight({
           team_name: teamName,
           kg: amount,
           waste_category: category,
           logged_by: user?.id ?? null,
         })
-        setStatus('Logged (local).')
+        setStatus(
+          selectedHotspot
+            ? `Logged (local) and cleared “${selectedHotspot.label}”.`
+            : 'Logged (local).',
+        )
         setKg('')
+        setHotspotId('')
         await refresh()
         return
       }
+
+      // Clear first with status=active guard — prevents double-clear / double-award.
+      if (hotspotId) {
+        const { data: cleared, error: clearErr } = await supabase
+          .from('race_hotspots')
+          .update({
+            status: 'cleared',
+            cleared_by_team_name: teamName.trim(),
+            cleared_at: new Date().toISOString(),
+          })
+          .eq('id', hotspotId)
+          .eq('status', 'active')
+          .select('id')
+          .maybeSingle()
+
+        if (clearErr) throw new Error(clearErr.message)
+        if (!cleared) {
+          throw new Error('That hotspot was already cleared by another team.')
+        }
+      }
+
       const { error } = await supabase.from('race_weight_logs').insert({
         event_slug: AMAZING_TRASH_RACE_S2,
         team_name: teamName.trim(),
@@ -107,8 +167,14 @@ function MarshalInner() {
         logged_by: user?.id ?? null,
       })
       if (error) throw new Error(error.message)
-      setStatus('Logged to live leaderboard.')
+
+      setStatus(
+        selectedHotspot
+          ? `Logged and cleared “${selectedHotspot.label}” (${selectedHotspot.point_value} pts).`
+          : 'Logged to live leaderboard.',
+      )
       setKg('')
+      setHotspotId('')
       await refresh()
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Failed')
@@ -129,7 +195,7 @@ function MarshalInner() {
     <div className="space-y-8">
       {usingLocal && (
         <p className="text-xs text-amber-200">
-          Local weight log — run migration 008 for shared leaderboard data.
+          Local weight/hotspot log — run migrations 008 + 014 for shared data.
         </p>
       )}
       <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -176,6 +242,21 @@ function MarshalInner() {
             ))}
           </select>
         </label>
+        <label className="block text-xs text-teal-200/80">
+          Hotspot cleared (optional)
+          <select
+            value={hotspotId}
+            onChange={(e) => setHotspotId(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white"
+          >
+            <option value="">None — weight only</option>
+            {activeHotspots.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.label} · {h.point_value} pts
+              </option>
+            ))}
+          </select>
+        </label>
         <button
           type="submit"
           disabled={busy}
@@ -216,7 +297,8 @@ export function RaceMarshalPage() {
           Marshal checkpoint
         </h1>
         <p className="mt-2 text-sm text-teal-100/70">
-          Log verified waste weight by squad. Feeds the Season 2 live leaderboard.
+          Log verified waste weight by squad and clear race hotspots. Feeds the Season 2 live
+          leaderboard.
         </p>
         <div className="mt-8">
           {!isSupabaseConfigured ? (

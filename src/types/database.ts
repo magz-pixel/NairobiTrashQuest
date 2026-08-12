@@ -192,4 +192,21 @@ export interface RaceWeightLog {
   created_at: string
 }
 
+export type RaceHotspotStatus = 'active' | 'cleared'
+
+export interface RaceHotspot {
+  id: string
+  event_slug: string
+  latitude: number
+  longitude: number
+  label: string
+  point_value: number
+  is_ghost_spot: boolean
+  reference_image_url: string | null
+  status: RaceHotspotStatus
+  cleared_by_team_name: string | null
+  cleared_at: string | null
+  created_at: string
+}
+
 export const AMAZING_TRASH_RACE_S2 = 'amazing-trash-race-s2'

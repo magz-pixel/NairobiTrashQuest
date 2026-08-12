@@ -1,7 +1,8 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
-import type { Report } from '../../types/database'
+import type { RaceHotspot, Report } from '../../types/database'
 import { marketConfig } from '../../lib/marketConfig'
 import { ClusterLayer } from './ClusterLayer'
+import { HotspotLayer } from './HotspotLayer'
 import { ReportPulseLayer } from './ReportPulseLayer'
 
 const LIGHT_TILE =
@@ -9,6 +10,7 @@ const LIGHT_TILE =
 
 interface MapViewProps {
   reports: Report[]
+  hotspots?: RaceHotspot[]
   onInteract?: () => void
   onSelectReport: (report: Report) => void
   pulseAt?: { latitude: number; longitude: number } | null
@@ -29,6 +31,7 @@ function MapInteractor({ onInteract }: { onInteract?: () => void }) {
 
 export function MapView({
   reports,
+  hotspots = [],
   onInteract,
   onSelectReport,
   pulseAt,
@@ -47,6 +50,7 @@ export function MapView({
         url={LIGHT_TILE}
       />
       <ClusterLayer reports={reports} onSelectReport={onSelectReport} />
+      <HotspotLayer hotspots={hotspots} />
       {pulseAt && (
         <ReportPulseLayer
           latitude={pulseAt.latitude}
