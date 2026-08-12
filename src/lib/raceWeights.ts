@@ -45,13 +45,22 @@ export interface TeamLeaderboardRow {
   kg: number
   logs: number
   tickets: number
+  /** Sum of cleared race_hotspots.point_value for this squad — primary ranking. */
+  points: number
+  /** @deprecated Prefer `points`; kept as alias for the points total. */
   score: number
 }
 
-/** Score = total kg + 0.5 per registered ticket on that team (small signup bonus). */
+export type HotspotPointCredit = {
+  cleared_by_team_name: string | null
+  point_value: number
+}
+
+/** Rank by hotspot points (primary), then kg (informational / CSR). */
 export function buildTeamLeaderboard(
   weights: RaceWeightLog[],
   ticketCounts: Record<string, number>,
+  hotspotCredits: HotspotPointCredit[] = [],
 ): TeamLeaderboardRow[] {
   const kgMap = new Map<string, { kg: number; logs: number }>()
   for (const w of weights) {
@@ -62,20 +71,34 @@ export function buildTeamLeaderboard(
     kgMap.set(team, cur)
   }
 
-  const teams = new Set([...kgMap.keys(), ...Object.keys(ticketCounts)])
+  const pointsMap = new Map<string, number>()
+  for (const h of hotspotCredits) {
+    const team = h.cleared_by_team_name?.trim() || 'Unassigned'
+    pointsMap.set(team, (pointsMap.get(team) ?? 0) + Number(h.point_value))
+  }
+
+  const teams = new Set([
+    ...kgMap.keys(),
+    ...Object.keys(ticketCounts),
+    ...pointsMap.keys(),
+  ])
   const rows: TeamLeaderboardRow[] = []
   for (const team of teams) {
     const { kg = 0, logs = 0 } = kgMap.get(team) ?? {}
     const tickets = ticketCounts[team] ?? 0
+    const points = pointsMap.get(team) ?? 0
     rows.push({
       team,
       kg,
       logs,
       tickets,
-      score: kg + tickets * 0.5,
+      points,
+      score: points,
     })
   }
-  return rows.sort((a, b) => b.score - a.score || b.kg - a.kg || a.team.localeCompare(b.team))
+  return rows.sort(
+    (a, b) => b.points - a.points || b.kg - a.kg || a.team.localeCompare(b.team),
+  )
 }
 
 export const WASTE_CATEGORIES: { id: WasteCategory; label: string }[] = [

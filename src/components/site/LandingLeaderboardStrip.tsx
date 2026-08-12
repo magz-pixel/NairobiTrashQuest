@@ -1,10 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { loadLocalRaceHotspots } from '../../lib/raceHotspots'
 import { loadLocalRaceRegistrations } from '../../lib/raceRegistration'
 import {
   buildTeamLeaderboard,
   loadLocalRaceWeights,
+  type HotspotPointCredit,
   type TeamLeaderboardRow,
 } from '../../lib/raceWeights'
 import { isSupabaseConfigured, supabase } from '../../lib/supabase'
@@ -17,53 +19,74 @@ export function LandingLeaderboardStrip() {
   const refresh = useCallback(async () => {
     let weights: RaceWeightLog[] = []
     let ticketCounts: Record<string, number> = {}
+    let hotspotCredits: HotspotPointCredit[] = []
 
-    if (!isSupabaseConfigured) {
+    const fillLocal = () => {
       weights = loadLocalRaceWeights()
+      ticketCounts = {}
       for (const r of loadLocalRaceRegistrations()) {
         const t = r.team_name?.trim() || 'Unassigned'
         ticketCounts[t] = (ticketCounts[t] ?? 0) + 1
       }
+      hotspotCredits = loadLocalRaceHotspots()
+        .filter((h) => h.status === 'cleared')
+        .map((h) => ({
+          cleared_by_team_name: h.cleared_by_team_name,
+          point_value: h.point_value,
+        }))
+    }
+
+    if (!isSupabaseConfigured) {
+      fillLocal()
     } else {
-      const [{ data: w, error }, { data: regs }] = await Promise.all([
-        supabase
-          .from('race_weight_logs')
-          .select('*')
-          .eq('event_slug', AMAZING_TRASH_RACE_S2),
-        supabase
-          .from('race_registrations')
-          .select('team_name')
-          .eq('event_slug', AMAZING_TRASH_RACE_S2),
-      ])
-      if (error) {
-        weights = loadLocalRaceWeights()
-        for (const r of loadLocalRaceRegistrations()) {
-          const t = r.team_name?.trim() || 'Unassigned'
-          ticketCounts[t] = (ticketCounts[t] ?? 0) + 1
-        }
+      const [{ data: w, error }, { data: regs }, { data: cleared, error: hErr }] =
+        await Promise.all([
+          supabase
+            .from('race_weight_logs')
+            .select('*')
+            .eq('event_slug', AMAZING_TRASH_RACE_S2),
+          supabase
+            .from('race_registrations')
+            .select('team_name')
+            .eq('event_slug', AMAZING_TRASH_RACE_S2),
+          supabase
+            .from('race_hotspots')
+            .select('cleared_by_team_name, point_value')
+            .eq('event_slug', AMAZING_TRASH_RACE_S2)
+            .eq('status', 'cleared'),
+        ])
+      if (error || hErr) {
+        fillLocal()
       } else {
         weights = (w ?? []) as RaceWeightLog[]
+        ticketCounts = {}
         for (const r of (regs ?? []) as { team_name: string | null }[]) {
           const t = r.team_name?.trim() || 'Unassigned'
           ticketCounts[t] = (ticketCounts[t] ?? 0) + 1
         }
+        hotspotCredits = (cleared ?? []) as HotspotPointCredit[]
       }
     }
 
-    setRows(buildTeamLeaderboard(weights, ticketCounts).slice(0, 3))
+    setRows(buildTeamLeaderboard(weights, ticketCounts, hotspotCredits).slice(0, 3))
   }, [])
 
   useEffect(() => {
-    void refresh()
+    const boot = window.setTimeout(() => {
+      void refresh()
+    }, 0)
     const id = window.setInterval(() => void refresh(), 10000)
-    return () => window.clearInterval(id)
+    return () => {
+      window.clearTimeout(boot)
+      window.clearInterval(id)
+    }
   }, [refresh])
 
   return (
     <div className="mt-6 rounded-xl border border-amber-400/25 bg-black/25 p-3 backdrop-blur-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300/90">
-          Live top 3 · kg + tickets
+          Live top 3 · hotspot pts
         </p>
         <Link to="/race/leaderboard" className="text-[11px] font-semibold text-[#00f2fe] hover:underline">
           Full board
@@ -72,7 +95,9 @@ export function LandingLeaderboardStrip() {
       <ul className="space-y-1.5">
         <AnimatePresence mode="popLayout">
           {rows.length === 0 && (
-            <li className="text-xs text-amber-50/60">No weights yet — register a squad and marshal kg.</li>
+            <li className="text-xs text-amber-50/60">
+              No scores yet — clear hotspots and marshal kg.
+            </li>
           )}
           {rows.map((r, i) => (
             <motion.li
@@ -83,14 +108,14 @@ export function LandingLeaderboardStrip() {
               exit={{ opacity: 0 }}
               className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-sm"
             >
-              <span className="flex items-center gap-2 min-w-0">
-                <span className="font-[family-name:var(--font-display)] text-amber-300 tabular-nums">
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="font-[family-name:var(--font-display)] tabular-nums text-amber-300">
                   {i + 1}
                 </span>
                 <span className="truncate font-medium text-white">{r.team}</span>
               </span>
-              <span className="shrink-0 tabular-nums text-[#00f2fe]">
-                {r.score.toFixed(1)}
+              <span className="shrink-0 tabular-nums text-orange-300">
+                {r.points} pts
               </span>
             </motion.li>
           ))}
