@@ -205,7 +205,7 @@ export function HomePage() {
             onStatusChange={setStatusFilter}
           />
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex w-[min(13.5rem,calc(100vw-9.5rem))] shrink-0 flex-col items-end gap-2">
           <ProfileBadge className="pointer-events-auto min-h-[48px]" />
           {!user && <MapJoinButton />}
           <DigestBanner />

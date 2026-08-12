@@ -14,20 +14,22 @@ export function ProfileBadge({ className = '' }: { className?: string }) {
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-sm shadow-[var(--shadow-sm)] ${className}`}
+      className={`flex w-full min-w-[11.5rem] max-w-[13.5rem] items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-sm shadow-[var(--shadow-sm)] sm:gap-3 sm:px-3 ${className}`}
     >
-      <XpProgressRing
-        xp={profile?.total_impact_points ?? 0}
-        badgeLevel={profile?.badge_level ?? 'scout'}
-        username={profile?.username}
-        size={40}
-        compact
-      />
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+      <div className="shrink-0">
+        <XpProgressRing
+          xp={profile?.total_impact_points ?? 0}
+          badgeLevel={profile?.badge_level ?? 'scout'}
+          username={profile?.username}
+          size={40}
+          compact
+        />
+      </div>
+      <div className="min-w-0 flex-1 overflow-hidden">
+        <p className="truncate text-sm font-semibold leading-tight text-[var(--text-primary)]">
           {profile?.username ?? 'User'}
         </p>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="truncate text-xs leading-tight text-[var(--text-muted)]">
           {profile ? BADGE_LABELS[profile.badge_level] : 'Scout'} ·{' '}
           {profile?.total_impact_points ?? 0} XP
         </p>
@@ -35,7 +37,7 @@ export function ProfileBadge({ className = '' }: { className?: string }) {
       <button
         type="button"
         onClick={() => signOut()}
-        className="shrink-0 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        className="ml-0.5 shrink-0 whitespace-nowrap text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       >
         Sign out
       </button>
