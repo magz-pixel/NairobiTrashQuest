@@ -22,7 +22,7 @@ const inputClass =
   'mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white'
 
 export function RaceRegisterPage() {
-  const { user, profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -33,11 +33,28 @@ export function RaceRegisterPage() {
   const [ticket, setTicket] = useState<RaceRegistration | null>(null)
   const [usingLocal, setUsingLocal] = useState(false)
 
+  // Auth-first when Supabase is live; unconfigured mode keeps the local fallback form.
+  const needsSignIn = isSupabaseConfigured && !loading && !user
+  const canShowForm =
+    (!isSupabaseConfigured && !loading) ||
+    (isSupabaseConfigured && !loading && Boolean(user))
+
+  const accountEmail = user?.email?.trim().toLowerCase() ?? ''
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSupabaseConfigured && !user) {
+      setError('Sign in to register for Season 2.')
+      return
+    }
     const squad = teamName.trim()
     if (!squad) {
       setError('Pick or enter your squad / micro-team name.')
+      return
+    }
+    const resolvedEmail = (user?.email ?? email).trim().toLowerCase()
+    if (!resolvedEmail) {
+      setError('Email is required.')
       return
     }
     setBusy(true)
@@ -47,7 +64,7 @@ export function RaceRegisterPage() {
         event_slug: AMAZING_TRASH_RACE_S2,
         full_name: fullName.trim(),
         phone: phone.trim(),
-        email: email.trim().toLowerCase(),
+        email: resolvedEmail,
         team_name: squad,
         ticket_code: generateTicketCode(),
         user_id: user?.id ?? null,
@@ -66,19 +83,22 @@ export function RaceRegisterPage() {
         return
       }
 
+      // Authenticated path: user_id is always the signed-in account.
+      const authenticatedPayload = { ...payload, user_id: user!.id }
+
       const { data, error: insErr } = await supabase
         .from('race_registrations')
-        .insert(payload)
+        .insert(authenticatedPayload)
         .select('*')
         .single()
 
       if (insErr) {
         const row = addLocalRaceRegistration({
-          full_name: payload.full_name,
-          phone: payload.phone,
-          email: payload.email,
-          team_name: payload.team_name,
-          user_id: payload.user_id,
+          full_name: authenticatedPayload.full_name,
+          phone: authenticatedPayload.phone,
+          email: authenticatedPayload.email,
+          team_name: authenticatedPayload.team_name,
+          user_id: authenticatedPayload.user_id,
         })
         setUsingLocal(true)
         setTicket(row)
@@ -146,7 +166,19 @@ export function RaceRegisterPage() {
           Register for a digital ticket, join a squad, and bring your code on race day.
         </p>
 
-        {!ticket ? (
+        {loading && isSupabaseConfigured && !ticket ? (
+          <p className="mt-8 text-sm text-teal-100/60">Checking your account…</p>
+        ) : needsSignIn && !ticket ? (
+          <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-5">
+            <p className="text-sm text-teal-50/90">
+              Create an account to register for Season 2. Your ticket will be saved to your
+              profile so it shows up under My impact.
+            </p>
+            <div className="mt-4">
+              <SignInButton variant="dark" label="Sign in to register" className="w-full" />
+            </div>
+          </div>
+        ) : !ticket && canShowForm ? (
           <form onSubmit={submit} className="mt-8 space-y-4">
             <label className="block text-xs text-teal-200/80">
               Full name
@@ -170,13 +202,22 @@ export function RaceRegisterPage() {
             </label>
             <label className="block text-xs text-teal-200/80">
               Email
-              <input
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-              />
+              {user ? (
+                <input
+                  readOnly
+                  type="email"
+                  value={accountEmail}
+                  className={`${inputClass} cursor-default opacity-80`}
+                />
+              ) : (
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                />
+              )}
             </label>
 
             <div>
@@ -237,7 +278,7 @@ export function RaceRegisterPage() {
             </button>
             {error && <p className="text-sm text-amber-200">{error}</p>}
           </form>
-        ) : (
+        ) : ticket ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -264,19 +305,7 @@ export function RaceRegisterPage() {
                 Stored in this browser until migration 007 is applied on Supabase.
               </p>
             )}
-            {!user ? (
-              <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm text-teal-50/90">
-                  Save this ticket to your account so it appears under My impact.
-                </p>
-                <div className="mt-3">
-                  <SignInButton variant="dark" label="Join & save ticket" />
-                </div>
-                <p className="mt-2 text-[11px] text-teal-100/50">
-                  Screenshot still works if you prefer — then register again while signed in.
-                </p>
-              </div>
-            ) : (
+            {user && (
               <p className="mt-3 text-xs text-[var(--fn-clear,#5eead4)]">
                 Signed in — open{' '}
                 <Link to="/me" className="underline">
@@ -296,7 +325,7 @@ export function RaceRegisterPage() {
               Register another person
             </button>
           </motion.div>
-        )}
+        ) : null}
 
         {profile?.is_admin && (
           <button
