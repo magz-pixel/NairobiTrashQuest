@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { getAuthRedirectUrl } from '../lib/authRedirect'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types/database'
 
@@ -28,8 +29,8 @@ export function useAuth() {
 
   useEffect(() => {
     if (!user) {
-      setProfile(null)
-      return
+      const t = window.setTimeout(() => setProfile(null), 0)
+      return () => window.clearTimeout(t)
     }
 
     supabase
@@ -45,7 +46,7 @@ export function useAuth() {
   const signInWithEmail = async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.href },
+      options: { emailRedirectTo: getAuthRedirectUrl() },
     })
     if (error) throw error
   }
@@ -54,7 +55,7 @@ export function useAuth() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href,
+        redirectTo: getAuthRedirectUrl(),
       },
     })
     if (error) throw error

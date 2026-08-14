@@ -82,9 +82,14 @@ if (url && anon) {
 
 console.log('\nManual steps (Supabase Dashboard):')
 console.log('  1. Authentication → URL Configuration')
-console.log('     Site URL: http://localhost:5173 (or your Vercel URL)')
-console.log('     Redirect URLs: http://localhost:5173, https://your-app.vercel.app')
-console.log('  2. SQL Editor → run supabase/migrations/002_realtime.sql')
-console.log('  3. Optional: scripts/seed-demo-reports.sql (after first sign-in)')
+console.log('     Site URL: your production domain (e.g. https://ramani-taka.co.ke)')
+console.log('     Redirect URLs (add every domain + path users sign in from):')
+console.log('       http://localhost:5173/**')
+console.log('       https://ramani-taka.co.ke/**')
+console.log('       https://your-app.vercel.app/**')
+console.log('     Avoid old *.vercel.app preview URLs — they cause DEPLOYMENT_NOT_FOUND.')
+console.log('  2. Vercel env: set VITE_SITE_URL=https://ramani-taka.co.ke (matches Site URL)')
+console.log('  3. SQL Editor → run supabase/migrations/002_realtime.sql')
+console.log('  4. Optional: scripts/seed-demo-reports.sql (after first sign-in)')
 
 process.exit(ok ? 0 : 1)

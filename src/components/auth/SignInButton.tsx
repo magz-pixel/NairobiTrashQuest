@@ -5,6 +5,8 @@ interface SignInButtonProps {
   label?: string
   className?: string
   variant?: 'light' | 'dark'
+  authTitle?: string
+  authBlurb?: string
 }
 
 /** Compact CTA that opens AuthModal — for map panels/modals. */
@@ -12,6 +14,8 @@ export function SignInButton({
   label = 'Sign in / Join',
   className = '',
   variant = 'light',
+  authTitle,
+  authBlurb,
 }: SignInButtonProps) {
   const [open, setOpen] = useState(false)
   const styles =
@@ -24,7 +28,12 @@ export function SignInButton({
       <button type="button" className={`${styles} ${className}`} onClick={() => setOpen(true)}>
         {label}
       </button>
-      <AuthModal open={open} onClose={() => setOpen(false)} />
+      <AuthModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={authTitle}
+        blurb={authBlurb}
+      />
     </>
   )
 }

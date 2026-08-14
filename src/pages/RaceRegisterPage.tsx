@@ -175,7 +175,13 @@ export function RaceRegisterPage() {
               profile so it shows up under My impact.
             </p>
             <div className="mt-4">
-              <SignInButton variant="dark" label="Sign in to register" className="w-full" />
+              <SignInButton
+                variant="dark"
+                label="Sign in to register"
+                className="w-full"
+                authTitle="Register for Season 2"
+                authBlurb="Sign in with Google or email magic link. Your ticket will be saved to your profile under My impact."
+              />
             </div>
           </div>
         ) : !ticket && canShowForm ? (
