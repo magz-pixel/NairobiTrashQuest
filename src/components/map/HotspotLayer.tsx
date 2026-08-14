@@ -36,17 +36,25 @@ export function HotspotLayer({ hotspots }: HotspotLayerProps) {
           icon={hotspotIcon(h.point_value)}
         >
           <Popup>
-            <div className="max-w-[220px] text-sm">
+            <div className="w-[280px] max-w-[calc(100vw-3rem)] text-sm">
               {h.reference_image_url ? (
                 <img
                   src={h.reference_image_url}
                   alt={h.label}
-                  className="mb-2 aspect-video w-full rounded-md object-cover"
+                  className="mb-2 aspect-[4/3] w-full rounded-md object-cover"
                   loading="lazy"
                 />
               ) : null}
               <p className="font-semibold">{h.label}</p>
               <p className="text-xs text-gray-600">{h.point_value} pts</p>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${h.latitude},${h.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-xs font-semibold text-[#0d9488] underline"
+              >
+                Get Directions
+              </a>
             </div>
           </Popup>
         </Marker>
