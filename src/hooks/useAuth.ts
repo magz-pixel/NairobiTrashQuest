@@ -14,7 +14,7 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session)
       setUser(data.session?.user ?? null)
-      setLoading(false)
+      if (!data.session?.user) setLoading(false)
     })
 
     const {
@@ -22,6 +22,7 @@ export function useAuth() {
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
       setUser(nextSession?.user ?? null)
+      if (!nextSession?.user) setLoading(false)
     })
 
     return () => subscription.unsubscribe()
@@ -29,18 +30,33 @@ export function useAuth() {
 
   useEffect(() => {
     if (!user) {
-      const t = window.setTimeout(() => setProfile(null), 0)
+      const t = window.setTimeout(() => {
+        setProfile(null)
+        setLoading(false)
+      }, 0)
       return () => window.clearTimeout(t)
     }
 
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (data) setProfile(data as Profile)
-      })
+    let cancelled = false
+    void (async () => {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        if (cancelled) return
+        setProfile((data as Profile) ?? null)
+      } catch {
+        if (cancelled) return
+        setProfile(null)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
   const signInWithEmail = async (email: string) => {

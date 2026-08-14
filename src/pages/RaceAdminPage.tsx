@@ -10,6 +10,7 @@ import {
   uploadRaceHotspotImage,
 } from '../lib/raceHotspots'
 import {
+  deleteLocalRaceRegistration,
   exportRaceRegistrationsCsv,
   groupRegistrationsByTeam,
   loadLocalRaceRegistrations,
@@ -25,7 +26,7 @@ const inputClass =
   'mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white'
 
 function AdminInner() {
-  const { user, profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const [rows, setRows] = useState<RaceRegistration[]>([])
   const [hotspots, setHotspots] = useState<RaceHotspot[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -90,6 +91,10 @@ function AdminInner() {
     }, 0)
     return () => window.clearTimeout(t)
   }, [load])
+
+  if (loading) {
+    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
+  }
 
   if (!profile?.is_admin && !usingLocal) {
     return (
@@ -158,6 +163,31 @@ function AdminInner() {
       await load()
     } catch (err) {
       setFormStatus(err instanceof Error ? err.message : 'Failed to add hotspot')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const onDeleteRegistration = async (row: RaceRegistration) => {
+    const ok = window.confirm(
+      `Delete ${row.full_name}'s ticket ${row.ticket_code}? This cannot be undone.`,
+    )
+    if (!ok) return
+    setBusy(true)
+    setFormStatus(null)
+    try {
+      if (usingLocal || !isSupabaseConfigured) {
+        deleteLocalRaceRegistration(row.id)
+      } else {
+        const { error: delErr } = await supabase
+          .from('race_registrations')
+          .delete()
+          .eq('id', row.id)
+        if (delErr) throw new Error(delErr.message)
+      }
+      await load()
+    } catch (err) {
+      setFormStatus(err instanceof Error ? err.message : 'Delete failed')
     } finally {
       setBusy(false)
     }
@@ -326,6 +356,7 @@ function AdminInner() {
         <p className="text-sm text-teal-100/70">
           {rows.length} warriors · {groups.length} squads
         </p>
+        {formStatus && <p className="text-sm text-[#2dd4bf]">{formStatus}</p>}
         <ul className="space-y-4">
           {groups.map((g) => (
             <li key={g.team} className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -335,11 +366,21 @@ function AdminInner() {
               </p>
               <ul className="mt-2 space-y-1 text-sm text-teal-100/80">
                 {g.members.map((m) => (
-                  <li key={m.id}>
-                    <span className="font-mono text-xs text-[#2dd4bf]">{m.ticket_code}</span>
-                    {' · '}
-                    {m.full_name}
-                    <span className="text-teal-100/50"> · {m.phone}</span>
+                  <li key={m.id} className="flex items-start justify-between gap-3">
+                    <span>
+                      <span className="font-mono text-xs text-[#2dd4bf]">{m.ticket_code}</span>
+                      {' · '}
+                      {m.full_name}
+                      <span className="text-teal-100/50"> · {m.phone}</span>
+                    </span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      className="shrink-0 text-xs text-amber-200 underline disabled:opacity-50"
+                      onClick={() => void onDeleteRegistration(m)}
+                    >
+                      Delete
+                    </button>
                   </li>
                 ))}
               </ul>

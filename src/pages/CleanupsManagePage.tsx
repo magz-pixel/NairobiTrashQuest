@@ -15,7 +15,7 @@ interface RsvpRow {
 }
 
 function ManageInner() {
-  const { user, profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const [events, setEvents] = useState<Event[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   const [rsvps, setRsvps] = useState<RsvpRow[]>([])
@@ -50,12 +50,23 @@ function ManageInner() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) return
-    void loadEvents()
+    const t = window.setTimeout(() => {
+      void loadEvents()
+    }, 0)
+    return () => window.clearTimeout(t)
   }, [loadEvents])
 
   useEffect(() => {
-    if (selected) void loadRsvps(selected)
+    if (!selected) return
+    const t = window.setTimeout(() => {
+      void loadRsvps(selected)
+    }, 0)
+    return () => window.clearTimeout(t)
   }, [selected, loadRsvps])
+
+  if (loading) {
+    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
+  }
 
   if (!profile?.is_admin) {
     return (

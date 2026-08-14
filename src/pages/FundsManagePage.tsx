@@ -9,7 +9,7 @@ import { formatKes } from '../lib/fundLedger'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 function LedgerManageInner() {
-  const { profile, signOut } = useAuth()
+  const { profile, signOut, loading } = useAuth()
   const { entries, addEntry, voidEntry, usingLocal, refetch } = useFundLedger()
   const [kind, setKind] = useState<'donation' | 'expense'>('donation')
   const [amount, setAmount] = useState('')
@@ -46,6 +46,10 @@ function LedgerManageInner() {
     } finally {
       setBusy(false)
     }
+  }
+
+  if (loading) {
+    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
   }
 
   if (!isAdmin && !usingLocal) {

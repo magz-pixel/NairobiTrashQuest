@@ -22,7 +22,7 @@ import {
 } from '../types/database'
 
 function MarshalInner() {
-  const { user, profile } = useAuth()
+  const { user, profile, loading } = useAuth()
   const [teamName, setTeamName] = useState<string>(RACE_TEAM_PRESETS[0])
   const [kg, setKg] = useState('')
   const [category, setCategory] = useState<WasteCategory>('mixed')
@@ -181,6 +181,10 @@ function MarshalInner() {
     } finally {
       setBusy(false)
     }
+  }
+
+  if (loading) {
+    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
   }
 
   if (!canWrite && isSupabaseConfigured) {

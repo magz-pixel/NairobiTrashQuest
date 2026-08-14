@@ -53,6 +53,10 @@ export function loadLocalRaceRegistrations(): RaceRegistration[] {
   return loadAll()
 }
 
+export function deleteLocalRaceRegistration(id: string) {
+  saveAll(loadAll().filter((row) => row.id !== id))
+}
+
 /** Suggested squad names for Season 2 — warriors can also type a custom name. */
 export const RACE_TEAM_PRESETS = [
   'Green Scouts',
