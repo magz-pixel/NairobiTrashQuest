@@ -88,7 +88,7 @@ export function LandingLeaderboardStrip() {
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300/90">
           Live top 3 · hotspot pts
         </p>
-        <Link to="/race/leaderboard" className="text-[11px] font-semibold text-[#00f2fe] hover:underline">
+        <Link to="/race/leaderboard" className="inline-flex min-h-[44px] items-center text-[11px] font-semibold text-[#00f2fe] hover:underline">
           Full board
         </Link>
       </div>

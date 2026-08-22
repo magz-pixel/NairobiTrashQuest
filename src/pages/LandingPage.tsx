@@ -90,7 +90,7 @@ export function LandingPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
-                className="mt-10 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-[var(--fn-clear)]/70 hover:text-[var(--fn-clear)]"
+                className="mt-10 inline-flex min-h-[44px] items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-[var(--fn-clear)]/70 hover:text-[var(--fn-clear)]"
               >
                 Scroll the course
                 <span aria-hidden className="inline-block animate-bounce">
@@ -109,7 +109,7 @@ export function LandingPage() {
             </p>
             <Link
               to="/mission"
-              className="mt-6 inline-flex text-sm font-bold text-[var(--fn-clear)] hover:text-white"
+              className="mt-6 inline-flex min-h-[44px] items-center text-sm font-bold text-[var(--fn-clear)] hover:text-white"
             >
               See our journey →
             </Link>
@@ -135,7 +135,7 @@ export function LandingPage() {
                 </MagneticButton>
                 <Link
                   to="/cleanups"
-                  className="mt-3 block text-sm font-semibold text-teal-200/90 hover:text-white"
+                  className="mt-3 inline-flex min-h-[44px] items-center text-sm font-semibold text-teal-200/90 hover:text-white"
                 >
                   Weekly cleanups →
                 </Link>
@@ -174,7 +174,7 @@ export function LandingPage() {
                 </MagneticButton>
                 <Link
                   to="/race/leaderboard"
-                  className="text-sm font-semibold text-amber-200/90 hover:text-white"
+                  className="inline-flex min-h-[44px] items-center text-sm font-semibold text-amber-200/90 hover:text-white"
                 >
                   Live leaderboard →
                 </Link>

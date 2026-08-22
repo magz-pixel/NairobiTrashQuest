@@ -24,7 +24,7 @@ const STATUS: { value: StatusFilter; label: string }[] = [
 ]
 
 const selectClass =
-  'rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-1.5 text-xs text-[var(--text-primary)] shadow-[var(--shadow-sm)]'
+  'min-h-[44px] rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] shadow-[var(--shadow-sm)]'
 
 export function MapFilters({
   severity,
@@ -33,7 +33,7 @@ export function MapFilters({
   onStatusChange,
 }: MapFiltersProps) {
   return (
-    <div className="pointer-events-auto flex flex-wrap gap-2">
+    <div className="pointer-events-auto flex flex-wrap gap-2.5">
       <select
         value={severity}
         onChange={(e) => onSeverityChange(e.target.value as SeverityFilter)}

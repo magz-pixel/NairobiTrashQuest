@@ -56,13 +56,13 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
           {links.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
               className={({ isActive }) =>
-                `rounded-md px-2.5 py-1.5 text-sm transition hover:bg-white/5 hover:text-white ${
+                `inline-flex min-h-[44px] items-center rounded-md px-2.5 py-2 text-sm transition hover:bg-white/5 hover:text-white ${
                   isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'
                 }`
               }
@@ -77,7 +77,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
             <>
               <Link
                 to="/me"
-                className="hidden rounded-lg border border-white/15 px-2.5 py-1.5 text-xs font-semibold text-teal-100 hover:bg-white/5 sm:inline-flex"
+                className="hidden min-h-[44px] items-center rounded-lg border border-white/15 px-2.5 py-2 text-xs font-semibold text-teal-100 hover:bg-white/5 sm:inline-flex"
               >
                 My impact
                 {profile ? (
@@ -89,7 +89,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
               <button
                 type="button"
                 onClick={() => void signOut()}
-                className="hidden text-xs text-teal-200/70 hover:text-white sm:inline"
+                className="hidden min-h-[44px] items-center px-2 text-xs text-teal-200/70 hover:text-white sm:inline-flex"
               >
                 Sign out
               </button>
@@ -98,21 +98,21 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
             <button
               type="button"
               onClick={() => setAuthOpen(true)}
-              className="rounded-lg border border-white/20 px-2.5 py-1.5 text-xs font-semibold text-teal-50 hover:bg-white/5 md:text-sm"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-white/20 px-2.5 py-2 text-xs font-semibold text-teal-50 hover:bg-white/5 md:text-sm"
             >
               Join / Sign in
             </button>
           )}
           <Link
             to="/race"
-            className="rounded-lg bg-[#2dd4bf] px-3 py-1.5 text-xs font-semibold text-[#042f2e] transition hover:bg-[#5eead4] md:text-sm"
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-[#2dd4bf] px-3 py-2 text-xs font-semibold text-[#042f2e] transition hover:bg-[#5eead4] md:text-sm"
           >
             Register S2
           </Link>
         </div>
       </div>
       <nav
-        className="flex gap-1 overflow-x-auto border-t border-white/5 px-4 py-2 lg:hidden"
+        className="flex gap-2 overflow-x-auto border-t border-white/5 px-4 py-2 lg:hidden"
         aria-label="Mobile"
       >
         {links.map((l) => (
@@ -120,7 +120,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
             key={l.to}
             to={l.to}
             className={({ isActive }) =>
-              `shrink-0 rounded-md px-2.5 py-1 text-xs ${
+              `inline-flex min-h-[44px] shrink-0 items-center rounded-md px-2.5 py-2 text-xs ${
                 isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'
               }`
             }
@@ -132,7 +132,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
           <NavLink
             to="/me"
             className={({ isActive }) =>
-              `shrink-0 rounded-md px-2.5 py-1 text-xs ${
+              `inline-flex min-h-[44px] shrink-0 items-center rounded-md px-2.5 py-2 text-xs ${
                 isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'
               }`
             }

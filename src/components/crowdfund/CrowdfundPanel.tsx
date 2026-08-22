@@ -49,7 +49,7 @@ export function CrowdfundPanel({ funding, onContribute }: CrowdfundPanelProps) {
       </div>
 
       {!fullyFunded && (
-        <Button type="button" className="mt-3 w-full" onClick={onContribute}>
+        <Button type="button" className="mt-3 min-h-[44px] w-full" onClick={onContribute}>
           {t('contribute')}
         </Button>
       )}

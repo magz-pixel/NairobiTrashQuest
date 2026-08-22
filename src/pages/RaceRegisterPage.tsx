@@ -228,7 +228,7 @@ export function RaceRegisterPage() {
 
             <div>
               <p className="text-xs text-teal-200/80">Squad / micro-team *</p>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-2.5">
                 {RACE_TEAM_PRESETS.map((preset) => (
                   <button
                     key={preset}
@@ -237,7 +237,7 @@ export function RaceRegisterPage() {
                       setCustomTeam(false)
                       setTeamName(preset)
                     }}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
+                    className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-2 text-xs font-semibold ${
                       !customTeam && teamName === preset
                         ? 'border-[#2dd4bf] bg-teal-500/20 text-[#2dd4bf]'
                         : 'border-white/15 text-teal-100/80'
@@ -252,7 +252,7 @@ export function RaceRegisterPage() {
                     setCustomTeam(true)
                     setTeamName('')
                   }}
-                  className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
+                  className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-2 text-xs font-semibold ${
                     customTeam
                       ? 'border-orange-400 bg-orange-500/15 text-orange-200'
                       : 'border-white/15 text-teal-100/80'

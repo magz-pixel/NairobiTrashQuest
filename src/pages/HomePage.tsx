@@ -171,7 +171,7 @@ export function HomePage() {
           <div className="pointer-events-auto flex items-center gap-2">
             <Link
               to="/"
-              className="rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
+              className="inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
             >
               Fix Nairobi
             </Link>
@@ -180,7 +180,7 @@ export function HomePage() {
             </h1>
             <button
               type="button"
-              className="pointer-events-auto rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
+              className="pointer-events-auto inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
               onClick={() => {
                 setLocale(getLocale() === 'en' ? 'sw' : 'en')
                 setLocaleTick((n) => n + 1)
@@ -192,7 +192,7 @@ export function HomePage() {
               <button
                 type="button"
                 onClick={() => setAdminDrawerOpen(true)}
-                className="pointer-events-auto rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
+                className="pointer-events-auto inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
                 aria-label="Admin tools"
               >
                 ⚙
@@ -213,11 +213,11 @@ export function HomePage() {
           <DigestBanner />
         </div>
       </div>
-      <div className="pointer-events-auto flex flex-wrap items-center gap-2">
+      <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
         <button
           type="button"
           onClick={() => setViewMode('map')}
-          className={`rounded-lg px-3 py-1 text-xs font-semibold shadow-[var(--shadow-sm)] ${
+          className={`inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-xs font-semibold shadow-[var(--shadow-sm)] ${
             viewMode === 'map'
               ? 'border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 text-[var(--brand-teal)]'
               : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
@@ -228,7 +228,7 @@ export function HomePage() {
         <button
           type="button"
           onClick={() => setViewMode('list')}
-          className={`rounded-lg px-3 py-1 text-xs font-semibold shadow-[var(--shadow-sm)] ${
+          className={`inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-xs font-semibold shadow-[var(--shadow-sm)] ${
             viewMode === 'list'
               ? 'border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 text-[var(--brand-teal)]'
               : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
@@ -240,7 +240,7 @@ export function HomePage() {
           href={whatsappReportUrl()}
           target="_blank"
           rel="noreferrer"
-          className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-green-700 shadow-[var(--shadow-sm)]"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-xs font-medium text-green-700 shadow-[var(--shadow-sm)]"
         >
           {t('whatsappReport')}
         </a>
