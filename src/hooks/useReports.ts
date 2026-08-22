@@ -16,6 +16,7 @@ function normalizeReport(row: Record<string, unknown>): Report {
     ai_tags: Array.isArray(row.ai_tags) ? (row.ai_tags as string[]) : [],
     cleared_image_url: (row.cleared_image_url as string | null) ?? null,
     cleared_at: (row.cleared_at as string | null) ?? null,
+    cleared_by: (row.cleared_by as string | null) ?? null,
     waste_type: (row.waste_type as string | null) ?? null,
     seen_count: (row.seen_count as number) ?? 0,
     flag_count: (row.flag_count as number) ?? 0,

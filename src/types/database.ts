@@ -28,6 +28,7 @@ export interface Report {
   ai_tags: string[]
   cleared_image_url: string | null
   cleared_at: string | null
+  cleared_by: string | null
   waste_type: string | null
   seen_count: number
   flag_count: number

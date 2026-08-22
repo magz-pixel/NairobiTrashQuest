@@ -240,6 +240,7 @@ function generateNairobiDemoReports(): Report[] {
       ai_tags: spot.ai_tags,
       cleared_image_url: spot.cleared_image_url ?? null,
       cleared_at: clearedAt,
+      cleared_by: null,
       created_at: created,
       updated_at: updatedAt,
       area_name: spot.area_name,

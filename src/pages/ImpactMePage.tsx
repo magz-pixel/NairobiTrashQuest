@@ -47,8 +47,7 @@ export function ImpactMePage() {
         supabase
           .from('reports')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('status', 'verified_cleared'),
+          .eq('cleared_by', user.id),
       ])
       setTickets((regs ?? []) as RaceRegistration[])
       setRsvps((rsvpRows ?? []) as unknown as EventRsvp[])
@@ -107,6 +106,16 @@ export function ImpactMePage() {
                   {profile?.total_impact_points ?? 0} XP
                 </strong>
               </p>
+              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-teal-100/80">
+                <p>
+                  Reports submitted{' '}
+                  <strong className="text-white">{mapStats.reports}</strong>
+                </p>
+                <p>
+                  Hotspots cleared{' '}
+                  <strong className="text-white">{mapStats.clears}</strong>
+                </p>
+              </div>
               <div className="mt-4 flex flex-wrap gap-3 text-sm">
                 <button
                   type="button"
@@ -126,22 +135,6 @@ export function ImpactMePage() {
                 <Link to="/map" className="text-teal-200/70 underline">
                   Open map
                 </Link>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-orange-300/90">
-                Map activity
-              </h2>
-              <div className="mt-3 flex gap-6 text-sm">
-                <p>
-                  Reports{' '}
-                  <strong className="text-white">{mapStats.reports}</strong>
-                </p>
-                <p>
-                  Cleared{' '}
-                  <strong className="text-white">{mapStats.clears}</strong>
-                </p>
               </div>
             </section>
 
