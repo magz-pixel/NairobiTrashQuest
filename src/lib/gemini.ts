@@ -10,6 +10,44 @@ Return ONLY valid JSON with no markdown: {"is_cleared": boolean, "matches_locati
 
 const demoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
+/** Bound how long report submit waits on the analyze-trash edge function. */
+export const AI_ANALYSIS_TIMEOUT_MS = 8_000
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === 'AbortError'
+}
+
+async function withAbortTimeout<T>(
+  ms: number,
+  run: (signal: AbortSignal) => Promise<T>,
+): Promise<T> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), ms)
+  try {
+    const runPromise = run(controller.signal)
+    // Timeout may win the race while the aborted fetch is still rejecting.
+    void runPromise.catch(() => {})
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      const onAbort = () => {
+        reject(new DOMException('AI analysis timed out', 'AbortError'))
+      }
+      if (controller.signal.aborted) {
+        onAbort()
+        return
+      }
+      controller.signal.addEventListener('abort', onAbort, { once: true })
+    })
+    return await Promise.race([runPromise, timeoutPromise])
+  } catch (err) {
+    if (controller.signal.aborted || isAbortError(err)) {
+      throw new DOMException('AI analysis timed out', 'AbortError')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
 function demoTrashAnalysis(): TrashAnalysis {
   return {
     is_trash: true,
@@ -26,9 +64,13 @@ function demoClearVerification(): ClearVerification {
   }
 }
 
-async function analyzeViaEdgeFunction(body: Record<string, unknown>) {
+async function analyzeViaEdgeFunction(
+  body: Record<string, unknown>,
+  signal?: AbortSignal,
+) {
   const { data, error } = await supabase.functions.invoke('analyze-trash', {
     body,
+    signal,
   })
   if (error) throw error
   if (typeof data === 'string') return JSON.parse(data)
@@ -62,13 +104,20 @@ export async function analyzeTrashImage(
   const base64 = await fileToBase64(file)
 
   try {
-    const data = await analyzeViaEdgeFunction({
-      mode: 'report',
-      imageBase64: base64,
-      mimeType: file.type || 'image/jpeg',
-    })
+    const data = await withAbortTimeout(AI_ANALYSIS_TIMEOUT_MS, (signal) =>
+      analyzeViaEdgeFunction(
+        {
+          mode: 'report',
+          imageBase64: base64,
+          mimeType: file.type || 'image/jpeg',
+        },
+        signal,
+      ),
+    )
     return data as TrashAnalysis
-  } catch {
+  } catch (err) {
+    // Timeout must reject so ReportTrashModal's AI soft-fail path can run.
+    if (isAbortError(err)) throw err
     try {
       return await analyzeViaDevClient(base64, file.type || 'image/jpeg')
     } catch {
