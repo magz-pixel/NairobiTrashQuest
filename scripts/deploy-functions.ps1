@@ -14,7 +14,8 @@ $functions = @(
   "analyze-trash",
   "public-stats",
   "weekly-digest",
-  "whatsapp-webhook"
+  "whatsapp-webhook",
+  "whatsapp-inbound"
 )
 
 foreach ($fn in $functions) {
@@ -27,4 +28,6 @@ Write-Host "Done. Optional secrets (Supabase Dashboard -> Edge Functions -> Secr
 Write-Host "  GEMINI_API_KEY          - for AI moderation"
 Write-Host "  RESEND_API_KEY          - for weekly digest emails"
 Write-Host "  WHATSAPP_WEBHOOK_SECRET - for WhatsApp webhook auth"
+Write-Host "  TWILIO_ACCOUNT_SID      - Twilio WhatsApp inbound (media + replies)"
+Write-Host "  TWILIO_AUTH_TOKEN       - Twilio WhatsApp inbound (media + replies)"
 Write-Host "  AUTO_APPROVE_REPORTS    - true/false (server-side webhook default)"
