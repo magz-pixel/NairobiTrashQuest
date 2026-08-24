@@ -204,6 +204,8 @@ export interface RaceHotspot {
   point_value: number
   is_ghost_spot: boolean
   reference_image_url: string | null
+  /** Landmark first, extra angles after. Empty on older single-photo pins. */
+  gallery_image_urls?: string[] | null
   status: RaceHotspotStatus
   cleared_by_team_name: string | null
   cleared_at: string | null

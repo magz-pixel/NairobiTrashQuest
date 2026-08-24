@@ -24,6 +24,13 @@ export function loadLocalRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2): RaceHo
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
 }
 
+/** Landmark first when gallery is set; otherwise the legacy single photo. */
+export function hotspotPhotoUrls(hotspot: RaceHotspot): string[] {
+  const gallery = (hotspot.gallery_image_urls ?? []).filter(Boolean)
+  if (gallery.length > 0) return gallery
+  return hotspot.reference_image_url ? [hotspot.reference_image_url] : []
+}
+
 export function addLocalRaceHotspot(input: {
   latitude: number
   longitude: number
@@ -31,7 +38,9 @@ export function addLocalRaceHotspot(input: {
   point_value: number
   is_ghost_spot: boolean
   reference_image_url?: string | null
+  gallery_image_urls?: string[] | null
 }): RaceHotspot {
+  const gallery = (input.gallery_image_urls ?? []).filter(Boolean)
   const row: RaceHotspot = {
     id: crypto.randomUUID(),
     event_slug: AMAZING_TRASH_RACE_S2,
@@ -40,7 +49,8 @@ export function addLocalRaceHotspot(input: {
     label: input.label.trim(),
     point_value: input.point_value,
     is_ghost_spot: input.is_ghost_spot,
-    reference_image_url: input.reference_image_url ?? null,
+    reference_image_url: input.reference_image_url ?? gallery[0] ?? null,
+    gallery_image_urls: gallery,
     status: 'active',
     cleared_by_team_name: null,
     cleared_at: null,
@@ -78,9 +88,10 @@ export async function uploadRaceHotspotImage(
   userId: string,
   hotspotId: string,
   file: File,
+  index = 0,
 ): Promise<string> {
   const compressed = await compressImageFile(file)
-  const path = `${userId}/${hotspotId}.jpg`
+  const path = `${userId}/${hotspotId}-${index}.jpg`
 
   const { error } = await supabase.storage
     .from('race-hotspot-images')

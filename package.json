@@ -21,6 +21,7 @@
     "db:008": "node scripts/run-sql.mjs supabase/migrations/008_race_weights.sql",
     "db:009": "node scripts/run-sql.mjs supabase/migrations/009_verify_cleared.sql",
     "db:010": "node scripts/run-sql.mjs supabase/migrations/010_event_rsvps.sql",
+    "db:017": "node scripts/run-sql.mjs supabase/migrations/017_race_hotspot_gallery.sql",
     "db:seed": "node scripts/run-sql.mjs scripts/seed-demo-reports.sql",
     "verify:race-week": "node scripts/verify-donate-module-b.mjs"
   },

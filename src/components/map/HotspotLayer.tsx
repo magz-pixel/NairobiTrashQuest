@@ -6,6 +6,7 @@ import {
   demoHotspotFundingSeed,
   useDemoFunding,
 } from '../../hooks/useDemoFunding'
+import { hotspotPhotoUrls } from '../../lib/raceHotspots'
 import { CrowdfundPanel } from '../crowdfund/CrowdfundPanel'
 
 interface HotspotLayerProps {
@@ -32,23 +33,58 @@ function hotspotIcon(pointValue: number) {
   })
 }
 
+function HotspotPhotoStrip({ urls, label }: { urls: string[]; label: string }) {
+  if (urls.length === 0) return null
+
+  if (urls.length === 1) {
+    return (
+      <img
+        src={urls[0]}
+        alt={label}
+        className="mb-2 aspect-[4/3] min-h-[44px] w-full rounded-md object-cover"
+        loading="lazy"
+      />
+    )
+  }
+
+  return (
+    <div
+      className="-mx-1 mb-2 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      {urls.map((url, i) => (
+        <figure
+          key={`${url}-${i}`}
+          className="relative min-h-[44px] w-[min(14rem,78%)] shrink-0 snap-start"
+        >
+          <img
+            src={url}
+            alt={i === 0 ? `${label} landmark` : `${label} angle ${i}`}
+            className="aspect-[4/3] h-full min-h-[44px] w-full rounded-md object-cover"
+            loading="lazy"
+          />
+          {i === 0 ? (
+            <figcaption className="absolute bottom-1 left-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              Landmark
+            </figcaption>
+          ) : null}
+        </figure>
+      ))}
+    </div>
+  )
+}
+
 function HotspotPopupContent({ hotspot }: { hotspot: RaceHotspot }) {
   const seed = useMemo(
     () => demoHotspotFundingSeed(hotspot.id, hotspot.point_value),
     [hotspot.id, hotspot.point_value],
   )
   const { funding, contribute } = useDemoFunding(hotspot.id, seed)
+  const photos = hotspotPhotoUrls(hotspot)
 
   return (
     <div className="w-full max-w-[min(17.5rem,calc(100vw-3rem))] text-sm">
-      {hotspot.reference_image_url ? (
-        <img
-          src={hotspot.reference_image_url}
-          alt={hotspot.label}
-          className="mb-2 aspect-[4/3] w-full rounded-md object-cover"
-          loading="lazy"
-        />
-      ) : null}
+      <HotspotPhotoStrip urls={photos} label={hotspot.label} />
       <p className="font-semibold">{hotspot.label}</p>
       <p className="text-xs text-gray-600">{hotspot.point_value} pts</p>
       <a

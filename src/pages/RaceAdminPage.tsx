@@ -39,7 +39,7 @@ function AdminInner() {
   const [label, setLabel] = useState('')
   const [pointValue, setPointValue] = useState('250')
   const [isGhost, setIsGhost] = useState(false)
-  const [photo, setPhoto] = useState<File | null>(null)
+  const [photos, setPhotos] = useState<File[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async () => {
@@ -119,25 +119,25 @@ function AdminInner() {
     setFormStatus(null)
     try {
       if (usingLocal || !isSupabaseConfigured) {
-        let imageUrl: string | null = null
-        if (photo) {
-          imageUrl = URL.createObjectURL(photo)
-        }
+        const gallery = photos.map((file) => URL.createObjectURL(file))
         addLocalRaceHotspot({
           latitude: lat,
           longitude: lng,
           label: label.trim(),
           point_value: points,
           is_ghost_spot: isGhost,
-          reference_image_url: imageUrl,
+          reference_image_url: gallery[0] ?? null,
+          gallery_image_urls: gallery,
         })
         setFormStatus('Hotspot saved locally.')
       } else {
         if (!user) throw new Error('Sign in required to upload.')
         const id = crypto.randomUUID()
-        let imageUrl: string | null = null
-        if (photo) {
-          imageUrl = await uploadRaceHotspotImage(user.id, id, photo)
+        const gallery: string[] = []
+        for (let i = 0; i < photos.length; i++) {
+          const file = photos[i]
+          if (!file) continue
+          gallery.push(await uploadRaceHotspotImage(user.id, id, file, i))
         }
         const { error: insErr } = await supabase.from('race_hotspots').insert({
           id,
@@ -147,7 +147,8 @@ function AdminInner() {
           label: label.trim(),
           point_value: points,
           is_ghost_spot: isGhost,
-          reference_image_url: imageUrl,
+          reference_image_url: gallery[0] ?? null,
+          gallery_image_urls: gallery,
           status: 'active',
         })
         if (insErr) throw new Error(insErr.message)
@@ -158,7 +159,7 @@ function AdminInner() {
       setLabel('')
       setPointValue('250')
       setIsGhost(false)
-      setPhoto(null)
+      setPhotos([])
       if (fileRef.current) fileRef.current.value = ''
       await load()
     } catch (err) {
@@ -215,7 +216,7 @@ function AdminInner() {
     <div className="space-y-10">
       {usingLocal && (
         <p className="text-xs text-amber-200">
-          Showing local data (run migrations 007 + 014 for shared registrations/hotspots).
+          Showing local data (run migrations 007 + 014 + 017 for shared registrations/hotspots).
         </p>
       )}
       {error && <p className="text-xs text-amber-200">{error}</p>}
@@ -288,14 +289,19 @@ function AdminInner() {
             Ghost spot (decoy — same map look as real)
           </label>
           <label className="block text-xs text-teal-200/80">
-            Reference photo (optional)
+            Reference photos (optional)
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
-              className="mt-1 block w-full text-sm text-teal-100/80"
-              onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+              multiple
+              className="mt-1 block min-h-[44px] w-full py-2 text-sm text-teal-100/80"
+              onChange={(e) => setPhotos(Array.from(e.target.files ?? []))}
             />
+            <span className="mt-1 block text-[11px] text-teal-100/55">
+              First photo is the landmark. Extra files are other angles.
+              {photos.length > 0 ? ` ${photos.length} selected.` : ''}
+            </span>
           </label>
           <button
             type="submit"
@@ -318,6 +324,11 @@ function AdminInner() {
                 <p className="text-xs text-teal-100/60">
                   {h.latitude.toFixed(5)}, {h.longitude.toFixed(5)} · {h.status}
                   {h.is_ghost_spot ? ' · ghost' : ''}
+                  {(h.gallery_image_urls?.length ?? 0) > 0
+                    ? ` · ${h.gallery_image_urls?.length} photos`
+                    : h.reference_image_url
+                      ? ' · 1 photo'
+                      : ''}
                   {h.cleared_by_team_name ? ` · cleared by ${h.cleared_by_team_name}` : ''}
                 </p>
               </div>
