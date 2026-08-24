@@ -166,16 +166,16 @@ export function HomePage() {
       className="pointer-events-none absolute inset-x-0 z-[1000] space-y-2 px-4"
       style={{ top: 'calc(env(safe-area-inset-top) + 8px)' }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="space-y-2">
-          <div className="pointer-events-auto flex items-center gap-2">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="pointer-events-auto flex flex-wrap items-center gap-2">
             <Link
               to="/"
               className="inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
             >
               Fix Nairobi
             </Link>
-            <h1 className="text-sm font-semibold text-[var(--text-primary)] md:text-base">
+            <h1 className="min-w-0 truncate text-sm font-semibold text-[var(--text-primary)] md:text-base">
               {marketConfig.appName}
             </h1>
             <button
@@ -207,7 +207,7 @@ export function HomePage() {
             onStatusChange={setStatusFilter}
           />
         </div>
-        <div className="flex w-[min(13.5rem,calc(100vw-9.5rem))] shrink-0 flex-col items-end gap-2">
+        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 md:w-auto md:max-w-[13.5rem] md:items-end">
           <ProfileBadge className="pointer-events-auto min-h-[48px]" />
           {!user && <MapJoinButton />}
           <DigestBanner />

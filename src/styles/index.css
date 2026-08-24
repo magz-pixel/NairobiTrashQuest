@@ -15,9 +15,9 @@
   --urgent-orange-light: #fdba74;
   --urgent-orange: #f97316;
   --urgent-orange-deep: #c2410c;
-  --mobile-nav-height: 64px;
-  --action-bar-height: 56px;
-  --nav-rail-width: 56px;
+  --mobile-nav-height: 4rem;
+  --action-bar-height: 3.5rem;
+  --nav-rail-width: 3.5rem;
   --font-display: 'Syne', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
   font-family: var(--font-body);
@@ -27,6 +27,11 @@
 
 * {
   box-sizing: border-box;
+}
+
+img,
+video {
+  max-width: 100%;
 }
 
 html,

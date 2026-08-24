@@ -180,7 +180,7 @@ export function CleanupLogPanel({
                     />
 
                     <label className="mt-3 block text-xs text-[var(--text-muted)]">Ecological impact</label>
-                    <div className="mt-2 grid grid-cols-6 gap-2">
+                    <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
                       {Array.from({ length: 6 }).map((_, i) => (
                         <button
                           key={i}

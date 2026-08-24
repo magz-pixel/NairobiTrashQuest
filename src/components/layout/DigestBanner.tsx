@@ -17,7 +17,7 @@ export function DigestBanner() {
   }
 
   return (
-    <div className="pointer-events-auto hidden max-w-[200px] rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 shadow-[var(--shadow-sm)] sm:block">
+    <div className="pointer-events-auto hidden w-full max-w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 shadow-[var(--shadow-sm)] sm:block sm:max-w-[12.5rem]">
       <p className="text-[10px] text-[var(--text-muted)]">Monday cleanup digest</p>
       <div className="mt-1 flex gap-2">
         <input

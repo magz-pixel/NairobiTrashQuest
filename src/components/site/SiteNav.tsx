@@ -13,6 +13,11 @@ const links: { to: string; label: string }[] = [
   { to: '/funds', label: 'Funds' },
 ]
 
+const navLinkClass = (isActive: boolean, size: 'sm' | 'md' = 'md') =>
+  `inline-flex min-h-[44px] items-center rounded-md transition hover:bg-white/5 hover:text-white ${
+    size === 'sm' ? 'w-full px-3 py-2.5 text-sm' : 'px-2.5 py-2 text-sm'
+  } ${isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'}`
+
 interface SiteNavProps {
   transparentOverHero?: boolean
 }
@@ -20,6 +25,7 @@ interface SiteNavProps {
 export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
   const [solid, setSolid] = useState(!transparentOverHero)
   const [authOpen, setAuthOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const { user, profile, loading, signOut } = useAuth()
 
   useEffect(() => {
@@ -33,6 +39,17 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [transparentOverHero])
 
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  const closeMenu = () => setMenuOpen(false)
+
   return (
     <header
       className={`${
@@ -44,9 +61,9 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
-        <Link to="/" className="group flex items-center gap-2.5">
+        <Link to="/" className="group flex min-w-0 items-center gap-2.5" onClick={closeMenu}>
           <FixNairobiMark className="shrink-0" />
-          <span className="flex flex-col leading-tight">
+          <span className="flex min-w-0 flex-col leading-tight">
             <span className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-[#e8f5f1] md:text-xl">
               Fix Nairobi
             </span>
@@ -58,15 +75,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
 
         <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
           {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                `inline-flex min-h-[44px] items-center rounded-md px-2.5 py-2 text-sm transition hover:bg-white/5 hover:text-white ${
-                  isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'
-                }`
-              }
-            >
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => navLinkClass(isActive)}>
               {l.label}
             </NavLink>
           ))}
@@ -77,7 +86,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
             <>
               <Link
                 to="/me"
-                className="hidden min-h-[44px] items-center rounded-lg border border-white/15 px-2.5 py-2 text-xs font-semibold text-teal-100 hover:bg-white/5 sm:inline-flex"
+                className="hidden min-h-[44px] items-center rounded-lg border border-white/15 px-2.5 py-2 text-xs font-semibold text-teal-100 hover:bg-white/5 lg:inline-flex"
               >
                 My impact
                 {profile ? (
@@ -89,7 +98,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
               <button
                 type="button"
                 onClick={() => void signOut()}
-                className="hidden min-h-[44px] items-center px-2 text-xs text-teal-200/70 hover:text-white sm:inline-flex"
+                className="hidden min-h-[44px] items-center px-2 text-xs text-teal-200/70 hover:text-white lg:inline-flex"
               >
                 Sign out
               </button>
@@ -98,7 +107,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
             <button
               type="button"
               onClick={() => setAuthOpen(true)}
-              className="inline-flex min-h-[44px] items-center rounded-lg border border-white/20 px-2.5 py-2 text-xs font-semibold text-teal-50 hover:bg-white/5 md:text-sm"
+              className="hidden min-h-[44px] items-center rounded-lg border border-white/20 px-2.5 py-2 text-xs font-semibold text-teal-50 hover:bg-white/5 lg:inline-flex md:text-sm"
             >
               Join / Sign in
             </button>
@@ -109,38 +118,79 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
           >
             Register S2
           </Link>
+          <button
+            type="button"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/20 text-lg text-teal-50 hover:bg-white/5 lg:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="site-mobile-menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? '✕' : '☰'}
+          </button>
         </div>
       </div>
-      <nav
-        className="flex gap-2 overflow-x-auto border-t border-white/5 px-4 py-2 lg:hidden"
-        aria-label="Mobile"
-      >
-        {links.map((l) => (
-          <NavLink
-            key={l.to}
-            to={l.to}
-            className={({ isActive }) =>
-              `inline-flex min-h-[44px] shrink-0 items-center rounded-md px-2.5 py-2 text-xs ${
-                isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'
-              }`
-            }
-          >
-            {l.label}
-          </NavLink>
-        ))}
-        {user ? (
-          <NavLink
-            to="/me"
-            className={({ isActive }) =>
-              `inline-flex min-h-[44px] shrink-0 items-center rounded-md px-2.5 py-2 text-xs ${
-                isActive ? 'bg-white/10 text-white' : 'text-teal-100/80'
-              }`
-            }
-          >
-            My impact
-          </NavLink>
-        ) : null}
-      </nav>
+
+      {menuOpen && (
+        <nav
+          id="site-mobile-menu"
+          className="border-t border-white/10 px-4 py-3 lg:hidden"
+          aria-label="Mobile menu"
+        >
+          <ul className="flex flex-col gap-1">
+            {links.map((l) => (
+              <li key={l.to}>
+                <NavLink
+                  to={l.to}
+                  onClick={closeMenu}
+                  className={({ isActive }) => navLinkClass(isActive, 'sm')}
+                >
+                  {l.label}
+                </NavLink>
+              </li>
+            ))}
+            {user ? (
+              <li>
+                <NavLink
+                  to="/me"
+                  onClick={closeMenu}
+                  className={({ isActive }) => navLinkClass(isActive, 'sm')}
+                >
+                  My impact
+                  {profile ? ` · ${profile.total_impact_points} XP` : ''}
+                </NavLink>
+              </li>
+            ) : (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenu()
+                    setAuthOpen(true)
+                  }}
+                  className="inline-flex min-h-[44px] w-full items-center rounded-md px-3 py-2.5 text-sm text-teal-100/80 hover:bg-white/5 hover:text-white"
+                >
+                  Join / Sign in
+                </button>
+              </li>
+            )}
+            {user ? (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenu()
+                    void signOut()
+                  }}
+                  className="inline-flex min-h-[44px] w-full items-center rounded-md px-3 py-2.5 text-sm text-teal-200/70 hover:bg-white/5 hover:text-white"
+                >
+                  Sign out
+                </button>
+              </li>
+            ) : null}
+          </ul>
+        </nav>
+      )}
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </header>
   )

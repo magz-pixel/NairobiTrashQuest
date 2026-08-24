@@ -11,7 +11,7 @@ const SEVERITY_STOPS = [
 export function MapLegend() {
   return (
     <div
-      className="map-legend pointer-events-auto absolute right-4 z-[1000] rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-sm)] max-md:bottom-[calc(env(safe-area-inset-bottom)+var(--mobile-nav-height,64px)+var(--action-bar-height,56px)+16px)] md:bottom-4"
+      className="map-legend pointer-events-auto absolute right-4 z-[1000] max-w-[min(12rem,calc(100vw-2rem))] rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 shadow-[var(--shadow-sm)] max-md:bottom-[calc(env(safe-area-inset-bottom)+var(--mobile-nav-height,4rem)+var(--action-bar-height,3.5rem)+1rem)] md:bottom-4"
     >
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
         Severity

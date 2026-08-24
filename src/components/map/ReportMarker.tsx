@@ -39,7 +39,7 @@ export function ReportMarker({ report }: ReportMarkerProps) {
           <img
             src={report.image_url}
             alt="Report"
-            className="mt-2 max-h-32 rounded"
+            className="mt-2 max-h-32 w-full max-w-full rounded object-cover"
           />
         </div>
       </Popup>

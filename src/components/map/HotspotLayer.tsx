@@ -36,7 +36,7 @@ export function HotspotLayer({ hotspots }: HotspotLayerProps) {
           icon={hotspotIcon(h.point_value)}
         >
           <Popup>
-            <div className="w-[280px] max-w-[calc(100vw-3rem)] text-sm">
+            <div className="w-full max-w-[min(17.5rem,calc(100vw-3rem))] text-sm">
               {h.reference_image_url ? (
                 <img
                   src={h.reference_image_url}

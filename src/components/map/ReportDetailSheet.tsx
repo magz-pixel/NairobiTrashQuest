@@ -190,7 +190,7 @@ export function ReportDetailSheet({
               </div>
             )}
 
-            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+            <div className="mt-3 grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
               <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
                 <p className="font-bold text-[var(--text-primary)]">1</p>
                 <p className="text-[10px] text-[var(--text-muted)]">Reports</p>

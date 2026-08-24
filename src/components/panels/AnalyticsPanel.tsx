@@ -34,7 +34,7 @@ export function AnalyticsPanel({ open, onClose, stats }: AnalyticsPanelProps) {
               <p className="text-sm text-[var(--text-muted)]">Pollution resolution overview</p>
             </div>
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <div className="rounded-xl bg-red-950/40 p-3 text-center">
                   <p className="text-2xl font-bold text-red-400">{stats.active}</p>
                   <p className="text-[10px] uppercase text-[var(--text-muted)]">Unresolved</p>

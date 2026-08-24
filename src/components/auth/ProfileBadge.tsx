@@ -14,7 +14,7 @@ export function ProfileBadge({ className = '' }: { className?: string }) {
 
   return (
     <div
-      className={`flex w-full min-w-[11.5rem] max-w-[13.5rem] items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-sm shadow-[var(--shadow-sm)] sm:gap-3 sm:px-3 ${className}`}
+      className={`flex w-full min-w-0 max-w-full items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-sm shadow-[var(--shadow-sm)] sm:max-w-[13.5rem] sm:gap-3 sm:px-3 ${className}`}
     >
       <div className="shrink-0">
         <XpProgressRing

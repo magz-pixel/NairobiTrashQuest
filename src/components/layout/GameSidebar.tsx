@@ -32,7 +32,7 @@ const NAV: { id: GameTab; label: string; icon: string }[] = [
 export function GameSidebar({ activeTab, onTabChange }: GameSidebarProps) {
   return (
     <aside
-      className="flex h-full w-[var(--nav-rail-width,56px)] shrink-0 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
+      className="flex h-full w-[var(--nav-rail-width,3.5rem)] shrink-0 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
       aria-label="Main navigation"
     >
       <div className="flex h-14 items-center justify-center border-b border-[var(--border-subtle)]">
