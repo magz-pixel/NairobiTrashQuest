@@ -169,10 +169,10 @@ export function AmazingTrashRaceCard() {
 
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
             <Link
-              to="/race"
+              to="/funds"
               className="inline-flex flex-1 items-center justify-center rounded-xl bg-[var(--fn-clear,#00f2fe)] px-5 py-3 text-center text-sm font-extrabold text-[#021a1a] shadow-[0_0_24px_rgba(0,242,254,0.3)] transition hover:brightness-110"
             >
-              Register for Season 2 — free ticket
+              Donate for Season 3
             </Link>
             <Link
               to="/race/leaderboard"
