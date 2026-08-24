@@ -1,10 +1,13 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getSessionId } from '../../lib/session'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
-import { useDemoFunding } from '../../hooks/useDemoFunding'
+import {
+  useDemoFunding,
+  type FundingSeed,
+} from '../../hooks/useDemoFunding'
 import { assignWard, daysSince, severityLabel } from '../../lib/wards'
 import { isDemoReport } from '../../lib/demoReports'
 import { marketConfig } from '../../lib/marketConfig'
@@ -33,7 +36,19 @@ export function ReportDetailSheet({
   const [status, setStatus] = useState<string | null>(null)
   const [seenCount, setSeenCount] = useState(0)
   const [contributeOpen, setContributeOpen] = useState(false)
-  const { funding, contribute } = useDemoFunding(report)
+
+  const fundingSeed = useMemo((): FundingSeed | null => {
+    if (!report) return null
+    const goal = report.funding_goal_tzs
+    if (goal == null || goal <= 0) return null
+    return {
+      goal,
+      raised: report.funding_raised_tzs ?? 0,
+      contributors: report.funding_contributors ?? 0,
+    }
+  }, [report])
+
+  const { funding, contribute } = useDemoFunding(report?.id ?? null, fundingSeed)
 
   if (!report) return null
 
