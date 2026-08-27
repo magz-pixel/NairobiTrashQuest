@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { CleanupsManagePage } from './pages/CleanupsManagePage'
@@ -12,6 +13,9 @@ import { RaceAdminPage } from './pages/RaceAdminPage'
 import { RaceLeaderboardPage } from './pages/RaceLeaderboardPage'
 import { RaceMarshalPage } from './pages/RaceMarshalPage'
 import { RaceRegisterPage } from './pages/RaceRegisterPage'
+
+/** Isolated Mapbox PoC — not linked from nav. */
+const MapboxTestPage = lazy(() => import('./pages/spike/MapboxTestPage'))
 
 function App() {
   return (
@@ -30,6 +34,20 @@ function App() {
           <Route path="/funds" element={<FundsPage />} />
           <Route path="/funds/manage" element={<FundsManagePage />} />
           <Route path="/mission" element={<MissionPage />} />
+          <Route
+            path="/spike/mapbox-test"
+            element={
+              <Suspense
+                fallback={
+                  <div className="flex min-h-[100dvh] items-center justify-center text-sm text-teal-700">
+                    Loading Mapbox spike…
+                  </div>
+                }
+              >
+                <MapboxTestPage />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
