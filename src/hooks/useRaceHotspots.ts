@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { loadLocalRaceHotspots } from '../lib/raceHotspots'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { AMAZING_TRASH_RACE_S2, type RaceHotspot } from '../types/database'
+import { AMAZING_TRASH_RACE_S2, isRaceMapActive, type RaceHotspot } from '../types/database'
 
 function normalizeHotspot(row: Record<string, unknown>): RaceHotspot {
   return {
@@ -31,6 +31,12 @@ export function useRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2) {
 
   const fetchHotspots = useCallback(async () => {
     setError(null)
+    if (!isRaceMapActive()) {
+      setUsingLocal(false)
+      setHotspots([])
+      return
+    }
+
     if (!isSupabaseConfigured) {
       setUsingLocal(true)
       setHotspots(loadLocalRaceHotspots(eventSlug))
@@ -62,7 +68,7 @@ export function useRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2) {
   }, [fetchHotspots])
 
   useEffect(() => {
-    if (!isSupabaseConfigured || usingLocal) return
+    if (!isRaceMapActive() || !isSupabaseConfigured || usingLocal) return
 
     const channel = supabase
       .channel(`race-hotspots-${eventSlug}`)

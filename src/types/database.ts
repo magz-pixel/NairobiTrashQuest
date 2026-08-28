@@ -241,9 +241,22 @@ export const RACE_SEASONS: Record<string, RaceSeasonWindow> = {
  */
 export const LIVE_RACE_REGISTRATION_SLUG: string | null = null
 
+/**
+ * Slug of the season whose hotspots may appear on the public map, or null off-season.
+ * Set when the race map window opens — no hook edits needed.
+ */
+export const LIVE_RACE_MAP_SLUG: string | null = null
+
 export function isRaceLive(now = new Date()): boolean {
   if (!LIVE_RACE_REGISTRATION_SLUG) return false
   const season = RACE_SEASONS[LIVE_RACE_REGISTRATION_SLUG]
   if (!season) return false
   return now >= season.registrationOpens && now <= season.registrationCloses
+}
+
+export function isRaceMapActive(now = new Date()): boolean {
+  if (!LIVE_RACE_MAP_SLUG) return false
+  const season = RACE_SEASONS[LIVE_RACE_MAP_SLUG]
+  if (!season) return false
+  return now >= season.hotspotsVisibleFrom && now <= season.hotspotsVisibleUntil
 }
