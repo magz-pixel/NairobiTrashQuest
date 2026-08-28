@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AuthModal } from '../auth/AuthModal'
 import { useAuth } from '../../hooks/useAuth'
+import { isRaceLive } from '../../types/database'
 import { FixNairobiMark } from './art/HeroArtScene'
 
 const links: { to: string; label: string }[] = [
@@ -27,6 +28,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
   const [authOpen, setAuthOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const { user, profile, loading, signOut } = useAuth()
+  const raceLive = isRaceLive()
 
   useEffect(() => {
     if (!transparentOverHero) {
@@ -112,12 +114,14 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
               Join / Sign in
             </button>
           )}
-          <Link
-            to="/race"
-            className="inline-flex min-h-[44px] items-center rounded-lg bg-[#2dd4bf] px-3 py-2 text-xs font-semibold text-[#042f2e] transition hover:bg-[#5eead4] md:text-sm"
-          >
-            Register S2
-          </Link>
+          {raceLive ? (
+            <Link
+              to="/race"
+              className="inline-flex min-h-[44px] items-center rounded-lg bg-[#2dd4bf] px-3 py-2 text-xs font-semibold text-[#042f2e] transition hover:bg-[#5eead4] md:text-sm"
+            >
+              Register S2
+            </Link>
+          ) : null}
           <button
             type="button"
             className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/20 text-lg text-teal-50 hover:bg-white/5 lg:hidden"

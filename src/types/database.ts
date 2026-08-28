@@ -213,3 +213,37 @@ export interface RaceHotspot {
 }
 
 export const AMAZING_TRASH_RACE_S2 = 'amazing-trash-race-s2'
+
+/** Registration and map-visibility windows for a trash-race season (Nairobi local dates). */
+export interface RaceSeasonWindow {
+  slug: string
+  label: string
+  registrationOpens: Date
+  registrationCloses: Date
+  hotspotsVisibleFrom: Date
+  hotspotsVisibleUntil: Date
+}
+
+export const RACE_SEASONS: Record<string, RaceSeasonWindow> = {
+  [AMAZING_TRASH_RACE_S2]: {
+    slug: AMAZING_TRASH_RACE_S2,
+    label: 'Season 2',
+    registrationOpens: new Date('2026-01-01T00:00:00+03:00'),
+    registrationCloses: new Date('2026-08-15T23:59:59+03:00'),
+    hotspotsVisibleFrom: new Date('2026-08-15T06:00:00+03:00'),
+    hotspotsVisibleUntil: new Date('2026-08-15T20:00:00+03:00'),
+  },
+}
+
+/**
+ * Slug of the season currently open for registration, or null between seasons.
+ * Set to the next season slug when registration opens — no landing-page edits needed.
+ */
+export const LIVE_RACE_REGISTRATION_SLUG: string | null = null
+
+export function isRaceLive(now = new Date()): boolean {
+  if (!LIVE_RACE_REGISTRATION_SLUG) return false
+  const season = RACE_SEASONS[LIVE_RACE_REGISTRATION_SLUG]
+  if (!season) return false
+  return now >= season.registrationOpens && now <= season.registrationCloses
+}

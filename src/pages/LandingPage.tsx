@@ -17,8 +17,10 @@ import { ScoutModeCanvas } from '../components/site/art/ScoutModeCanvas'
 import { MagneticButton } from '../components/site/fx/MagneticButton'
 import { SmoothScroll } from '../components/site/fx/SmoothScroll'
 import { SiteFooter, SiteNav } from '../components/site/SiteNav'
+import { isRaceLive } from '../types/database'
 
 export function LandingPage() {
+  const raceLive = isRaceLive()
   const heroRef = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
   const { scrollYProgress } = useScroll({
@@ -78,10 +80,12 @@ export function LandingPage() {
                 transition={{ duration: 0.5, delay: 0.28 }}
                 className="mt-8 flex flex-wrap gap-3"
               >
-                <MagneticButton to="/race" variant="primary">
-                  Register — Trash Race S2
-                </MagneticButton>
-                <MagneticButton to="/map" variant="secondary">
+                {raceLive ? (
+                  <MagneticButton to="/race" variant="primary">
+                    Register — Trash Race S2
+                  </MagneticButton>
+                ) : null}
+                <MagneticButton to="/map" variant={raceLive ? 'secondary' : 'primary'}>
                   Open Trash Map
                 </MagneticButton>
               </motion.div>
@@ -169,9 +173,11 @@ export function LandingPage() {
                 streets.
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-3">
-                <MagneticButton to="/race" variant="primary">
-                  Get your Season 2 ticket
-                </MagneticButton>
+                {raceLive ? (
+                  <MagneticButton to="/race" variant="primary">
+                    Get your Season 2 ticket
+                  </MagneticButton>
+                ) : null}
                 <Link
                   to="/race/leaderboard"
                   className="inline-flex min-h-[44px] items-center text-sm font-semibold text-amber-200/90 hover:text-white"
