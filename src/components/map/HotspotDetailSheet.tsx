@@ -55,11 +55,10 @@ function HotspotPhotoStrip({ urls, label }: { urls: string[]; label: string }) {
 }
 
 export function HotspotDetailSheet({ hotspot, onClose }: HotspotDetailSheetProps) {
-  const seed = useMemo(
-    () =>
-      hotspot ? demoHotspotFundingSeed(hotspot.id, hotspot.point_value) : null,
-    [hotspot],
-  )
+  const seed = useMemo(() => {
+    if (!hotspot?.is_funded) return null
+    return demoHotspotFundingSeed(hotspot.id, hotspot.point_value)
+  }, [hotspot])
   const { funding, contribute } = useDemoFunding(hotspot?.id ?? null, seed)
   const photos = hotspot ? hotspotPhotoUrls(hotspot) : []
 
@@ -87,8 +86,14 @@ export function HotspotDetailSheet({ hotspot, onClose }: HotspotDetailSheetProps
             exit={{ y: '100%' }}
           >
             <div className="mb-3 flex items-start justify-between gap-2">
-              <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--urgent-orange-deep)]">
-                Race hotspot · {hotspot.point_value} pts
+              <span
+                className={
+                  hotspot.is_funded
+                    ? 'rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--brand-teal)]'
+                    : 'rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--urgent-orange-deep)]'
+                }
+              >
+                {hotspot.is_funded ? 'Funded cleanup' : 'Race hotspot'} · {hotspot.point_value} pts
               </span>
               <button type="button" onClick={onClose} className="text-[var(--text-muted)]">
                 ✕
@@ -112,7 +117,7 @@ export function HotspotDetailSheet({ hotspot, onClose }: HotspotDetailSheetProps
               Get directions →
             </a>
 
-            {funding ? (
+            {hotspot.is_funded && funding ? (
               <div className="mt-4">
                 <CrowdfundPanel
                   funding={funding}

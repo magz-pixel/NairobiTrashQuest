@@ -49,6 +49,7 @@ export function addLocalRaceHotspot(input: {
     label: input.label.trim(),
     point_value: input.point_value,
     is_ghost_spot: input.is_ghost_spot,
+    is_funded: false,
     reference_image_url: input.reference_image_url ?? gallery[0] ?? null,
     gallery_image_urls: gallery,
     status: 'active',

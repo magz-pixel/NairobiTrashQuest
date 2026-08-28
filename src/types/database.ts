@@ -203,6 +203,8 @@ export interface RaceHotspot {
   label: string
   point_value: number
   is_ghost_spot: boolean
+  /** When true, map UI shows crowd-funded cleanup styling and demo funding panel. */
+  is_funded: boolean
   reference_image_url: string | null
   /** Landmark first, extra angles after. Empty on older single-photo pins. */
   gallery_image_urls?: string[] | null

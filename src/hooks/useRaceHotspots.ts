@@ -12,6 +12,7 @@ function normalizeHotspot(row: Record<string, unknown>): RaceHotspot {
     label: row.label as string,
     point_value: row.point_value as number,
     is_ghost_spot: Boolean(row.is_ghost_spot),
+    is_funded: Boolean(row.is_funded),
     reference_image_url: (row.reference_image_url as string | null) ?? null,
     gallery_image_urls: Array.isArray(row.gallery_image_urls)
       ? (row.gallery_image_urls as string[])
