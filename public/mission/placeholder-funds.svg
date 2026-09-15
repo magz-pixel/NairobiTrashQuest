@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#0c1f1c"/>
+  <rect x="80" y="160" width="480" height="28" rx="14" fill="#0a1a17" stroke="#2dd4bf" stroke-opacity="0.4"/>
+  <rect x="80" y="160" width="220" height="28" rx="14" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="80" y1="0" x2="300" y2="0">
+      <stop stop-color="#f97316"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+  </defs>
+  <text x="40" y="450" fill="#5eead4" font-family="system-ui,sans-serif" font-size="22" font-weight="700">PUBLIC LEDGER</text>
+</svg>

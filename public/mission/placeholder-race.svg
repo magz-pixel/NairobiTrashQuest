@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#1a1208"/>
+  <rect x="100" y="100" width="440" height="240" rx="16" fill="#f5f0e6"/>
+  <line x1="220" y1="110" x2="220" y2="330" stroke="#071613" stroke-opacity="0.25" stroke-dasharray="6 6"/>
+  <text x="140" y="180" fill="#0d9488" font-family="system-ui,sans-serif" font-size="28" font-weight="800">ATR2-����</text>
+  <text x="140" y="220" fill="#071613" font-family="system-ui,sans-serif" font-size="16">Amazing Trash Race S2</text>
+  <text x="40" y="450" fill="#fbbf24" font-family="system-ui,sans-serif" font-size="22" font-weight="700">RACE TICKETS</text>
+</svg>

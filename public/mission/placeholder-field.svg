@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+  <rect width="640" height="480" fill="#234a44"/>
+  <circle cx="200" cy="220" r="70" fill="#f97316" fill-opacity="0.4"/>
+  <circle cx="360" cy="200" r="50" fill="#2dd4bf" fill-opacity="0.35"/>
+  <circle cx="420" cy="300" r="60" fill="#fbbf24" fill-opacity="0.25"/>
+  <text x="40" y="450" fill="#e8f5f1" font-family="system-ui,sans-serif" font-size="22" font-weight="700">FIELD PHOTO � REPLACE ME</text>
+</svg>
