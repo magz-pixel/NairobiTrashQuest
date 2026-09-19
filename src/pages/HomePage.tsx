@@ -64,13 +64,24 @@ export function HomePage() {
   const [pulseAt, setPulseAt] = useState<{ latitude: number; longitude: number } | null>(null)
   const [focusAt, setFocusAt] = useState<MapFocusTarget | null>(null)
   const [activeWard, setActiveWard] = useState<WardBox | null>(null)
-  const [sheet, setSheet] = useState<SheetHeight>('half')
+  const [sheet, setSheet] = useState<SheetHeight>('peek')
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [isPhone, setIsPhone] = useState(true)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const sync = () => setIsPhone(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   useEffect(() => {
     setActiveWard(null)
     setSelectedReport(null)
+    setDetailsOpen(false)
     setFocusAt(null)
-    setSheet('half')
+    setSheet('peek')
   }, [city.slug])
 
   const realReports = allReports.filter((r) => !isDemoReport(r))
@@ -126,9 +137,16 @@ export function HomePage() {
   const selectReport = (report: Report) => {
     flushSync(() => setActivePanel(null))
     setSelectedReport(report)
-    setSheet((h) => (h === 'peek' ? 'half' : h))
+    if (isPhone) {
+      setDetailsOpen(false)
+      setSheet((h) => (h === 'full' ? 'full' : 'half'))
+    } else {
+      setDetailsOpen(true)
+    }
     setFocusAt({ lat: report.latitude, lng: report.longitude, zoom: 16 })
   }
+
+  const sheetPad = isPhone ? (sheet === 'peek' ? 120 : sheet === 'half' ? 340 : 560) : 0
 
   const handleReported = (coords?: { id: string; latitude: number; longitude: number }) => {
     refetch()
@@ -170,7 +188,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="map-experience flex h-[100dvh] w-full overflow-hidden bg-[#dce8e1]">
+    <div className="map-experience flex h-[100dvh] w-full overflow-hidden bg-[#dce8e1]" data-sheet={sheet}>
       <FieldRail {...board} />
       <div className="relative min-h-0 min-w-0 flex-1">
         <Suspense
@@ -185,11 +203,19 @@ export function HomePage() {
             hotspots={raceMapHotspots}
             selectedId={selectedReport?.id}
             focusAt={focusAt}
+            paddingBottom={sheetPad}
             pulseAt={pulseAt}
             onPulseDone={() => setPulseAt(null)}
             onSelectReport={selectReport}
             onLocated={(lat, lng) => setFocusAt({ lat, lng, zoom: 16 })}
-            onInteract={() => setActivePanel(null)}
+            onMapClick={() => {
+              setActivePanel(null)
+              if (!isPhone) return
+              setSelectedReport(null)
+              setDetailsOpen(false)
+              setSheet('peek')
+            }}
+            onDragStart={() => setActivePanel(null)}
           />
         </Suspense>
         <MapTopBar
@@ -200,14 +226,46 @@ export function HomePage() {
         <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
           {city.label} · {city.country}
         </p>
-        <FieldDock height={sheet} onHeightChange={setSheet} {...board} />
+        {sheet !== 'full' ? (
+          <button
+            type="button"
+            onClick={openScan}
+            className="map-report-fab pointer-events-auto absolute right-3 z-[1075] inline-flex h-14 items-center gap-2 rounded-full bg-gold-400 pl-2 pr-5 text-sm font-extrabold text-emerald-950 shadow-[0_16px_40px_rgba(217,154,22,.42)] md:hidden"
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-[#063b32] text-xl leading-none text-white">
+              +
+            </span>
+            Report
+          </button>
+        ) : null}
+        <FieldDock
+          height={sheet}
+          onHeightChange={setSheet}
+          selectedReport={selectedReport}
+          onClearSelection={() => {
+            setSelectedReport(null)
+            setDetailsOpen(false)
+          }}
+          onOpenDetails={() => setDetailsOpen(true)}
+          onVerifySpot={() => {
+            setSelectedReport(null)
+            setDetailsOpen(false)
+            openClear()
+          }}
+          userLoggedIn={!!user}
+          {...board}
+        />
       </div>
 
       <ReportDetailSheet
-        report={selectedReport}
-        onClose={() => setSelectedReport(null)}
+        report={detailsOpen ? selectedReport : null}
+        onClose={() => {
+          setDetailsOpen(false)
+          if (!isPhone) setSelectedReport(null)
+        }}
         onVerify={() => {
           setSelectedReport(null)
+          setDetailsOpen(false)
           openClear()
         }}
         onUpdated={refetch}

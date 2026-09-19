@@ -29,7 +29,7 @@ export function ReportListView({ reports, selectedId, onSelect }: ReportListView
             <button
               type="button"
               onClick={() => onSelect(r)}
-              className={`flex w-full gap-3 rounded-2xl border p-2.5 text-left transition ${
+              className={`flex min-h-[4.5rem] w-full gap-3 rounded-2xl border p-2 text-left transition md:p-2.5 ${
                 selected
                   ? 'border-[#063b32] bg-[#063b32] text-white shadow-[0_12px_30px_rgba(6,59,50,.2)]'
                   : 'border-[#e5efeb] bg-white text-[#12332d] hover:border-[#0b8c76]/40'
@@ -38,7 +38,7 @@ export function ReportListView({ reports, selectedId, onSelect }: ReportListView
               <img
                 src={r.image_url}
                 alt=""
-                className="h-[4.25rem] w-[4.25rem] shrink-0 rounded-xl object-cover"
+                className="h-14 w-14 shrink-0 rounded-xl object-cover md:h-[4.25rem] md:w-[4.25rem]"
               />
               <div className="min-w-0 flex-1 py-0.5">
                 <p className="truncate text-sm font-extrabold">
