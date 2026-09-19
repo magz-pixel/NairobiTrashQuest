@@ -5,6 +5,7 @@ import { useReports } from '../hooks/useReports'
 import { useReportStats } from '../hooks/useReportStats'
 import { useCity, useCityPath } from '../lib/CityContext'
 import { SignInButton } from '../components/auth/SignInButton'
+import { ChapterDesk } from '../components/site/ChapterDesk'
 import { ReferenceHero } from '../components/site/ReferenceHero'
 import { SiteFooter } from '../components/site/SiteNav'
 
@@ -26,6 +27,7 @@ export function CommandCenterPage() {
     <div className="fn-rebuild min-h-full overflow-hidden bg-canvas text-ink">
       <main>
         <ReferenceHero stats={stats} loading={loading} />
+        <ChapterDesk slug={city.slug} chapterName={city.chapterName} />
 
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24"><div className="max-w-2xl"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-emerald-700">How it works on the ground</p><h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.05em] sm:text-5xl">A small action. A visible difference.</h2></div><div className="mt-12 grid gap-5 lg:grid-cols-3">{features.map((feature, index) => <motion.article key={feature.eyebrow} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * .08 }} className={`min-h-[320px] rounded-[1.5rem] p-6 sm:p-8 ${feature.tone === 'dark' ? 'fn-panel-dark bg-[#063b32] text-white' : feature.tone === 'gold' ? 'bg-gold-100 text-emerald-950' : 'bg-[#dff0e9] text-ink'}`}><div className="flex items-start justify-between"><span className="text-xs font-extrabold uppercase tracking-[.18em] opacity-65">{feature.eyebrow}</span><span className="text-2xl">↗</span></div><div className="mt-24"><h3 className="text-2xl font-extrabold tracking-[-.04em]">{feature.title}</h3><p className="mt-3 text-sm leading-6 opacity-70">{feature.copy}</p></div></motion.article>)}</div></section>
 

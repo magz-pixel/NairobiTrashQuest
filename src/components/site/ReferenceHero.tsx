@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ReportStats } from '../../types/database'
 import { useCity, useCityPath } from '../../lib/CityContext'
+import { CHAPTER_PAGES } from '../../lib/chapterPages'
 
 interface ReferenceHeroProps {
   stats: ReportStats
@@ -9,15 +10,6 @@ interface ReferenceHeroProps {
 }
 
 const arrow = 'M5 12h14M13 6l6 6-6 6'
-const navItems = [
-  ['Mission', '/mission'],
-  ['Trash Map', '/map'],
-  ['Cleanups', '/cleanups'],
-  ['Trash Race', '/race'],
-  ['Leaderboard', '/race/leaderboard'],
-  ['Funds', '/funds'],
-  ['My impact', '/me'],
-] as const
 
 export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -62,8 +54,8 @@ export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
         <nav aria-label="Primary navigation" className={`absolute inset-4 grid overflow-hidden rounded-[28px] bg-emerald-950 text-white shadow-[0_30px_100px_rgba(0,0,0,.35)] transition duration-500 sm:inset-6 lg:inset-8 lg:grid-cols-[1.35fr_.65fr] ${menuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
           <div className="flex min-h-0 flex-col px-6 pb-6 pt-6 sm:px-10 sm:pb-10 sm:pt-8 lg:px-14">
             <div className="flex items-center justify-between border-b border-white/15 pb-6"><div><p className="text-[10px] font-extrabold uppercase tracking-[.24em] text-teal-200">Ramani-Taka / menu</p><p className="mt-1 text-sm text-white/50">Choose your next move</p></div><button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="grid h-11 w-11 place-items-center rounded-full border border-white/25 text-2xl leading-none transition hover:bg-white hover:text-emerald-950">×</button></div>
-            <ul className="mt-5 overflow-x-hidden overflow-y-auto">{navItems.map(([label, href], index) => <li key={href}><Link to={path(href)} onClick={() => setMenuOpen(false)} className="group flex items-center gap-4 border-b border-white/10 py-3.5 transition hover:pl-3 hover:text-teal-200 sm:py-4"><span className="w-7 text-[10px] font-bold text-white/35">0{index + 1}</span><span className="text-[clamp(1.45rem,4vw,2.8rem)] font-semibold leading-none tracking-[-.045em]">{label}</span><span className="ml-auto translate-x-2 text-2xl opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100">↗</span></Link></li>)}</ul>
-            <div className="mt-auto flex flex-wrap items-center gap-4 pt-6 text-xs text-white/50"><span>Made for the people on the ground.</span><span className="h-1 w-1 rounded-full bg-gold-400" /><span>{city.label}, {city.country}</span></div>
+            <ul className="mt-5 overflow-x-hidden overflow-y-auto">{CHAPTER_PAGES.map((item, index) => <li key={item.href}><Link to={path(item.href)} onClick={() => setMenuOpen(false)} className="group flex items-center gap-4 border-b border-white/10 py-3.5 transition hover:pl-3 hover:text-teal-200 sm:py-4"><span className="w-7 text-[10px] font-bold text-white/35">0{index + 1}</span><span className="text-[clamp(1.45rem,4vw,2.8rem)] font-semibold leading-none tracking-[-.045em]">{item.label}</span><span className="ml-auto translate-x-2 text-2xl opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100">↗</span></Link></li>)}</ul>
+            <div className="mt-auto flex flex-wrap items-center gap-4 pt-6 text-xs text-white/50"><span>Made for the people on the ground.</span><span className="h-1 w-1 rounded-full bg-gold-400" /><span>{city.label}, {city.country}</span><Link to="/" onClick={() => setMenuOpen(false)} className="font-bold text-gold-300 hover:text-white">All cities ↗</Link></div>
           </div>
           <div className="relative hidden overflow-hidden bg-[#d9eee7] p-8 text-emerald-950 lg:flex lg:flex-col lg:justify-between lg:p-10"><div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold-300/70 blur-2xl" /><div className="relative"><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-emerald-700">The field brief</p><h2 className="mt-5 max-w-xs text-4xl font-extrabold leading-[.95] tracking-[-.06em]">Put the city back in our hands.</h2><p className="mt-5 max-w-xs text-sm leading-6 text-emerald-950/65">One report can give a crew the place, the proof, and the reason to show up.</p></div><div className="relative rounded-2xl bg-white/75 p-5 shadow-sm"><div className="flex items-end justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.17em] text-muted">Open places today</p><p className="mt-2 text-5xl font-extrabold tracking-[-.07em]">{loading ? '—' : stats.active}</p></div><span className="mb-1 h-3 w-3 rounded-full bg-[#ef8268] shadow-[0_0_0_7px_rgba(239,130,104,.18)]" /></div><Link to={path('/map')} onClick={() => setMenuOpen(false)} className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-900 text-sm font-bold text-white transition hover:bg-emerald-700">Open the field map ↗</Link></div></div>
         </nav>

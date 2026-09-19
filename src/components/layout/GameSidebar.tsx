@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { cityPath } from '../../lib/cities'
 import { useCity } from '../../lib/CityContext'
 
 export type GameTab =
@@ -40,7 +42,7 @@ export function GameSidebar({ activeTab, onTabChange }: GameSidebarProps) {
         <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-950 text-sm font-extrabold text-gold-300">RT</span><div><p className="text-sm font-extrabold text-[var(--text-primary)]">{city.chapterName}</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--text-muted)]">field workspace</p></div></div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1.5 p-4">
+      <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto p-4">
         <p className="px-3 pb-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--text-muted)]">Participate</p>
         {NAV.map((item) => {
           const active = activeTab === item.id
@@ -69,6 +71,28 @@ export function GameSidebar({ activeTab, onTabChange }: GameSidebarProps) {
           )
         })}
       </nav>
+      <div className="border-t border-[var(--border-subtle)] p-4">
+        <p className="px-3 pb-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--text-muted)]">
+          City chapter
+        </p>
+        <div className="flex flex-col gap-1">
+          <Link to={cityPath(city.slug)} className="rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-muted)] hover:bg-teal-50 hover:text-[var(--text-primary)]">
+            Chapter home
+          </Link>
+          <Link to={cityPath(city.slug, '/race')} className="rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-muted)] hover:bg-teal-50 hover:text-[var(--text-primary)]">
+            Trash Race
+          </Link>
+          <Link to={cityPath(city.slug, '/cleanups')} className="rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-muted)] hover:bg-teal-50 hover:text-[var(--text-primary)]">
+            Cleanups
+          </Link>
+          <Link to={cityPath(city.slug, '/funds')} className="rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-muted)] hover:bg-teal-50 hover:text-[var(--text-primary)]">
+            Funds
+          </Link>
+          <Link to="/" className="rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-muted)] hover:bg-teal-50 hover:text-[var(--text-primary)]">
+            All cities
+          </Link>
+        </div>
+      </div>
     </aside>
   )
 }

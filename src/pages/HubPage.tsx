@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { SiteFooter } from '../components/site/SiteNav'
 import { FixNairobiMark } from '../components/site/BrandMark'
-import { NAIROBI, cityPath, getActiveCities } from '../lib/cities'
+import { ChapterPageChips } from '../components/site/ChapterDesk'
+import { CHAPTER_NAV } from '../lib/chapterPages'
+import { cityPath, getActiveCities } from '../lib/cities'
 
 const chapters = getActiveCities()
 
@@ -46,7 +48,7 @@ export function HubPage() {
         <section className="mx-auto max-w-7xl px-5 pb-8 sm:px-8 lg:px-12">
           <p className="text-xs font-extrabold uppercase tracking-[.2em] text-emerald-700">Choose a city</p>
           <h2 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-[-.05em] text-[#063b32]">
-            Open the map where you live.
+            Enter the chapter where you live.
           </h2>
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {chapters.map((city) => (
@@ -61,14 +63,15 @@ export function HubPage() {
                   {city.chapterName}
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-teal-100/75">
-                  {city.label} chapter of Ramani-Taka. Same map, same race, same public ledger —
-                  filtered to this city.
+                  {city.label} chapter of Ramani-Taka. Map, race, cleanups, funds, and mission —
+                  already waiting inside this city.
                 </p>
+                <ChapterPageChips slug={city.slug} />
                 <Link
-                  to={cityPath(city.slug, '/map')}
-                  className="mt-auto inline-flex min-h-12 items-center pt-8 text-sm font-extrabold text-gold-300"
+                  to={cityPath(city.slug)}
+                  className="mt-auto inline-flex min-h-12 items-center pt-6 text-sm font-extrabold text-gold-300"
                 >
-                  Open the {city.label} map ↗
+                  Enter {city.chapterName} ↗
                 </Link>
               </article>
             ))}
@@ -76,35 +79,28 @@ export function HubPage() {
         </section>
 
         <section className="bg-[#e5f0eb] px-5 py-16 sm:px-8 lg:px-12">
-          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="fn-eyebrow">Amazing Trash Race</p>
-              <h2 className="mt-3 text-4xl font-extrabold tracking-[-.05em] text-[#063b32]">
-                Squads, hotspots, a public scoreboard.
-              </h2>
-              <p className="mt-4 max-w-md text-base leading-7 text-[#5d746e]">
-                The race runs as a city chapter. Register in Nairobi today; Kampala and Dar es
-                Salaam use the same ticket engine when local crews go live.
-              </p>
-              <Link
-                to={cityPath(NAIROBI, '/race')}
-                className="mt-7 inline-flex min-h-12 items-center rounded-[var(--radius-control)] bg-gold-400 px-6 text-sm font-extrabold text-emerald-950"
-              >
-                Enter the Nairobi race ↗
-              </Link>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
-                <p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#6a827b]">Chapters</p>
-                <p className="mt-3 text-4xl font-extrabold text-[#063b32]">{chapters.length}</p>
-                <p className="mt-2 text-sm text-[#5d746e]">Nairobi · Kampala · Dar es Salaam</p>
-              </div>
-              <div className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
-                <p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#6a827b]">One build</p>
-                <p className="mt-3 text-4xl font-extrabold text-[#063b32]">1</p>
-                <p className="mt-2 text-sm text-[#5d746e]">Codebase, database, and deployment.</p>
-              </div>
-            </div>
+          <div className="mx-auto max-w-7xl">
+            <p className="fn-eyebrow">Same desk, every city</p>
+            <h2 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-[-.05em] text-[#063b32]">
+              You keep all the pages. The city is just the filter.
+            </h2>
+            <p className="mt-4 max-w-xl text-base leading-7 text-[#5d746e]">
+              Open a chapter and the whole product is there: map, cleanups, race, leaderboard,
+              funds, and mission. Switch cities later — you stay on the same kind of page.
+            </p>
+            <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {CHAPTER_NAV.map((page, index) => (
+                <li key={page.href} className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
+                  <p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#6a827b]">
+                    {String(index + 1).padStart(2, '0')}
+                  </p>
+                  <h3 className="mt-4 text-2xl font-extrabold tracking-[-.04em] text-[#063b32]">
+                    {page.label}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[#5d746e]">{page.blurb}</p>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
       </main>

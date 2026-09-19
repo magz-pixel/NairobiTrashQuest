@@ -4,17 +4,9 @@ import { AuthModal } from '../auth/AuthModal'
 import { useAuth } from '../../hooks/useAuth'
 import { useCity, useCityPath, useCitySwitchPath } from '../../lib/CityContext'
 import { cityPath, getActiveCities } from '../../lib/cities'
+import { CHAPTER_NAV } from '../../lib/chapterPages'
 import { isRaceLive } from '../../types/database'
 import { FixNairobiMark } from './BrandMark'
-
-const navItems = [
-  ['Mission', '/mission'],
-  ['Trash Map', '/map'],
-  ['Cleanups', '/cleanups'],
-  ['Trash Race', '/race'],
-  ['Leaderboard', '/race/leaderboard'],
-  ['Funds', '/funds'],
-] as const
 
 const navLinkClass = (isActive: boolean, size: 'sm' | 'md' = 'md') =>
   `inline-flex min-h-[44px] items-center rounded-[var(--radius-control)] transition hover:bg-white/10 hover:text-white ${
@@ -70,7 +62,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
-        <Link to="/" className="group flex min-w-0 items-center gap-2.5" onClick={closeMenu}>
+        <Link to={path('/')} className="group flex min-w-0 items-center gap-2.5" onClick={closeMenu}>
           <FixNairobiMark className="shrink-0" />
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-white md:text-xl">
@@ -83,9 +75,9 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
         </Link>
 
         <nav className="hidden items-center gap-2 xl:flex" aria-label="Primary">
-          {navItems.map(([label, href]) => (
-            <NavLink key={href} to={path(href)} className={({ isActive }) => navLinkClass(isActive)}>
-              {label}
+          {CHAPTER_NAV.map((item) => (
+            <NavLink key={item.href} to={path(item.href)} className={({ isActive }) => navLinkClass(isActive)}>
+              {item.label}
             </NavLink>
           ))}
         </nav>
@@ -107,6 +99,12 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
               ))}
             </select>
           </label>
+          <Link
+            to="/"
+            className="hidden min-h-[44px] items-center px-2 text-[10px] font-bold uppercase tracking-[.12em] text-teal-200/80 hover:text-white md:inline-flex"
+          >
+            All cities
+          </Link>
           {!loading && user ? (
             <>
               <Link
@@ -181,15 +179,22 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
               ))}
             </select>
           </label>
+          <Link
+            to="/"
+            onClick={closeMenu}
+            className="mb-2 inline-flex min-h-[44px] w-full items-center rounded-md px-3 py-2.5 text-sm text-teal-100/80 hover:bg-white/5 hover:text-white md:hidden"
+          >
+            All cities
+          </Link>
           <ul className="flex flex-col gap-1">
-            {navItems.map(([label, href]) => (
-              <li key={href}>
+            {CHAPTER_NAV.map((item) => (
+              <li key={item.href}>
                 <NavLink
-                  to={path(href)}
+                  to={path(item.href)}
                   onClick={closeMenu}
                   className={({ isActive }) => navLinkClass(isActive, 'sm')}
                 >
-                  {label}
+                  {item.label}
                 </NavLink>
               </li>
             ))}
@@ -257,7 +262,7 @@ export function SiteFooter({ hub = false }: { hub?: boolean }) {
                 {getActiveCities().map((c) => (
                   <Link
                     key={c.slug}
-                    to={cityPath(c.slug, '/map')}
+                    to={cityPath(c.slug)}
                     className="inline-flex min-h-12 items-center rounded-full bg-gold-400 px-5 text-sm font-extrabold text-emerald-950"
                   >
                     {c.chapterName} ↗

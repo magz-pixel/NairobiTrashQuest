@@ -25,6 +25,7 @@ import { AdminDrawer } from '../components/panels/AdminDrawer'
 import { ReportTrashModal } from '../components/reports/ReportTrashModal'
 import { QuickReportModal } from '../components/reports/QuickReportModal'
 import { ClearTrashModal } from '../components/reports/ClearTrashModal'
+import { ChapterEscapeLinks } from '../components/site/ChapterDesk'
 import { isDemoReport, showDemoData } from '../lib/demoReports'
 import { getLocale, setLocale, t, whatsappReportUrl } from '../lib/i18n'
 import { Link } from 'react-router-dom'
@@ -175,7 +176,7 @@ export function HomePage() {
               to="/"
               className="inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
             >
-              {city.chapterName}
+              All cities
             </Link>
             <h1 className="min-w-0 truncate text-sm font-semibold text-[var(--text-primary)] md:text-base">
               {city.chapterName}
@@ -216,6 +217,7 @@ export function HomePage() {
         </div>
       </div>
       <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
+        <ChapterEscapeLinks slug={city.slug} />
         <button
           type="button"
           onClick={() => setViewMode('map')}
