@@ -13,6 +13,7 @@ import {
 
 interface ClusterLayerProps {
   reports: Report[]
+  selectedId?: string | null
   onSelectReport: (report: Report) => void
 }
 
@@ -33,23 +34,20 @@ function clusterIcon(count: number, color: string) {
   })
 }
 
-function pinIcon(severity: number, status: string) {
-  const size = pinSize(severity)
+function pinIcon(severity: number, status: string, selected = false) {
+  const size = pinSize(severity) + (selected ? 8 : 4)
   const color = pinColor(severity, status)
   return L.divIcon({
     className: 'cluster-marker',
-    html: `<div style="
-      width:${size}px;height:${size}px;
-      background:${color};border-radius:50%;
-      border:2px solid #fff;
-      box-shadow:0 2px 6px rgba(0,0,0,0.25);
-    "></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    html: `<div class="map-pin${selected ? ' is-selected' : ''}" style="--pin:${color};width:${size}px;height:${size + 6}px">
+      <span></span>
+    </div>`,
+    iconSize: [size, size + 6],
+    iconAnchor: [size / 2, size + 4],
   })
 }
 
-export function ClusterLayer({ reports, onSelectReport }: ClusterLayerProps) {
+export function ClusterLayer({ reports, selectedId, onSelectReport }: ClusterLayerProps) {
   const map = useMap()
   const [zoom, setZoom] = useState(() => map.getZoom())
 
@@ -72,7 +70,8 @@ export function ClusterLayer({ reports, onSelectReport }: ClusterLayerProps) {
             <Marker
               key={r.id}
               position={[r.latitude, r.longitude]}
-              icon={pinIcon(r.severity_score, r.status)}
+              icon={pinIcon(r.severity_score, r.status, r.id === selectedId)}
+              zIndexOffset={r.id === selectedId ? 600 : 0}
               eventHandlers={{ click: () => onSelectReport(r) }}
             />
           )

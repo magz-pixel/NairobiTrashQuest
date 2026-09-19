@@ -1,17 +1,11 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useReportStats } from '../hooks/useReportStats'
 import { useCity } from '../lib/CityContext'
-import { ProfileBadge } from '../components/auth/ProfileBadge'
-import { SignInButton } from '../components/auth/SignInButton'
-import { GameShell, type GameTab } from '../components/layout/GameShell'
-import { DigestBanner } from '../components/layout/DigestBanner'
-import { MapStatsBar } from '../components/map/MapStatsBar'
-import { MapFilters } from '../components/map/MapFilters'
-import { MapLegend } from '../components/map/MapLegend'
-import { ReportListView } from '../components/map/ReportListView'
+import { FieldDock, FieldRail, type SheetHeight } from '../components/map/FieldDock'
+import { MapTopBar } from '../components/map/MapTopBar'
 import { ReportDetailSheet } from '../components/map/ReportDetailSheet'
 import { EventsPanel } from '../components/panels/EventsPanel'
 import { BlogPanel } from '../components/panels/BlogPanel'
@@ -25,32 +19,33 @@ import { AdminDrawer } from '../components/panels/AdminDrawer'
 import { ReportTrashModal } from '../components/reports/ReportTrashModal'
 import { QuickReportModal } from '../components/reports/QuickReportModal'
 import { ClearTrashModal } from '../components/reports/ClearTrashModal'
-import { ChapterEscapeLinks } from '../components/site/ChapterDesk'
-import { isDemoReport, showDemoData } from '../lib/demoReports'
-import { getLocale, setLocale, t, whatsappReportUrl } from '../lib/i18n'
-import { Link } from 'react-router-dom'
+import { isDemoReport } from '../lib/demoReports'
+import type { WardBox } from '../lib/cities'
 import { useAuth } from '../hooks/useAuth'
 import type { Report, SeverityFilter, StatusFilter } from '../types/database'
+import type { GameTab } from '../components/layout/GameShell'
+import type { MapFocusTarget } from '../components/map/MapView'
 
 const MapView = lazy(() =>
   import('../components/map/MapView').then((m) => ({ default: m.MapView })),
 )
 
-function MapJoinButton() {
-  return (
-    <div className="pointer-events-auto">
-      <SignInButton label="Join / Sign in" className="min-h-[48px] shadow-[var(--shadow-sm)]" />
-    </div>
+function reportsInWard(list: Report[], ward: WardBox | null) {
+  if (!ward) return list
+  return list.filter(
+    (r) =>
+      r.latitude >= ward.minLat &&
+      r.latitude <= ward.maxLat &&
+      r.longitude >= ward.minLng &&
+      r.longitude <= ward.maxLng,
   )
 }
 
-type ViewMode = 'map' | 'list'
-
 export function HomePage() {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const city = useCity()
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('active')
   const { reports, mapReports, allReports, loading, refetch } = useReports(
     severityFilter,
     statusFilter,
@@ -58,9 +53,7 @@ export function HomePage() {
   )
   const { activeHotspots: raceMapHotspots } = useRaceHotspots()
   const stats = useReportStats(allReports)
-  const [activeTab, setActiveTab] = useState<GameTab>('map')
   const [activePanel, setActivePanel] = useState<GameTab | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>('map')
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [quickReportOpen, setQuickReportOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
@@ -69,11 +62,28 @@ export function HomePage() {
   const [adminOpen, setAdminOpen] = useState(false)
   const [adminDrawerOpen, setAdminDrawerOpen] = useState(false)
   const [pulseAt, setPulseAt] = useState<{ latitude: number; longitude: number } | null>(null)
-  const [, setLocaleTick] = useState(0)
+  const [focusAt, setFocusAt] = useState<MapFocusTarget | null>(null)
+  const [activeWard, setActiveWard] = useState<WardBox | null>(null)
+  const [sheet, setSheet] = useState<SheetHeight>('half')
+
+  useEffect(() => {
+    setActiveWard(null)
+    setSelectedReport(null)
+    setFocusAt(null)
+    setSheet('half')
+  }, [city.slug])
 
   const realReports = allReports.filter((r) => !isDemoReport(r))
   const activeHotspots = realReports.filter(
     (r) => r.status === 'active' || r.status === 'flagged',
+  )
+  const visibleReports = useMemo(
+    () => reportsInWard(reports, activeWard),
+    [reports, activeWard],
+  )
+  const visibleMapReports = useMemo(
+    () => reportsInWard(mapReports, activeWard),
+    [mapReports, activeWard],
   )
 
   const viewExistingReport = (report: Report) => {
@@ -82,20 +92,8 @@ export function HomePage() {
     selectReport(report)
   }
 
-  const closePanelsAndModals = () => {
-    setActivePanel(null)
-    setQuickReportOpen(false)
-    setReportOpen(false)
-    setClearOpen(false)
-    setSelectedReport(null)
-    setAnalyticsOpen(false)
-    setAdminOpen(false)
-    setAdminDrawerOpen(false)
-  }
-
   const openQuickReport = () => {
     flushSync(() => {
-      setActiveTab('map')
       setActivePanel(null)
       setSelectedReport(null)
       setClearOpen(false)
@@ -108,7 +106,6 @@ export function HomePage() {
 
   const openReport = () => {
     flushSync(() => {
-      setActiveTab('map')
       setActivePanel(null)
       setSelectedReport(null)
       setClearOpen(false)
@@ -118,7 +115,6 @@ export function HomePage() {
 
   const openClear = () => {
     flushSync(() => {
-      setActiveTab('map')
       setActivePanel(null)
       setSelectedReport(null)
       setReportOpen(false)
@@ -127,175 +123,84 @@ export function HomePage() {
     setClearOpen(true)
   }
 
-  const handleTab = (tab: GameTab) => {
-    if (tab === 'map') {
-      setActiveTab('map')
-      closePanelsAndModals()
-      return
-    }
-    if (tab === 'report') {
-      openScan()
-      return
-    }
-    if (tab === 'clear') {
-      openClear()
-      return
-    }
-    setSelectedReport(null)
-    setActivePanel((prev) => {
-      const next = prev === tab ? null : tab
-      setActiveTab(next ? tab : 'map')
-      return next
-    })
-  }
-
   const selectReport = (report: Report) => {
-    flushSync(() => {
-      setActivePanel(null)
-      setActiveTab('map')
-    })
+    flushSync(() => setActivePanel(null))
     setSelectedReport(report)
+    setSheet((h) => (h === 'peek' ? 'half' : h))
+    setFocusAt({ lat: report.latitude, lng: report.longitude, zoom: 16 })
   }
 
   const handleReported = (coords?: { id: string; latitude: number; longitude: number }) => {
     refetch()
     if (coords) {
       setPulseAt({ latitude: coords.latitude, longitude: coords.longitude })
+      setFocusAt({ lat: coords.latitude, lng: coords.longitude, zoom: 16 })
     }
   }
 
-  const hudTop = (
-    <div
-      className="pointer-events-none absolute inset-x-0 z-[1000] space-y-2 px-4"
-      style={{ top: 'calc(env(safe-area-inset-top) + 8px)' }}
-    >
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="pointer-events-auto flex flex-wrap items-center gap-2">
-            <Link
-              to="/"
-              className="inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
-            >
-              All cities
-            </Link>
-            <h1 className="min-w-0 truncate text-sm font-semibold text-[var(--text-primary)] md:text-base">
-              {city.chapterName}
-            </h1>
-            <button
-              type="button"
-              className="pointer-events-auto inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
-              onClick={() => {
-                setLocale(getLocale() === 'en' ? 'sw' : 'en')
-                setLocaleTick((n) => n + 1)
-              }}
-            >
-              {getLocale() === 'en' ? 'SW' : 'EN'}
-            </button>
-            {profile?.is_admin && (
-              <button
-                type="button"
-                onClick={() => setAdminDrawerOpen(true)}
-                className="pointer-events-auto inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
-                aria-label="Admin tools"
-              >
-                ⚙
-              </button>
-            )}
-          </div>
-          <MapStatsBar stats={stats} loading={loading} />
-          <MapFilters
-            severity={severityFilter}
-            status={statusFilter}
-            onSeverityChange={setSeverityFilter}
-            onStatusChange={setStatusFilter}
-          />
-        </div>
-        <div className="flex w-full min-w-0 flex-col items-stretch gap-2 md:w-auto md:max-w-[13.5rem] md:items-end">
-          <ProfileBadge className="pointer-events-auto min-h-[48px]" />
-          {!user && <MapJoinButton />}
-          <DigestBanner />
-        </div>
-      </div>
-      <div className="pointer-events-auto flex flex-wrap items-center gap-2.5">
-        <ChapterEscapeLinks slug={city.slug} />
-        <button
-          type="button"
-          onClick={() => setViewMode('map')}
-          className={`inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-xs font-semibold shadow-[var(--shadow-sm)] ${
-            viewMode === 'map'
-              ? 'border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 text-[var(--brand-teal)]'
-              : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
-          }`}
-        >
-          {t('map')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode('list')}
-          className={`inline-flex min-h-[44px] items-center rounded-lg px-3 py-2 text-xs font-semibold shadow-[var(--shadow-sm)] ${
-            viewMode === 'list'
-              ? 'border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 text-[var(--brand-teal)]'
-              : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
-          }`}
-        >
-          {t('list')}
-        </button>
-        <a
-          href={whatsappReportUrl()}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2 text-xs font-medium text-green-700 shadow-[var(--shadow-sm)]"
-        >
-          {t('whatsappReport')}
-        </a>
-        {showDemoData && !loading && realReports.length === 0 && (
-          <span className="text-[10px] font-medium text-[var(--text-muted)]">· demo data</span>
-        )}
-      </div>
-    </div>
-  )
+  const flyToWard = (ward: WardBox | null) => {
+    setActiveWard(ward)
+    if (!ward) {
+      setFocusAt({ lat: city.center.lat, lng: city.center.lng, zoom: city.mapZoom })
+      return
+    }
+    setFocusAt({
+      lat: (ward.minLat + ward.maxLat) / 2,
+      lng: (ward.minLng + ward.maxLng) / 2,
+      zoom: 15,
+    })
+  }
+
+  const board = {
+    cityLabel: city.label,
+    chapterName: city.chapterName,
+    stats,
+    loading,
+    reports: visibleReports,
+    selectedId: selectedReport?.id,
+    severity: severityFilter,
+    status: statusFilter,
+    wards: city.wardBoxes,
+    activeWardId: activeWard?.id ?? null,
+    onSeverityChange: setSeverityFilter,
+    onStatusChange: setStatusFilter,
+    onSelectWard: flyToWard,
+    onSelect: selectReport,
+    onReport: openScan,
+  }
 
   return (
-    <GameShell
-      activeTab={activeTab}
-      onTabChange={handleTab}
-      onReport={openQuickReport}
-      reportLabel={t('reportTrash')}
-      userLoggedIn={!!user}
-    >
-      <div className="relative h-full w-full">
-        {viewMode === 'map' ? (
-          <>
-            <Suspense
-              fallback={
-                <div className="flex h-full items-center justify-center text-[var(--brand-teal)]">
-                  Loading map…
-                </div>
-              }
-            >
-              <MapView
-                reports={mapReports}
-                hotspots={raceMapHotspots}
-                pulseAt={pulseAt}
-                onPulseDone={() => setPulseAt(null)}
-                onSelectReport={selectReport}
-                onInteract={() => {
-                  setActivePanel(null)
-                  setActiveTab('map')
-                }}
-              />
-            </Suspense>
-            {hudTop}
-            <MapLegend />
-          </>
-        ) : (
-          <>
-            {hudTop}
-            <div className="h-full bg-[var(--bg-app)] pt-44">
-              <ReportListView reports={reports} onSelect={selectReport} />
+    <div className="map-experience flex h-[100dvh] w-full overflow-hidden bg-[#dce8e1]">
+      <FieldRail {...board} />
+      <div className="relative min-h-0 min-w-0 flex-1">
+        <Suspense
+          fallback={
+            <div className="grid h-full place-items-center text-sm font-bold text-[#0b8c76]">
+              Opening the {city.label} field…
             </div>
-          </>
-        )}
+          }
+        >
+          <MapView
+            reports={visibleMapReports}
+            hotspots={raceMapHotspots}
+            selectedId={selectedReport?.id}
+            focusAt={focusAt}
+            pulseAt={pulseAt}
+            onPulseDone={() => setPulseAt(null)}
+            onSelectReport={selectReport}
+            onLocated={(lat, lng) => setFocusAt({ lat, lng, zoom: 16 })}
+            onInteract={() => setActivePanel(null)}
+          />
+        </Suspense>
+        <MapTopBar
+          onVerify={openClear}
+          onOpenPanel={(id) => setActivePanel(id)}
+          onAdmin={() => setAdminDrawerOpen(true)}
+        />
+        <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
+          {city.label} · {city.country}
+        </p>
+        <FieldDock height={sheet} onHeightChange={setSheet} {...board} />
       </div>
 
       <ReportDetailSheet
@@ -328,36 +233,30 @@ export function HomePage() {
       <AnalyticsPanel open={analyticsOpen} onClose={() => setAnalyticsOpen(false)} stats={stats} />
       <AdminReviewPanel open={adminOpen} onClose={() => setAdminOpen(false)} onReviewed={refetch} />
 
-      <EventsPanel open={activePanel === 'events'} onClose={() => { setActivePanel(null); setActiveTab('map') }} />
-      <MissionsPanel open={activePanel === 'missions'} onClose={() => { setActivePanel(null); setActiveTab('map') }} />
-      <BlogPanel open={activePanel === 'blog'} onClose={() => { setActivePanel(null); setActiveTab('map') }} />
-      <CleanupLogPanel open={activePanel === 'log'} onClose={() => { setActivePanel(null); setActiveTab('map') }} onLogged={refetch} />
-      <ProfilePanel open={activePanel === 'profile'} onClose={() => { setActivePanel(null); setActiveTab('map') }} />
-      <RewardsPanel open={activePanel === 'rewards'} onClose={() => { setActivePanel(null); setActiveTab('map') }} />
+      <EventsPanel open={activePanel === 'events'} onClose={() => setActivePanel(null)} />
+      <MissionsPanel open={activePanel === 'missions'} onClose={() => setActivePanel(null)} />
+      <BlogPanel open={activePanel === 'blog'} onClose={() => setActivePanel(null)} />
+      <CleanupLogPanel open={activePanel === 'log'} onClose={() => setActivePanel(null)} onLogged={refetch} />
+      <ProfilePanel open={activePanel === 'profile'} onClose={() => setActivePanel(null)} />
+      <RewardsPanel open={activePanel === 'rewards'} onClose={() => setActivePanel(null)} />
 
       {user && (
         <>
           <ReportTrashModal
             open={reportOpen}
-            onClose={() => {
-              setReportOpen(false)
-              setActiveTab('map')
-            }}
+            onClose={() => setReportOpen(false)}
             onReported={refetch}
             activeReports={activeHotspots}
             onViewExistingReport={viewExistingReport}
           />
           <ClearTrashModal
             open={clearOpen}
-            onClose={() => {
-              setClearOpen(false)
-              setActiveTab('map')
-            }}
+            onClose={() => setClearOpen(false)}
             activeReports={activeHotspots}
             onCleared={refetch}
           />
         </>
       )}
-    </GameShell>
+    </div>
   )
 }

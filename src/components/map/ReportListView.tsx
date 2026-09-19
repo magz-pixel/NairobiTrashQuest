@@ -1,52 +1,61 @@
 import type { Report } from '../../types/database'
-import { marketConfig } from '../../lib/marketConfig'
+import { useCity } from '../../lib/CityContext'
 import { daysSince, severityLabel } from '../../lib/wards'
 
 interface ReportListViewProps {
   reports: Report[]
+  selectedId?: string | null
   onSelect: (report: Report) => void
 }
 
-export function ReportListView({ reports, onSelect }: ReportListViewProps) {
+export function ReportListView({ reports, selectedId, onSelect }: ReportListViewProps) {
+  const city = useCity()
+
   if (reports.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-sm text-[var(--text-muted)]">
-        No reports match these filters.
+      <div className="rounded-2xl bg-[#f4f7f2] px-4 py-8 text-center text-sm leading-6 text-[#5d746e]">
+        No spots match these filters in {city.label}. Shift a neighbourhood or report one.
       </div>
     )
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--bg-app)] p-4 pb-32">
-      <ul className="space-y-2">
-        {reports.map((r) => (
+    <ul className="space-y-2">
+      {reports.map((r) => {
+        const selected = r.id === selectedId
+        const cleared = r.status === 'verified_cleared'
+        return (
           <li key={r.id}>
             <button
               type="button"
               onClick={() => onSelect(r)}
-              className="flex w-full gap-3 rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 text-left shadow-[var(--shadow-sm)] hover:border-[var(--brand-teal)]/40"
+              className={`flex w-full gap-3 rounded-2xl border p-2.5 text-left transition ${
+                selected
+                  ? 'border-[#063b32] bg-[#063b32] text-white shadow-[0_12px_30px_rgba(6,59,50,.2)]'
+                  : 'border-[#e5efeb] bg-white text-[#12332d] hover:border-[#0b8c76]/40'
+              }`}
             >
               <img
                 src={r.image_url}
                 alt=""
-                className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                className="h-[4.25rem] w-[4.25rem] shrink-0 rounded-xl object-cover"
               />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-[var(--text-primary)]">
-                  {r.area_name ?? `${marketConfig.cityName} hotspot`}
+              <div className="min-w-0 flex-1 py-0.5">
+                <p className="truncate text-sm font-extrabold">
+                  {r.area_name ?? `${city.label} hotspot`}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
-                  {severityLabel(r.severity_score)} · {r.status.replace('_', ' ')} ·{' '}
-                  {daysSince(r.created_at)}d
+                <p className={`mt-1 text-xs ${selected ? 'text-teal-100/80' : 'text-[#5d746e]'}`}>
+                  {cleared ? 'Cleared' : severityLabel(r.severity_score)} · {daysSince(r.created_at)}d
+                  open · {r.waste_type ?? 'Mixed waste'}
                 </p>
-                <p className="text-[10px] text-[var(--text-muted)]">
-                  {r.waste_type ?? 'Mixed waste'} · {r.seen_count} seen
+                <p className={`mt-1 text-[10px] font-bold uppercase tracking-[.12em] ${selected ? 'text-gold-300' : 'text-[#0b8c76]'}`}>
+                  {r.seen_count} neighbours have seen this
                 </p>
               </div>
             </button>
           </li>
-        ))}
-      </ul>
-    </div>
+        )
+      })}
+    </ul>
   )
 }
