@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { mergeWithDemoReports } from '../lib/demoReports'
 import { filterReportsBySeverity, filterReportsByStatus } from '../lib/wards'
-import { supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import type { Report, SeverityFilter, StatusFilter } from '../types/database'
 
 function normalizeReport(row: Record<string, unknown>): Report {
@@ -27,12 +27,14 @@ function normalizeReport(row: Record<string, unknown>): Report {
     is_anonymous: (row.is_anonymous as boolean) ?? false,
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
+    city: (row.city as string) ?? 'nairobi',
   }
 }
 
 export function useReports(
   severityFilter: SeverityFilter = 'all',
   statusFilter: StatusFilter = 'all',
+  citySlug = 'nairobi',
 ) {
   const [allReports, setAllReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,26 +42,33 @@ export function useReports(
 
   const fetchReports = useCallback(async () => {
     setError(null)
+    if (!isSupabaseConfigured) {
+      setAllReports(mergeWithDemoReports([], citySlug))
+      return
+    }
     const { data, error: fetchError } = await supabase
       .from('reports')
       .select('*')
+      .eq('city', citySlug)
       .in('status', ['active', 'verified_cleared', 'pending', 'flagged'])
       .order('created_at', { ascending: false })
 
     if (fetchError) {
       setError(fetchError.message)
+      setAllReports(mergeWithDemoReports([], citySlug))
       return
     }
 
     const live = (data ?? []).map((row) => normalizeReport(row as Record<string, unknown>))
-    setAllReports(mergeWithDemoReports(live))
-  }, [])
+    setAllReports(mergeWithDemoReports(live, citySlug))
+  }, [citySlug])
 
   useEffect(() => {
     fetchReports().finally(() => setLoading(false))
   }, [fetchReports])
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return
     const channel = supabase
       .channel('reports-all')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {

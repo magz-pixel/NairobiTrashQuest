@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import type { RaceHotspot, Report } from '../../types/database'
-import { marketConfig } from '../../lib/marketConfig'
+import { useCity } from '../../lib/CityContext'
 import { ClusterLayer } from './ClusterLayer'
 import { HotspotLayer } from './HotspotLayer'
 import { ReportPulseLayer } from './ReportPulseLayer'
@@ -37,10 +37,12 @@ export function MapView({
   pulseAt,
   onPulseDone,
 }: MapViewProps) {
+  const city = useCity()
   return (
     <MapContainer
-      center={marketConfig.mapCenter}
-      zoom={marketConfig.mapZoom}
+      key={city.slug}
+      center={[city.center.lat, city.center.lng]}
+      zoom={city.mapZoom}
       className="h-full w-full"
       zoomControl={false}
     >

@@ -5,6 +5,7 @@ interface RaceTicket3DProps {
   code?: string
   holderName?: string
   teamName?: string
+  cityLabel?: string
   className?: string
   compact?: boolean
 }
@@ -14,6 +15,7 @@ export function RaceTicket3D({
   code = 'ATR2-····',
   holderName,
   teamName,
+  cityLabel = 'Ramani-Taka',
   className = '',
   compact = false,
 }: RaceTicket3DProps) {
@@ -94,7 +96,7 @@ export function RaceTicket3D({
             <p className="mt-3 text-sm font-semibold text-[#0a192f]/80">Amazing Trash Race</p>
           )}
           {teamName && <p className="text-xs text-[#0a192f]/65">Squad · {teamName}</p>}
-          <p className="mt-1 text-xs text-[#0a192f]/55">Nairobi · Fix Nairobi × XPNC</p>
+          <p className="mt-1 text-xs text-[#0a192f]/55">{cityLabel}</p>
 
           {/* Barcode + scan */}
           <div className="relative mt-4 overflow-hidden rounded-lg bg-[#0a192f]/08 px-3 py-3">

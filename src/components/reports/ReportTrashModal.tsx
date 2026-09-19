@@ -10,6 +10,7 @@ import { compressImageFile } from '../../lib/uploads'
 import { assignWard } from '../../lib/wards'
 import { nearestActiveReport } from '../../lib/nearbyReports'
 import { bumpMissionProgress } from '../../lib/missions'
+import { useCity } from '../../lib/CityContext'
 import { useAuth } from '../../hooks/useAuth'
 import type { Report, TrashAnalysis } from '../../types/database'
 import { Button } from '../ui/Button'
@@ -45,6 +46,7 @@ export function ReportTrashModal({
   onViewExistingReport,
 }: ReportTrashModalProps) {
   const { user } = useAuth()
+  const city = useCity()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -117,7 +119,7 @@ export function ReportTrashModal({
     const reportId = crypto.randomUUID()
     setStatus('Uploading photo…')
     const imageUrl = await uploadReportImage(user.id, reportId, compressed)
-    const ward = assignWard(position.coords.latitude, position.coords.longitude)
+    const ward = assignWard(position.coords.latitude, position.coords.longitude, city.slug)
 
     setStatus(aiNote ? `Saving report… (${aiNote})` : 'Saving report…')
     const { error } = await supabase.from('reports').insert({
@@ -132,6 +134,7 @@ export function ReportTrashModal({
       ward_id: ward?.wardId ?? null,
       area_name: ward?.areaName ?? null,
       waste_type: analysis.tags[0] ?? 'Mixed waste',
+      city: city.slug,
     })
 
     if (error) throw error

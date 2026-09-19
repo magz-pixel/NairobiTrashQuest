@@ -1,15 +1,20 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { FUND_TARGET_KES, formatKes } from '../../lib/fundLedger'
+import { formatCityMoney, FUND_TARGET, getCity } from '../../lib/cities'
 
 interface FundProgressBarProps {
   raised: number
   target?: number
+  formatMoney?: (amount: number) => string
 }
 
-export function FundProgressBar({ raised, target = FUND_TARGET_KES }: FundProgressBarProps) {
+export function FundProgressBar({
+  raised,
+  target = FUND_TARGET,
+  formatMoney = (n) => formatCityMoney(n, getCity('nairobi')),
+}: FundProgressBarProps) {
   const reduce = useReducedMotion()
   const safeRaised = Number.isFinite(raised) ? Math.max(0, raised) : 0
-  const safeTarget = Number.isFinite(target) && target > 0 ? target : FUND_TARGET_KES
+  const safeTarget = Number.isFinite(target) && target > 0 ? target : FUND_TARGET
   const pct = Math.min(100, Math.round((safeRaised / safeTarget) * 100))
   const fillPct = safeRaised > 0 ? Math.max(pct, 4) : 0
 
@@ -21,9 +26,9 @@ export function FundProgressBar({ raised, target = FUND_TARGET_KES }: FundProgre
             Of campaign target
           </p>
           <p className="mt-1 text-sm text-teal-100/80">
-            <strong className="fn-neon-text text-lg md:text-xl">{formatKes(safeRaised)}</strong>
+            <strong className="fn-neon-text text-lg md:text-xl">{formatMoney(safeRaised)}</strong>
             <span className="text-teal-100/60"> raised of </span>
-            <strong className="text-white">{formatKes(safeTarget)}</strong>
+            <strong className="text-white">{formatMoney(safeTarget)}</strong>
           </p>
         </div>
         <p className="font-[family-name:var(--font-display)] text-3xl font-bold tabular-nums text-[var(--fn-clear,#00f2fe)] md:text-4xl">

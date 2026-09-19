@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { marketConfig } from '../../lib/marketConfig'
+import { useCity } from '../../lib/CityContext'
 
 export type GameTab =
   | 'map'
@@ -30,13 +30,14 @@ const NAV: { id: GameTab; label: string; icon: string }[] = [
 ]
 
 export function GameSidebar({ activeTab, onTabChange }: GameSidebarProps) {
+  const city = useCity()
   return (
     <aside
       className="flex h-full w-[15.5rem] shrink-0 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
       aria-label="Main navigation"
     >
       <div className="border-b border-[var(--border-subtle)] px-5 py-5">
-        <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-950 text-sm font-extrabold text-gold-300">FN</span><div><p className="text-sm font-extrabold text-[var(--text-primary)]">{marketConfig.appShortName}</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--text-muted)]">field workspace</p></div></div>
+        <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-950 text-sm font-extrabold text-gold-300">RT</span><div><p className="text-sm font-extrabold text-[var(--text-primary)]">{city.chapterName}</p><p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--text-muted)]">field workspace</p></div></div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1.5 p-4">

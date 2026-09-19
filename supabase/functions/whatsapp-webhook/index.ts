@@ -59,6 +59,7 @@ serve(async (req) => {
       waste_type: 'Mixed waste',
       approved_at: autoApprove ? new Date().toISOString() : null,
       moderation_note: 'Submitted via WhatsApp webhook',
+      city: 'nairobi',
     })
 
     if (error) throw error

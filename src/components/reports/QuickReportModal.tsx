@@ -4,6 +4,7 @@ import { assignWard } from '../../lib/wards'
 import { getSessionId } from '../../lib/session'
 import { uploadReportImage, analyzeTrashImage } from '../../lib/gemini'
 import { nearestActiveReport } from '../../lib/nearbyReports'
+import { useCity } from '../../lib/CityContext'
 import type { Report, TrashAnalysis } from '../../types/database'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
@@ -39,6 +40,7 @@ export function QuickReportModal({
   activeReports = [],
   onViewExistingReport,
 }: QuickReportModalProps) {
+  const city = useCity()
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -106,7 +108,7 @@ export function QuickReportModal({
       }
 
       const imageUrl = await uploadReportImage('anonymous', reportId, file)
-      const ward = assignWard(position.coords.latitude, position.coords.longitude)
+      const ward = assignWard(position.coords.latitude, position.coords.longitude, city.slug)
 
       const autoLive =
         AUTO_APPROVE && analysis.moderation_action !== 'review'
@@ -130,6 +132,7 @@ export function QuickReportModal({
         approved_at: autoLive ? new Date().toISOString() : null,
         moderation_note:
           analysis.moderation_action === 'review' ? 'Queued for human review' : null,
+        city: city.slug,
       })
 
       if (error) throw error

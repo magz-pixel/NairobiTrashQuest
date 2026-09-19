@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthGate } from '../components/auth/AuthGate'
-import { SiteFooter, SiteNav } from '../components/site/SiteNav'
+import { OpsFrame } from '../components/site/PagePrimitives'
 import { useAuth } from '../hooks/useAuth'
+import { useCityPath } from '../lib/CityContext'
 import {
   addLocalRaceHotspot,
   deleteLocalRaceHotspot,
@@ -22,11 +23,12 @@ import {
   type RaceRegistration,
 } from '../types/database'
 
-const inputClass =
-  'mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white'
+const inputClass = 'fn-field'
+const labelClass = 'fn-label'
 
 function AdminInner() {
   const { user, profile, loading } = useAuth()
+  const path = useCityPath()
   const [rows, setRows] = useState<RaceRegistration[]>([])
   const [hotspots, setHotspots] = useState<RaceHotspot[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -93,12 +95,12 @@ function AdminInner() {
   }, [load])
 
   if (loading) {
-    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
+    return <p className="text-sm text-[#5d746e]">Checking admin access…</p>
   }
 
   if (!profile?.is_admin && !usingLocal) {
     return (
-      <p className="rounded-[var(--radius-card)] border border-amber-400/30 bg-amber-950/40 p-4 text-sm text-amber-100">
+      <p className="fn-warn">
         Admin access required. Set <code>profiles.is_admin = true</code> for your user.
       </p>
     )
@@ -215,25 +217,25 @@ function AdminInner() {
   return (
     <div className="space-y-10">
       {usingLocal && (
-        <p className="text-xs text-gold-200">
+        <p className="text-xs font-semibold text-[#8b6207]">
           Showing local data (run migrations 007 + 014 + 017 for shared registrations/hotspots).
         </p>
       )}
-      {error && <p className="text-xs text-gold-200">{error}</p>}
+      {error && <p className="text-xs font-semibold text-[#8b6207]">{error}</p>}
 
       <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-white">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-[#063b32]">
           Race hotspots
         </h2>
-        <p className="text-sm text-teal-100/70">
+        <p className="text-sm text-[#5d746e]">
           Pre-load GPS pins with point values. Ghost spots look identical on the map — no visual
           tell.
         </p>
         <form
           onSubmit={onAddHotspot}
-          className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5"
+          className="space-y-3"
         >
-          <label className="block text-xs text-teal-200/80">
+          <label className={labelClass}>
             Label
             <input
               required
@@ -244,7 +246,7 @@ function AdminInner() {
             />
           </label>
           <div className="grid grid-cols-2 gap-3">
-            <label className="block text-xs text-teal-200/80">
+            <label className={labelClass}>
               Latitude
               <input
                 required
@@ -255,7 +257,7 @@ function AdminInner() {
                 className={inputClass}
               />
             </label>
-            <label className="block text-xs text-teal-200/80">
+            <label className={labelClass}>
               Longitude
               <input
                 required
@@ -267,7 +269,7 @@ function AdminInner() {
               />
             </label>
           </div>
-          <label className="block text-xs text-teal-200/80">
+          <label className={labelClass}>
             Point value
             <input
               required
@@ -279,26 +281,26 @@ function AdminInner() {
               className={inputClass}
             />
           </label>
-          <label className="flex items-center gap-2 text-xs text-teal-200/80">
+          <label className="flex items-center gap-2 text-sm font-semibold text-[#36564e]">
             <input
               type="checkbox"
               checked={isGhost}
               onChange={(e) => setIsGhost(e.target.checked)}
-              className="rounded border-white/20"
+              className="rounded border-[#d9e9e4]"
             />
             Ghost spot (decoy — same map look as real)
           </label>
-          <label className="block text-xs text-teal-200/80">
+          <label className={labelClass}>
             Reference photos (optional)
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
               multiple
-              className="mt-1 block min-h-[44px] w-full py-2 text-sm text-teal-100/80"
+              className="mt-1 block min-h-[44px] w-full py-2 text-sm text-[#36564e]"
               onChange={(e) => setPhotos(Array.from(e.target.files ?? []))}
             />
-            <span className="mt-1 block text-[11px] text-teal-100/55">
+            <span className="mt-1 block text-[11px] font-medium text-[#71867f]">
               First photo is the landmark. Extra files are other angles.
               {photos.length > 0 ? ` ${photos.length} selected.` : ''}
             </span>
@@ -306,22 +308,22 @@ function AdminInner() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl bg-[#2dd4bf] py-3 text-sm font-bold text-emerald-950 disabled:opacity-50"
+            className="fn-action fn-action-gold w-full justify-center disabled:opacity-50"
           >
             {busy ? 'Saving…' : 'Add hotspot'}
           </button>
-          {formStatus && <p className="text-sm text-teal-200">{formStatus}</p>}
+          {formStatus && <p className="text-sm font-semibold text-[#0b8c76]">{formStatus}</p>}
         </form>
 
-        <ul className="divide-y divide-white/10 border-t border-white/10 text-sm">
+        <ul className="divide-y divide-[#e5efeb] border-t border-[#e5efeb] text-sm">
           {hotspots.map((h) => (
             <li key={h.id} className="flex items-start justify-between gap-3 py-3">
               <div>
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-[#063b32]">
                   {h.label}{' '}
-                  <span className="font-mono text-xs text-gold-300">{h.point_value} pts</span>
+                  <span className="font-mono text-xs text-[#8b6207]">{h.point_value} pts</span>
                 </p>
-                <p className="text-xs text-teal-100/60">
+                <p className="text-xs text-[#71867f]">
                   {h.latitude.toFixed(5)}, {h.longitude.toFixed(5)} · {h.status}
                   {h.is_ghost_spot ? ' · ghost' : ''}
                   {(h.gallery_image_urls?.length ?? 0) > 0
@@ -335,7 +337,7 @@ function AdminInner() {
               <button
                 type="button"
                 disabled={busy}
-                className="shrink-0 text-xs text-gold-200 underline disabled:opacity-50"
+                className="shrink-0 text-xs font-bold text-[#8b6207] underline disabled:opacity-50"
                 onClick={() => void onDeleteHotspot(h.id)}
               >
                 Delete
@@ -343,7 +345,7 @@ function AdminInner() {
             </li>
           ))}
           {hotspots.length === 0 && (
-            <li className="py-3 text-teal-100/50">No hotspots yet.</li>
+            <li className="py-3 text-[#71867f]">No hotspots yet.</li>
           )}
         </ul>
       </section>
@@ -352,42 +354,42 @@ function AdminInner() {
         <div className="flex flex-wrap gap-3 text-sm">
           <button
             type="button"
-            className="rounded-lg bg-[#2dd4bf] px-3 py-2 font-semibold text-emerald-950"
+            className="rounded-lg bg-[#0b8c76] px-3 py-2 font-semibold text-white"
             onClick={() => exportRaceRegistrationsCsv(rows)}
           >
             Export CSV
           </button>
-          <button type="button" className="text-teal-200 underline" onClick={() => void load()}>
+          <button type="button" className="font-bold text-[#0b8c76] underline" onClick={() => void load()}>
             Refresh
           </button>
-          <Link to="/race/marshal" className="text-teal-200 underline">
+          <Link to={path('/race/marshal')} className="font-bold text-[#0b8c76] underline">
             Marshal weights
           </Link>
         </div>
-        <p className="text-sm text-teal-100/70">
+        <p className="text-sm text-[#5d746e]">
           {rows.length} warriors · {groups.length} squads
         </p>
-        {formStatus && <p className="text-sm text-teal-200">{formStatus}</p>}
+        {formStatus && <p className="text-sm font-semibold text-[#0b8c76]">{formStatus}</p>}
         <ul className="space-y-4">
           {groups.map((g) => (
-            <li key={g.team} className="rounded-[var(--radius-card)] border border-white/10 bg-white/5 p-4">
-              <p className="font-[family-name:var(--font-display)] text-lg font-bold text-white">
+            <li key={g.team} className="rounded-[var(--radius-card)] border border-[#d9e9e4] bg-white p-4 shadow-sm">
+              <p className="font-[family-name:var(--font-display)] text-lg font-bold text-[#063b32]">
                 {g.team}{' '}
-                <span className="text-sm font-normal text-teal-300">({g.members.length})</span>
+                <span className="text-sm font-normal text-[#0b8c76]">({g.members.length})</span>
               </p>
-              <ul className="mt-2 space-y-1 text-sm text-teal-100/80">
+              <ul className="mt-2 space-y-1 text-sm text-[#36564e]">
                 {g.members.map((m) => (
                   <li key={m.id} className="flex items-start justify-between gap-3">
                     <span>
-                      <span className="font-mono text-xs text-teal-200">{m.ticket_code}</span>
+                      <span className="font-mono text-xs text-[#0b8c76]">{m.ticket_code}</span>
                       {' · '}
                       {m.full_name}
-                      <span className="text-teal-100/50"> · {m.phone}</span>
+                      <span className="text-[#71867f]"> · {m.phone}</span>
                     </span>
                     <button
                       type="button"
                       disabled={busy}
-                      className="shrink-0 text-xs text-gold-200 underline disabled:opacity-50"
+                      className="shrink-0 text-xs font-bold text-[#8b6207] underline disabled:opacity-50"
                       onClick={() => void onDeleteRegistration(m)}
                     >
                       Delete
@@ -405,29 +407,19 @@ function AdminInner() {
 
 export function RaceAdminPage() {
   return (
-    <div className="fn-rebuild min-h-full bg-[#f3f7f4] text-[#12332d]">
-      <SiteNav />
-      <main className="mx-auto w-full max-w-6xl px-4 py-14 md:px-8 md:py-20">
-        <Link to="/race" className="text-sm text-teal-300 hover:text-white">
-          ← Registration
-        </Link>
-        <h1 className="fn-display mt-4 text-5xl font-extrabold tracking-[-.06em] text-[#063b32]">
-          Race admin · teams & hotspots
-        </h1>
-        <p className="mt-2 text-sm text-teal-100/70">
-          Load Season 2 GPS hotspots and review squad registrations.
-        </p>
-        <div className="mt-8">
-          {!isSupabaseConfigured ? (
-            <AdminInner />
-          ) : (
-            <AuthGate>
-              <AdminInner />
-            </AuthGate>
-          )}
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
+    <OpsFrame
+      title="Race admin · teams & hotspots"
+      eyebrow="Season 2 ops"
+      description="Load Season 2 GPS hotspots and review squad registrations."
+      backTo="/race"
+    >
+      {!isSupabaseConfigured ? (
+        <AdminInner />
+      ) : (
+        <AuthGate>
+          <AdminInner />
+        </AuthGate>
+      )}
+    </OpsFrame>
   )
 }

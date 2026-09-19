@@ -2,15 +2,16 @@ import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFundLedger } from '../../hooks/useFundLedger'
-import { formatKes } from '../../lib/fundLedger'
+import { formatCityMoney } from '../../lib/cities'
+import { useCity, useCityPath } from '../../lib/CityContext'
 import { DonateModal } from './DonateModal'
 import { FundProgressBar } from './FundProgressBar'
 
-function AnimatedKes({ value }: { value: number }) {
+function AnimatedKes({ value, format }: { value: number; format: (n: number) => string }) {
   const motionVal = useMotionValue(0)
   const spring = useSpring(motionVal, { stiffness: 60, damping: 20 })
-  const display = useTransform(spring, (v) => formatKes(v))
-  const [text, setText] = useState(formatKes(0))
+  const display = useTransform(spring, (v) => format(v))
+  const [text, setText] = useState(() => format(0))
 
   useEffect(() => {
     motionVal.set(Number.isFinite(value) ? value : 0)
@@ -25,7 +26,10 @@ function AnimatedKes({ value }: { value: number }) {
 }
 
 export function FundsCounterStrip({ compact = false }: { compact?: boolean }) {
-  const { totals, feed, loading } = useFundLedger()
+  const city = useCity()
+  const path = useCityPath()
+  const money = (n: number) => formatCityMoney(n, city)
+  const { totals, feed, loading } = useFundLedger(city.slug)
   const [spotlight, setSpotlight] = useState(0)
   const [donateOpen, setDonateOpen] = useState(false)
 
@@ -63,21 +67,21 @@ export function FundsCounterStrip({ compact = false }: { compact?: boolean }) {
           compact ? 'text-3xl' : 'text-4xl md:text-5xl'
         }`}
       >
-        {loading ? '…' : <AnimatedKes value={totals.raised} />}
+        {loading ? '…' : <AnimatedKes value={totals.raised} format={money} />}
       </p>
       <p className="mt-1 text-sm text-teal-100/70">raised to date</p>
 
       <div className="mt-5">
-        <FundProgressBar raised={totals.raised} />
+        <FundProgressBar raised={totals.raised} target={city.fundTarget} formatMoney={money} />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-4 text-xs text-teal-100/80 md:text-sm">
         <span>
-          Spent <strong className="text-white">{formatKes(totals.spent)}</strong>
+          Spent <strong className="text-white">{money(totals.spent)}</strong>
         </span>
         <span>
           Remaining{' '}
-          <strong className="text-[var(--fn-clear)]">{formatKes(totals.remaining)}</strong>
+          <strong className="text-[var(--fn-clear)]">{money(totals.remaining)}</strong>
         </span>
       </div>
 
@@ -119,7 +123,7 @@ export function FundsCounterStrip({ compact = false }: { compact?: boolean }) {
               <p>
                 <strong>{current.donor_or_payee}</strong>
                 {' — '}
-                {formatKes(Number(current.amount_kes))}
+                {money(Number(current.amount_kes))}
                 {current.note ? (
                   <span className="text-teal-100/60"> · {current.note}</span>
                 ) : null}
@@ -133,7 +137,7 @@ export function FundsCounterStrip({ compact = false }: { compact?: boolean }) {
 
       {!compact && (
         <Link
-          to="/funds"
+          to={path('/funds')}
           className="mt-5 inline-flex text-sm font-semibold text-[var(--fn-clear)] hover:text-white"
         >
           Full accountability ledger →

@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom'
 import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useReportStats } from '../hooks/useReportStats'
+import { useCity } from '../lib/CityContext'
 import { ProfileBadge } from '../components/auth/ProfileBadge'
 import { SignInButton } from '../components/auth/SignInButton'
 import { GameShell, type GameTab } from '../components/layout/GameShell'
@@ -26,7 +27,6 @@ import { QuickReportModal } from '../components/reports/QuickReportModal'
 import { ClearTrashModal } from '../components/reports/ClearTrashModal'
 import { isDemoReport, showDemoData } from '../lib/demoReports'
 import { getLocale, setLocale, t, whatsappReportUrl } from '../lib/i18n'
-import { marketConfig } from '../lib/marketConfig'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import type { Report, SeverityFilter, StatusFilter } from '../types/database'
@@ -47,11 +47,13 @@ type ViewMode = 'map' | 'list'
 
 export function HomePage() {
   const { user, profile } = useAuth()
+  const city = useCity()
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const { reports, mapReports, allReports, loading, refetch } = useReports(
     severityFilter,
     statusFilter,
+    city.slug,
   )
   const { activeHotspots: raceMapHotspots } = useRaceHotspots()
   const stats = useReportStats(allReports)
@@ -173,10 +175,10 @@ export function HomePage() {
               to="/"
               className="inline-flex min-h-[44px] items-center rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2.5 py-2 text-[10px] font-medium text-[var(--text-muted)] shadow-[var(--shadow-sm)]"
             >
-              Fix Nairobi
+              {city.chapterName}
             </Link>
             <h1 className="min-w-0 truncate text-sm font-semibold text-[var(--text-primary)] md:text-base">
-              {marketConfig.appName}
+              {city.chapterName}
             </h1>
             <button
               type="button"

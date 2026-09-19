@@ -8,7 +8,7 @@ import {
   voidLocalFundEntry,
 } from '../lib/fundLedger'
 
-export function useFundLedger() {
+export function useFundLedger(citySlug = 'nairobi') {
   const [entries, setEntries] = useState<FundEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [usingLocal, setUsingLocal] = useState(false)
@@ -16,8 +16,8 @@ export function useFundLedger() {
 
   const applyLocal = useCallback(() => {
     setUsingLocal(true)
-    setEntries(loadLocalFundEntries())
-  }, [])
+    setEntries(loadLocalFundEntries().filter((e) => e.city === citySlug))
+  }, [citySlug])
 
   const refetch = useCallback(async () => {
     setError(null)
@@ -29,6 +29,7 @@ export function useFundLedger() {
     const { data, error: qErr } = await supabase
       .from('fund_entries')
       .select('*')
+      .eq('city', citySlug)
       .order('created_at', { ascending: false })
 
     if (qErr) {
@@ -41,7 +42,7 @@ export function useFundLedger() {
     setUsingLocal(false)
     setEntries((data ?? []) as FundEntry[])
     setLoading(false)
-  }, [applyLocal])
+  }, [applyLocal, citySlug])
 
   useEffect(() => {
     void refetch()
@@ -77,8 +78,9 @@ export function useFundLedger() {
         amount_kes: input.amount_kes,
         donor_or_payee: input.donor_or_payee,
         note: input.note ?? null,
+        city: citySlug,
       })
-      setEntries(loadLocalFundEntries())
+      setEntries(loadLocalFundEntries().filter((e) => e.city === citySlug))
       return
     }
     const { error: insErr } = await supabase.from('fund_entries').insert({
@@ -86,6 +88,7 @@ export function useFundLedger() {
       amount_kes: input.amount_kes,
       donor_or_payee: input.donor_or_payee,
       note: input.note ?? null,
+      city: citySlug,
     })
     if (insErr) throw new Error(insErr.message)
     await refetch()
@@ -94,7 +97,7 @@ export function useFundLedger() {
   const voidEntry = async (id: string) => {
     if (usingLocal || !isSupabaseConfigured) {
       voidLocalFundEntry(id)
-      setEntries(loadLocalFundEntries())
+      setEntries(loadLocalFundEntries().filter((e) => e.city === citySlug))
       return
     }
     const { error: updErr } = await supabase

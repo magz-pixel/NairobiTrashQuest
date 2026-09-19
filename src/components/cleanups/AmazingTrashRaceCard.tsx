@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isSupabaseConfigured, supabase } from '../../lib/supabase'
+import { useCity, useCityPath } from '../../lib/CityContext'
 import {
   AMAZING_TRASH_RACE_S2,
   type RaceRegistration,
@@ -12,7 +13,7 @@ export const ATR2_EVENT = {
   title: 'Amazing Trash Race · Season 2',
   dateLabel: '15 August 2026',
   when: new Date('2026-08-15T08:00:00+03:00'),
-  place: 'Nairobi · Fix Nairobi × XPNC',
+  place: 'City chapter',
   synopsis:
     'A fun, all-day city cleanup race. Register free, join a squad, get a digital ticket, then map trash, clear hotspots, and log kilos with marshals. Squade scores go live on the leaderboard. Families, students, and warriors welcome — no experience needed.',
 }
@@ -25,6 +26,8 @@ interface RaceStats {
 }
 
 export function AmazingTrashRaceCard() {
+  const city = useCity()
+  const path = useCityPath()
   const [open, setOpen] = useState(false)
   const [stats, setStats] = useState<RaceStats>({
     people: 0,
@@ -40,16 +43,17 @@ export function AmazingTrashRaceCard() {
     let usingLocal = false
 
     if (!isSupabaseConfigured) {
-      rows = loadLocalRaceRegistrations()
+      rows = loadLocalRaceRegistrations().filter((r) => r.city === city.slug)
       usingLocal = true
     } else {
       const { data, error } = await supabase
         .from('race_registrations')
         .select('*')
         .eq('event_slug', AMAZING_TRASH_RACE_S2)
+        .eq('city', city.slug)
         .order('created_at', { ascending: false })
       if (error || !data) {
-        rows = loadLocalRaceRegistrations()
+        rows = loadLocalRaceRegistrations().filter((r) => r.city === city.slug)
         usingLocal = true
       } else {
         rows = data as RaceRegistration[]
@@ -66,7 +70,7 @@ export function AmazingTrashRaceCard() {
       usingLocal,
     })
     setLoading(false)
-  }, [])
+  }, [city.slug])
 
   useEffect(() => {
     void load()
@@ -80,7 +84,7 @@ export function AmazingTrashRaceCard() {
   )
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-gold-400/40 bg-gradient-to-br from-[#1a1208] via-[#0c1a14] to-[#0a192f] shadow-[0_0_40px_rgba(255,107,0,0.12)]">
+    <article className="fn-panel-dark overflow-hidden rounded-2xl border border-gold-400/40 bg-gradient-to-br from-[#1a1208] via-[#0c1a14] to-[#0a192f] shadow-[0_0_40px_rgba(255,107,0,0.12)]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -95,7 +99,7 @@ export function AmazingTrashRaceCard() {
               {ATR2_EVENT.title}
             </h2>
             <p className="mt-1 text-sm text-amber-50/75">
-              {ATR2_EVENT.dateLabel} · {ATR2_EVENT.place}
+              {ATR2_EVENT.dateLabel} · {city.chapterName}
             </p>
           </div>
           <span className="rounded-lg border border-gold-400/40 bg-black/30 px-3 py-1.5 text-xs font-semibold text-amber-100">
@@ -169,13 +173,13 @@ export function AmazingTrashRaceCard() {
 
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
             <Link
-              to="/funds"
+              to={path('/funds')}
               className="inline-flex flex-1 items-center justify-center rounded-xl bg-[var(--fn-clear,#00f2fe)] px-5 py-3 text-center text-sm font-extrabold text-[#021a1a] shadow-[0_0_24px_rgba(0,242,254,0.3)] transition hover:brightness-110"
             >
               Donate for Season 3
             </Link>
             <Link
-              to="/race/leaderboard"
+              to={path('/race/leaderboard')}
               className="inline-flex items-center justify-center rounded-[var(--radius-card)] border border-white/20 px-4 py-3 text-sm font-semibold text-teal-100 hover:bg-white/5"
             >
               Leaderboard

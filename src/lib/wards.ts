@@ -1,9 +1,13 @@
 import type { Report } from '../types/database'
-import { marketConfig } from './marketConfig'
+import { getCity } from './cities'
 
 /** Rough ward assignment by lat/lng bounding boxes (MVP — replace with GeoJSON point-in-polygon). */
-export function assignWard(lat: number, lng: number): { wardId: string; areaName: string } | null {
-  for (const box of marketConfig.wardBoxes) {
+export function assignWard(
+  lat: number,
+  lng: number,
+  citySlug?: string,
+): { wardId: string; areaName: string } | null {
+  for (const box of getCity(citySlug).wardBoxes) {
     if (lat >= box.minLat && lat <= box.maxLat && lng >= box.minLng && lng <= box.maxLng) {
       return { wardId: box.id, areaName: box.name }
     }
@@ -23,12 +27,12 @@ export function severityLabel(score: number): string {
   return 'Minimal'
 }
 
-export function complaintMailto(areaName: string, reportId: string): string {
+export function complaintMailto(areaName: string, reportId: string, citySlug?: string): string {
   const subject = encodeURIComponent(`Trash report — ${areaName}`)
   const body = encodeURIComponent(
     `I am reporting a persistent trash hotspot.\n\nReport ID: ${reportId}\nArea: ${areaName}\n\nPlease investigate and arrange cleanup.`,
   )
-  return `mailto:${marketConfig.complaintEmail}?subject=${subject}&body=${body}`
+  return `mailto:${getCity(citySlug).complaintEmail}?subject=${subject}&body=${body}`
 }
 
 export function filterReportsBySeverity(reports: Report[], filter: string): Report[] {

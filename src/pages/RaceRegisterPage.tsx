@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { RaceTicket3D } from '../components/site/art/RaceTicket3D'
 import { SignInButton } from '../components/auth/SignInButton'
-import { SiteFooter, SiteNav } from '../components/site/SiteNav'
+import { ActionLink, PageIntro, PublicShell } from '../components/site/PagePrimitives'
+import { useCity, useCityPath } from '../lib/CityContext'
 import { useAuth } from '../hooks/useAuth'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
@@ -18,11 +19,14 @@ import {
   type RaceRegistration,
 } from '../types/database'
 
-const inputClass =
-  'mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white'
+const inputClass = 'fn-field'
+const labelClass = 'fn-label'
 
 export function RaceRegisterPage() {
   const { user, profile, loading } = useAuth()
+  const city = useCity()
+  const path = useCityPath()
+  const citySlug = city.slug
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -68,6 +72,7 @@ export function RaceRegisterPage() {
         team_name: squad,
         ticket_code: generateTicketCode(),
         user_id: user?.id ?? null,
+        city: citySlug,
       }
 
       if (!isSupabaseConfigured) {
@@ -77,6 +82,7 @@ export function RaceRegisterPage() {
           email: payload.email,
           team_name: payload.team_name,
           user_id: payload.user_id,
+          city: citySlug,
         })
         setUsingLocal(true)
         setTicket(row)
@@ -99,6 +105,7 @@ export function RaceRegisterPage() {
           email: authenticatedPayload.email,
           team_name: authenticatedPayload.team_name,
           user_id: authenticatedPayload.user_id,
+          city: citySlug,
         })
         setUsingLocal(true)
         setTicket(row)
@@ -127,6 +134,7 @@ export function RaceRegisterPage() {
     const { data, error: qErr } = await supabase
       .from('race_registrations')
       .select('*')
+      .eq('city', citySlug)
       .eq('event_slug', AMAZING_TRASH_RACE_S2)
       .order('created_at', { ascending: false })
     if (qErr) {
@@ -136,214 +144,204 @@ export function RaceRegisterPage() {
     exportRaceRegistrationsCsv((data ?? []) as RaceRegistration[])
   }
 
-  return (
-    <div className="fn-rebuild min-h-full bg-[#f3f7f4] text-[#12332d]">
-      <SiteNav />
-      <main className="mx-auto grid w-full max-w-7xl gap-8 px-5 pb-20 pt-28 sm:px-8 lg:grid-cols-[.8fr_1.2fr] lg:px-12 lg:pt-32">
-        <div className="flex flex-wrap gap-3 text-xs">
-          <Link to="/race/leaderboard" className="text-teal-200 hover:underline">
-            Live leaderboard
+  const introAction = (
+    <div className="flex flex-wrap gap-3">
+      <ActionLink to={path('/race/leaderboard')} tone="light">
+        Live leaderboard
+      </ActionLink>
+      {profile?.is_admin ? (
+        <>
+          <Link to={path('/race/admin')} className="fn-action fn-action-light">
+            Admin · teams
           </Link>
-          {profile?.is_admin && (
-            <>
-              <Link to="/race/admin" className="text-teal-200/80 hover:underline">
-                Admin · teams
-              </Link>
-              <Link to="/race/marshal" className="text-teal-200/80 hover:underline">
-                Marshal weights
-              </Link>
-            </>
-          )}
-        </div>
+          <Link to={path('/race/marshal')} className="fn-action fn-action-light">
+            Marshal weights
+          </Link>
+        </>
+      ) : null}
+    </div>
+  )
 
-        <p className="fn-eyebrow mt-8">
-          Season 2
-        </p>
-        <h1 className="fn-display mt-3 text-5xl font-extrabold leading-[.95] tracking-[-.06em] text-[#063b32] sm:text-7xl">
-          Amazing Trash Race
-        </h1>
-        <p className="mt-5 max-w-md text-base leading-7 text-[#617972]">
-          Register for a digital ticket, join a squad, and bring your code on race day.
-        </p>
-
-        {loading && isSupabaseConfigured && !ticket ? (
-          <p className="mt-8 text-sm text-teal-100/60">Checking your account…</p>
-        ) : needsSignIn && !ticket ? (
-          <div className="mt-8 rounded-[var(--radius-card)] border border-white/10 bg-white/5 p-5">
-            <p className="text-sm text-teal-50/90">
-              Create an account to register for Season 2. Your ticket will be saved to your
-              profile so it shows up under My impact.
-            </p>
-            <div className="mt-4">
-              <SignInButton
-                variant="dark"
-                label="Sign in to register"
-                className="w-full"
-                authTitle="Register for Season 2"
-                authBlurb="Sign in with Google or email magic link. Your ticket will be saved to your profile under My impact."
-              />
-            </div>
-          </div>
-        ) : !ticket && canShowForm ? (
-          <form onSubmit={submit} className="mt-8 space-y-4">
-            <label className="block text-xs text-teal-200/80">
-              Full name
-              <input
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={inputClass}
-              />
-            </label>
-            <label className="block text-xs text-teal-200/80">
-              Phone
-              <input
-                required
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={inputClass}
-                placeholder="07XX XXX XXX"
-              />
-            </label>
-            <label className="block text-xs text-teal-200/80">
-              Email
-              {user ? (
-                <input
-                  readOnly
-                  type="email"
-                  value={accountEmail}
-                  className={`${inputClass} cursor-default opacity-80`}
+  return (
+    <PublicShell>
+      <main>
+        <PageIntro
+          eyebrow="Season 2"
+          title="Amazing Trash Race"
+          body="Register for a digital ticket, join a squad, and bring your code on race day."
+          action={introAction}
+        />
+        <section className="mx-auto max-w-xl px-5 pb-20 sm:px-8 lg:px-12">
+          {loading && isSupabaseConfigured && !ticket ? (
+            <p className="text-sm text-[#5d746e]">Checking your account…</p>
+          ) : needsSignIn && !ticket ? (
+            <div className="rounded-[1.5rem] border border-[#d9e9e4] bg-white p-6 shadow-[var(--shadow-card)]">
+              <p className="text-sm leading-6 text-[#36564e]">
+                Create an account to register for Season 2. Your ticket will be saved to your
+                profile so it shows up under My impact.
+              </p>
+              <div className="mt-4">
+                <SignInButton
+                  variant="dark"
+                  label="Sign in to register"
+                  className="w-full"
+                  authTitle="Register for Season 2"
+                  authBlurb="Sign in with Google or email magic link. Your ticket will be saved to your profile under My impact."
                 />
-              ) : (
+              </div>
+            </div>
+          ) : !ticket && canShowForm ? (
+            <form onSubmit={submit} className="space-y-4">
+              <label className={labelClass}>
+                Full name
                 <input
                   required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   className={inputClass}
                 />
-              )}
-            </label>
+              </label>
+              <label className={labelClass}>
+                Phone
+                <input
+                  required
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className={inputClass}
+                  placeholder="07XX XXX XXX"
+                />
+              </label>
+              <label className={labelClass}>
+                Email
+                {user ? (
+                  <input
+                    readOnly
+                    type="email"
+                    value={accountEmail}
+                    className={`${inputClass} cursor-default opacity-80`}
+                  />
+                ) : (
+                  <input
+                    required
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={inputClass}
+                  />
+                )}
+              </label>
 
-            <div>
-              <p className="text-xs text-teal-200/80">Squad / micro-team *</p>
-              <div className="mt-2 flex flex-wrap gap-2.5">
-                {RACE_TEAM_PRESETS.map((preset) => (
+              <div>
+                <p className={labelClass}>Squad / micro-team *</p>
+                <div className="mt-2 flex flex-wrap gap-2.5">
+                  {RACE_TEAM_PRESETS.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => {
+                        setCustomTeam(false)
+                        setTeamName(preset)
+                      }}
+                      className={`fn-chip-btn ${!customTeam && teamName === preset ? 'is-on' : ''}`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
                   <button
-                    key={preset}
                     type="button"
                     onClick={() => {
-                      setCustomTeam(false)
-                      setTeamName(preset)
+                      setCustomTeam(true)
+                      setTeamName('')
                     }}
-                    className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-2 text-xs font-semibold ${
-                      !customTeam && teamName === preset
-                        ? 'border-[#2dd4bf] bg-teal-500/20 text-teal-200'
-                        : 'border-white/15 text-teal-100/80'
-                    }`}
+                    className={`fn-chip-btn ${customTeam ? 'is-on' : ''}`}
                   >
-                    {preset}
+                    Custom…
                   </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCustomTeam(true)
-                    setTeamName('')
-                  }}
-                  className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-2 text-xs font-semibold ${
-                    customTeam
-                      ? 'border-orange-400 bg-orange-500/15 text-orange-200'
-                      : 'border-white/15 text-teal-100/80'
-                  }`}
-                >
-                  Custom…
-                </button>
+                </div>
+                {customTeam && (
+                  <input
+                    required
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    className={inputClass}
+                    placeholder="Your squad name"
+                  />
+                )}
+                {!customTeam && !teamName && (
+                  <p className="mt-2 text-[11px] font-semibold text-[#8b6207]">Select a squad above.</p>
+                )}
               </div>
-              {customTeam && (
-                <input
-                  required
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  className={inputClass}
-                  placeholder="Your squad name"
-                />
-              )}
-              {!customTeam && !teamName && (
-                <p className="mt-2 text-[11px] text-gold-200/80">Select a squad above.</p>
-              )}
-            </div>
 
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full rounded-xl bg-[#2dd4bf] py-3 text-sm font-bold text-emerald-950 disabled:opacity-50"
+              <button
+                type="submit"
+                disabled={busy}
+                className="fn-action fn-action-gold w-full justify-center disabled:opacity-50"
+              >
+                {busy ? 'Issuing ticket…' : 'Get my ticket'}
+              </button>
+              {error && <p className="text-sm font-semibold text-[#8b6207]">{error}</p>}
+            </form>
+          ) : ticket ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
             >
-              {busy ? 'Issuing ticket…' : 'Get my ticket'}
-            </button>
-            {error && <p className="text-sm text-gold-200">{error}</p>}
-          </form>
-        ) : ticket ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-8"
-          >
-            <RaceTicket3D
-              code={ticket.ticket_code}
-              holderName={ticket.full_name}
-              teamName={ticket.team_name ?? undefined}
-            />
-            <p className="mt-4 rounded-lg bg-black/30 px-3 py-2 text-xs text-teal-100/80">
-              Screenshot this ticket. On race day open the{' '}
-              <Link to="/map" className="font-semibold text-[#00f2fe]">
-                Trash Map
-              </Link>{' '}
-              and watch the{' '}
-              <Link to="/race/leaderboard" className="font-semibold text-[#00f2fe]">
-                live leaderboard
-              </Link>
-              .
-            </p>
-            {usingLocal && (
-              <p className="mt-3 text-xs text-gold-200">
-                Stored in this browser until migration 007 is applied on Supabase.
-              </p>
-            )}
-            {user && (
-              <p className="mt-3 text-xs text-[var(--fn-clear,#5eead4)]">
-                Signed in — open{' '}
-                <Link to="/me" className="underline">
-                  My impact
+              <RaceTicket3D
+                code={ticket.ticket_code}
+                holderName={ticket.full_name}
+                teamName={ticket.team_name ?? undefined}
+                cityLabel={city.chapterName}
+              />
+              <p className="mt-4 rounded-xl bg-[#eef6f2] px-4 py-3 text-xs leading-5 text-[#36564e]">
+                Screenshot this ticket. On race day open the{' '}
+                <Link to={path('/map')} className="font-bold text-[#0b8c76]">
+                  Trash Map
                 </Link>{' '}
-                to see tickets linked to your account.
+                and watch the{' '}
+                <Link to={path('/race/leaderboard')} className="font-bold text-[#0b8c76]">
+                  live leaderboard
+                </Link>
+                .
               </p>
-            )}
+              {usingLocal && (
+                <p className="mt-3 text-xs text-[#8b6207]">
+                  Stored in this browser until migration 007 is applied on Supabase.
+                </p>
+              )}
+              {user && (
+                <p className="mt-3 text-xs text-[#0b8c76]">
+                  Signed in — open{' '}
+                  <Link to={path('/me')} className="font-bold underline">
+                    My impact
+                  </Link>{' '}
+                  to see tickets linked to your account.
+                </p>
+              )}
+              <button
+                type="button"
+                className="mt-4 text-sm font-bold text-[#0b8c76] underline"
+                onClick={() => {
+                  setTicket(null)
+                  setError(null)
+                }}
+              >
+                Register another person
+              </button>
+            </motion.div>
+          ) : null}
+
+          {profile?.is_admin && (
             <button
               type="button"
-              className="mt-4 text-sm text-teal-300 underline"
-              onClick={() => {
-                setTicket(null)
-                setError(null)
-              }}
+              onClick={() => void exportCsv()}
+              className="mt-8 text-sm font-bold text-[#0b8c76] underline"
             >
-              Register another person
+              Export registrations CSV
             </button>
-          </motion.div>
-        ) : null}
-
-        {profile?.is_admin && (
-          <button
-            type="button"
-            onClick={() => void exportCsv()}
-            className="mt-8 text-sm text-teal-200 underline"
-          >
-            Export registrations CSV
-          </button>
-        )}
+          )}
+        </section>
       </main>
-      <SiteFooter />
-    </div>
+    </PublicShell>
   )
 }

@@ -15,7 +15,7 @@ interface AuthModalProps {
 export function AuthModal({
   open,
   onClose,
-  title = 'Join Fix Nairobi',
+  title = 'Join Ramani-Taka',
   blurb = 'Make an account to report trash, join cleanups, and save your impact points. Free — use Google or email.',
   onAuthenticated,
 }: AuthModalProps) {
