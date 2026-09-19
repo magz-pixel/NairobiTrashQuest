@@ -80,13 +80,13 @@ export function RewardsPanel({ open, onClose }: RewardsPanelProps) {
 
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {!user && (
-                <Card className="bg-gray-50">
+                <Card className="bg-canvas">
                   <p className="mb-3 text-sm text-[var(--text-primary)]">Sign in to redeem rewards.</p>
                   <SignInButton />
                 </Card>
               )}
               {REWARDS.map((reward) => (
-                <Card key={reward.name} className="bg-gray-50">
+                <Card key={reward.name} className="bg-canvas">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-[var(--text-primary)]">{reward.name}</p>

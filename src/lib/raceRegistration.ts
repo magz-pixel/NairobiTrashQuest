@@ -32,6 +32,7 @@ export function addLocalRaceRegistration(input: {
   email: string
   team_name?: string | null
   user_id?: string | null
+  city?: string
 }): RaceRegistration {
   const rows = loadAll()
   const row: RaceRegistration = {
@@ -44,6 +45,7 @@ export function addLocalRaceRegistration(input: {
     ticket_code: generateTicketCode(),
     user_id: input.user_id ?? null,
     created_at: new Date().toISOString(),
+    city: input.city ?? 'nairobi',
   }
   saveAll([row, ...rows])
   return row

@@ -266,6 +266,7 @@ export function generateDemoReportsDar(): Report[] {
       funding_goal_tzs: spot.funding_goal_tzs,
       funding_raised_tzs: spot.funding_raised_tzs,
       funding_contributors: spot.funding_contributors,
+      city: 'dar-es-salaam',
     })
   })
 }

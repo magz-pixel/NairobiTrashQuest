@@ -1,6 +1,7 @@
 import type { FundEntry } from '../types/database'
+import { formatCityMoney, getCity } from './cities'
 
-const LOCAL_KEY = 'fix_nairobi_fund_entries_v1'
+const LOCAL_KEY = 'ramani_taka_fund_entries_v1'
 
 const SEED: Omit<FundEntry, 'id' | 'created_at' | 'created_by' | 'voided'>[] = [
   {
@@ -8,30 +9,56 @@ const SEED: Omit<FundEntry, 'id' | 'created_at' | 'created_by' | 'voided'>[] = [
     amount_kes: 50_000,
     donor_or_payee: 'XPNC Partnership seed',
     note: 'Season 2 operating float',
+    city: 'nairobi',
   },
   {
     kind: 'donation',
     amount_kes: 25_000,
     donor_or_payee: 'Community donor circle',
     note: 'Amazing Trash Race prep',
+    city: 'nairobi',
   },
   {
     kind: 'donation',
     amount_kes: 10_000,
     donor_or_payee: 'Anonymous supporter',
     note: 'General Fix Nairobi fund',
+    city: 'nairobi',
   },
   {
     kind: 'expense',
     amount_kes: 12_000,
     donor_or_payee: 'Cleanup kit procurement',
     note: 'Gloves, bags, vests — Race S2',
+    city: 'nairobi',
   },
   {
     kind: 'expense',
     amount_kes: 8_000,
     donor_or_payee: 'Print & zone materials',
     note: 'Maps and marshal sheets',
+    city: 'nairobi',
+  },
+  {
+    kind: 'donation',
+    amount_kes: 8_000_000,
+    donor_or_payee: 'Kampala partner seed',
+    note: 'Fix Kampala operating float',
+    city: 'kampala',
+  },
+  {
+    kind: 'donation',
+    amount_kes: 2_500_000,
+    donor_or_payee: 'Community donor circle',
+    note: 'Nakivubo channel cleanup kit',
+    city: 'kampala',
+  },
+  {
+    kind: 'donation',
+    amount_kes: 4_000_000,
+    donor_or_payee: 'Dar partner seed',
+    note: 'Fix Dar es Salaam operating float',
+    city: 'dar-es-salaam',
   },
 ]
 
@@ -66,7 +93,7 @@ export function saveLocalFundEntries(entries: FundEntry[]) {
 }
 
 export function addLocalFundEntry(
-  partial: Pick<FundEntry, 'kind' | 'amount_kes' | 'donor_or_payee' | 'note'>,
+  partial: Pick<FundEntry, 'kind' | 'amount_kes' | 'donor_or_payee' | 'note' | 'city'>,
 ): FundEntry {
   const entries = loadLocalFundEntries()
   const next: FundEntry = {
@@ -78,6 +105,7 @@ export function addLocalFundEntry(
     voided: false,
     created_by: null,
     created_at: nowIso(),
+    city: partial.city,
   }
   const updated = [next, ...entries]
   saveLocalFundEntries(updated)
@@ -103,9 +131,9 @@ export function summarizeFunds(entries: FundEntry[]) {
 }
 
 export function formatKes(amount: number) {
-  return `KSh ${Math.round(amount).toLocaleString('en-KE')}`
+  return formatCityMoney(amount, getCity('nairobi'))
 }
 
-/** Season 2 community fund campaign target (KES). Edit here until admin settings exist. */
+/** Season 2 community fund campaign target. Edit here until admin settings exist. */
 export const FUND_TARGET_KES = 500_000
 

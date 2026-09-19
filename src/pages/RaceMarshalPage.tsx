@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { AuthGate } from '../components/auth/AuthGate'
-import { SiteFooter, SiteNav } from '../components/site/SiteNav'
+import { OpsFrame } from '../components/site/PagePrimitives'
 import { useAuth } from '../hooks/useAuth'
 import {
   clearLocalRaceHotspot,
@@ -184,12 +183,12 @@ function MarshalInner() {
   }
 
   if (loading) {
-    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
+    return <p className="text-sm text-[#5d746e]">Checking admin access…</p>
   }
 
   if (!canWrite && isSupabaseConfigured) {
     return (
-      <p className="rounded-xl border border-amber-400/30 p-4 text-sm text-amber-100">
+      <p className="fn-warn">
         Sign in as an admin to log marshal weights.
       </p>
     )
@@ -198,20 +197,20 @@ function MarshalInner() {
   return (
     <div className="space-y-8">
       {usingLocal && (
-        <p className="text-xs text-amber-200">
+        <p className="text-xs font-semibold text-[#8b6207]">
           Local weight/hotspot log — run migrations 008 + 014 for shared data.
         </p>
       )}
-      <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-white">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-[#063b32]">
           Log checkpoint weight
         </h2>
-        <label className="block text-xs text-teal-200/80">
+        <label className="fn-label">
           Squad
           <select
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white"
+            className="fn-field"
           >
             {teamOptions.map((t) => (
               <option key={t} value={t}>
@@ -220,7 +219,7 @@ function MarshalInner() {
             ))}
           </select>
         </label>
-        <label className="block text-xs text-teal-200/80">
+        <label className="fn-label">
           Kilograms
           <input
             type="number"
@@ -229,15 +228,15 @@ function MarshalInner() {
             required
             value={kg}
             onChange={(e) => setKg(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white"
+            className="fn-field"
           />
         </label>
-        <label className="block text-xs text-teal-200/80">
+        <label className="fn-label">
           Waste category
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as WasteCategory)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white"
+            className="fn-field"
           >
             {WASTE_CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>
@@ -246,12 +245,12 @@ function MarshalInner() {
             ))}
           </select>
         </label>
-        <label className="block text-xs text-teal-200/80">
+        <label className="fn-label">
           Hotspot cleared (optional)
           <select
             value={hotspotId}
             onChange={(e) => setHotspotId(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#0a1a17] px-3 py-2.5 text-white"
+            className="fn-field"
           >
             <option value="">None — weight only</option>
             {activeHotspots.map((h) => (
@@ -264,25 +263,25 @@ function MarshalInner() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-xl bg-orange-500 py-3 text-sm font-bold text-white disabled:opacity-50"
+          className="fn-action fn-action-gold w-full justify-center disabled:opacity-50"
         >
           {busy ? 'Saving…' : 'Add to leaderboard'}
         </button>
-        {status && <p className="text-sm text-[#2dd4bf]">{status}</p>}
+        {status && <p className="text-sm font-semibold text-[#0b8c76]">{status}</p>}
       </form>
 
       <div>
-        <h3 className="text-sm font-semibold text-white">Recent logs</h3>
-        <ul className="mt-2 divide-y divide-white/10 border-t border-white/10 text-sm">
+        <h3 className="text-sm font-semibold text-[#063b32]">Recent logs</h3>
+        <ul className="mt-2 divide-y divide-[#e5efeb] border-t border-[#e5efeb] text-sm">
           {logs.map((l) => (
-            <li key={l.id} className="flex justify-between gap-2 py-2 text-teal-100/80">
+            <li key={l.id} className="flex justify-between gap-2 py-2 text-[#36564e]">
               <span>
                 {l.team_name} · {l.waste_category}
               </span>
-              <strong className="text-orange-300">{Number(l.kg).toFixed(1)} kg</strong>
+              <strong className="text-[#8b6207]">{Number(l.kg).toFixed(1)} kg</strong>
             </li>
           ))}
-          {logs.length === 0 && <li className="py-3 text-teal-100/50">No weights yet.</li>}
+          {logs.length === 0 && <li className="py-3 text-[#71867f]">No weights yet.</li>}
         </ul>
       </div>
     </div>
@@ -291,30 +290,19 @@ function MarshalInner() {
 
 export function RaceMarshalPage() {
   return (
-    <div className="fn-landing min-h-full bg-[#071613] text-[#e8f5f1]">
-      <SiteNav />
-      <main className="mx-auto max-w-lg px-4 py-12 md:px-6">
-        <Link to="/race/leaderboard" className="text-sm text-teal-300 hover:text-white">
-          ← Leaderboard
-        </Link>
-        <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-bold text-white">
-          Marshal checkpoint
-        </h1>
-        <p className="mt-2 text-sm text-teal-100/70">
-          Log verified waste weight by squad and clear race hotspots. Feeds the Season 2 live
-          leaderboard.
-        </p>
-        <div className="mt-8">
-          {!isSupabaseConfigured ? (
-            <MarshalInner />
-          ) : (
-            <AuthGate>
-              <MarshalInner />
-            </AuthGate>
-          )}
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
+    <OpsFrame
+      title="Marshal checkpoint"
+      eyebrow="Season 2 ops"
+      description="Log verified waste weight by squad and clear race hotspots. Feeds the Season 2 live leaderboard."
+      backTo="/race/leaderboard"
+    >
+      {!isSupabaseConfigured ? (
+        <MarshalInner />
+      ) : (
+        <AuthGate>
+          <MarshalInner />
+        </AuthGate>
+      )}
+    </OpsFrame>
   )
 }

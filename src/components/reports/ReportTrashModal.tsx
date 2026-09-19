@@ -10,6 +10,7 @@ import { compressImageFile } from '../../lib/uploads'
 import { assignWard } from '../../lib/wards'
 import { nearestActiveReport } from '../../lib/nearbyReports'
 import { bumpMissionProgress } from '../../lib/missions'
+import { useCity } from '../../lib/CityContext'
 import { useAuth } from '../../hooks/useAuth'
 import type { Report, TrashAnalysis } from '../../types/database'
 import { Button } from '../ui/Button'
@@ -45,6 +46,7 @@ export function ReportTrashModal({
   onViewExistingReport,
 }: ReportTrashModalProps) {
   const { user } = useAuth()
+  const city = useCity()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -117,7 +119,7 @@ export function ReportTrashModal({
     const reportId = crypto.randomUUID()
     setStatus('Uploading photo…')
     const imageUrl = await uploadReportImage(user.id, reportId, compressed)
-    const ward = assignWard(position.coords.latitude, position.coords.longitude)
+    const ward = assignWard(position.coords.latitude, position.coords.longitude, city.slug)
 
     setStatus(aiNote ? `Saving report… (${aiNote})` : 'Saving report…')
     const { error } = await supabase.from('reports').insert({
@@ -132,6 +134,7 @@ export function ReportTrashModal({
       ward_id: ward?.wardId ?? null,
       area_name: ward?.areaName ?? null,
       waste_type: analysis.tags[0] ?? 'Mixed waste',
+      city: city.slug,
     })
 
     if (error) throw error
@@ -302,7 +305,7 @@ export function ReportTrashModal({
             }}
           />
         ) : gpsWarning ? (
-          <div className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+          <div className="space-y-3 rounded-[var(--radius-card)] border border-amber-500/40 bg-gold-400/10 p-3">
             <p className="text-sm text-[var(--text-primary)]">
               GPS accuracy is about{' '}
               <span className="font-semibold">
@@ -356,7 +359,7 @@ export function ReportTrashModal({
                 className="aspect-video w-full rounded-lg object-cover"
               />
             ) : (
-              <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-gray-50 text-sm text-[var(--text-muted)]">
+              <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-canvas text-sm text-[var(--text-muted)]">
                 Capture or upload a photo
               </div>
             )}
@@ -389,7 +392,7 @@ export function ReportTrashModal({
               />
             </div>
 
-            <div className="rounded-xl border border-[var(--border-subtle)] bg-black/30 p-3">
+            <div className="rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-black/30 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-semibold text-[var(--text-primary)]">
                   Intensity (your rating)

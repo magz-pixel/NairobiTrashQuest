@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { loadLocalRaceHotspots } from '../lib/raceHotspots'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { AMAZING_TRASH_RACE_S2, type RaceHotspot } from '../types/database'
+import { useCity } from '../lib/CityContext'
+import { AMAZING_TRASH_RACE_S2, isRaceMapActive, type RaceHotspot } from '../types/database'
 
 function normalizeHotspot(row: Record<string, unknown>): RaceHotspot {
   return {
@@ -12,6 +13,7 @@ function normalizeHotspot(row: Record<string, unknown>): RaceHotspot {
     label: row.label as string,
     point_value: row.point_value as number,
     is_ghost_spot: Boolean(row.is_ghost_spot),
+    is_funded: Boolean(row.is_funded),
     reference_image_url: (row.reference_image_url as string | null) ?? null,
     gallery_image_urls: Array.isArray(row.gallery_image_urls)
       ? (row.gallery_image_urls as string[])
@@ -24,6 +26,7 @@ function normalizeHotspot(row: Record<string, unknown>): RaceHotspot {
 }
 
 export function useRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2) {
+  const city = useCity()
   const [hotspots, setHotspots] = useState<RaceHotspot[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -31,9 +34,22 @@ export function useRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2) {
 
   const fetchHotspots = useCallback(async () => {
     setError(null)
+    const inCity = (list: RaceHotspot[]) =>
+      list.filter(
+        (h) =>
+          Math.abs(h.latitude - city.center.lat) < 0.4 &&
+          Math.abs(h.longitude - city.center.lng) < 0.4,
+      )
+
+    if (!isRaceMapActive()) {
+      setUsingLocal(false)
+      setHotspots([])
+      return
+    }
+
     if (!isSupabaseConfigured) {
       setUsingLocal(true)
-      setHotspots(loadLocalRaceHotspots(eventSlug))
+      setHotspots(inCity(loadLocalRaceHotspots(eventSlug)))
       return
     }
 
@@ -45,14 +61,16 @@ export function useRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2) {
 
     if (fetchError) {
       setUsingLocal(true)
-      setHotspots(loadLocalRaceHotspots(eventSlug))
+      setHotspots(inCity(loadLocalRaceHotspots(eventSlug)))
       setError(fetchError.message)
       return
     }
 
     setUsingLocal(false)
-    setHotspots((data ?? []).map((row) => normalizeHotspot(row as Record<string, unknown>)))
-  }, [eventSlug])
+    setHotspots(
+      inCity((data ?? []).map((row) => normalizeHotspot(row as Record<string, unknown>))),
+    )
+  }, [eventSlug, city.center.lat, city.center.lng])
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -62,7 +80,7 @@ export function useRaceHotspots(eventSlug = AMAZING_TRASH_RACE_S2) {
   }, [fetchHotspots])
 
   useEffect(() => {
-    if (!isSupabaseConfigured || usingLocal) return
+    if (!isRaceMapActive() || !isSupabaseConfigured || usingLocal) return
 
     const channel = supabase
       .channel(`race-hotspots-${eventSlug}`)

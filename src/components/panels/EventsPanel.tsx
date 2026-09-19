@@ -2,32 +2,69 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import type { Event } from '../../types/database'
+import { useCity, useCityPath } from '../../lib/CityContext'
 import { Card } from '../ui/Card'
 
-const DEMO_EVENTS: Event[] = [
-  {
-    id: 'demo-ev-1',
-    title: 'CBD River Cleanup',
-    description: 'Join rangers to clear plastic along the Nairobi River footpath.',
-    location: 'CBD, Nairobi',
-    latitude: -1.286,
-    longitude: 36.817,
-    event_date: new Date(Date.now() + 86400000 * 3).toISOString(),
-    organizer_id: '00000000-0000-4000-8000-000000000001',
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'demo-ev-2',
-    title: 'Westlands Park Sweep',
-    description: 'Gamified litter hunt — earn double impact points this weekend.',
-    location: 'Westlands',
-    latitude: -1.265,
-    longitude: 36.805,
-    event_date: new Date(Date.now() + 86400000 * 7).toISOString(),
-    organizer_id: '00000000-0000-4000-8000-000000000001',
-    created_at: new Date().toISOString(),
-  },
-]
+function demoEvents(citySlug: string): Event[] {
+  if (citySlug === 'kampala') {
+    return [
+      {
+        id: 'demo-ev-kla-1',
+        title: 'Nakivubo Channel Sweep',
+        description: 'Join crews to clear plastic along the Nakivubo drainage.',
+        location: 'Central Division, Kampala',
+        latitude: 0.312,
+        longitude: 32.58,
+        event_date: new Date(Date.now() + 86400000 * 3).toISOString(),
+        organizer_id: '00000000-0000-4000-8000-000000000001',
+        created_at: new Date().toISOString(),
+        city: 'kampala',
+      },
+    ]
+  }
+  if (citySlug === 'dar-es-salaam') {
+    return [
+      {
+        id: 'demo-ev-dar-1',
+        title: 'Kariakoo Market Sweep',
+        description: 'Clear overflow around Kariakoo and log verified bags.',
+        location: 'Kariakoo, Dar es Salaam',
+        latitude: -6.822,
+        longitude: 39.275,
+        event_date: new Date(Date.now() + 86400000 * 3).toISOString(),
+        organizer_id: '00000000-0000-4000-8000-000000000001',
+        created_at: new Date().toISOString(),
+        city: 'dar-es-salaam',
+      },
+    ]
+  }
+  return [
+    {
+      id: 'demo-ev-1',
+      title: 'CBD River Cleanup',
+      description: 'Join rangers to clear plastic along the Nairobi River footpath.',
+      location: 'CBD, Nairobi',
+      latitude: -1.286,
+      longitude: 36.817,
+      event_date: new Date(Date.now() + 86400000 * 3).toISOString(),
+      organizer_id: '00000000-0000-4000-8000-000000000001',
+      created_at: new Date().toISOString(),
+      city: 'nairobi',
+    },
+    {
+      id: 'demo-ev-2',
+      title: 'Westlands Park Sweep',
+      description: 'Gamified litter hunt — earn double impact points this weekend.',
+      location: 'Westlands',
+      latitude: -1.265,
+      longitude: 36.805,
+      event_date: new Date(Date.now() + 86400000 * 7).toISOString(),
+      organizer_id: '00000000-0000-4000-8000-000000000001',
+      created_at: new Date().toISOString(),
+      city: 'nairobi',
+    },
+  ]
+}
 
 interface EventsPanelProps {
   open: boolean
@@ -35,6 +72,8 @@ interface EventsPanelProps {
 }
 
 export function EventsPanel({ open, onClose }: EventsPanelProps) {
+  const city = useCity()
+  const path = useCityPath()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -43,14 +82,15 @@ export function EventsPanel({ open, onClose }: EventsPanelProps) {
     supabase
       .from('events')
       .select('*')
+      .eq('city', city.slug)
       .gte('event_date', new Date().toISOString())
       .order('event_date', { ascending: true })
       .then(({ data }) => {
         const live = (data ?? []) as Event[]
-        setEvents(live.length > 0 ? live : DEMO_EVENTS)
+        setEvents(live.length > 0 ? live : demoEvents(city.slug))
         setLoading(false)
       })
-  }, [open])
+  }, [open, city.slug])
 
   return (
     <AnimatePresence>
@@ -80,8 +120,8 @@ export function EventsPanel({ open, onClose }: EventsPanelProps) {
                 Cleanup events
               </h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
-                Squad up and reclaim Nairobi block by block. Full list also on{' '}
-                <a href="/cleanups" className="font-semibold text-[var(--brand-teal)]">
+                Squad up and reclaim {city.label} block by block. Full list also on{' '}
+                <a href={path('/cleanups')} className="font-semibold text-[var(--brand-teal)]">
                   /cleanups
                 </a>
                 .
@@ -94,7 +134,7 @@ export function EventsPanel({ open, onClose }: EventsPanelProps) {
                 <ul className="space-y-3">
                   {events.map((event) => (
                     <li key={event.id}>
-                      <Card className="border-[var(--brand-teal)]/10 bg-gray-50">
+                      <Card className="border-[var(--brand-teal)]/10 bg-canvas">
                         <h3 className="font-semibold text-[var(--brand-teal)]">
                           {event.title}
                         </h3>

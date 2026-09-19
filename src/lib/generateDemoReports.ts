@@ -1,6 +1,6 @@
 import type { Report, ReportStatus } from '../types/database'
-import { isRamaniMarket } from './marketConfig'
 import { generateDemoReportsDar } from './generateDemoReportsDar'
+import { generateDemoReportsKampala } from './generateDemoReportsKampala'
 import { demoReportDefaults } from './reportDefaults'
 
 const DEMO_USER = '00000000-0000-4000-8000-000000000001'
@@ -246,10 +246,13 @@ function generateNairobiDemoReports(): Report[] {
       area_name: spot.area_name,
       ward_id: spot.ward_id,
       waste_type: spot.waste_type,
+      city: 'nairobi',
     })
   })
 }
 
-export function generateDemoReports(): Report[] {
-  return isRamaniMarket ? generateDemoReportsDar() : generateNairobiDemoReports()
+export function generateDemoReports(citySlug = 'nairobi'): Report[] {
+  if (citySlug === 'kampala') return generateDemoReportsKampala()
+  if (citySlug === 'dar-es-salaam') return generateDemoReportsDar()
+  return generateNairobiDemoReports()
 }

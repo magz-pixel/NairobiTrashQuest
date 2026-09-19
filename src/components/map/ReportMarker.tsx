@@ -12,7 +12,7 @@ function dotIcon(severity: number) {
       width:${size}px;height:${size}px;
       background:${color};
       border-radius:50%;
-      box-shadow:0 0 8px ${color};
+      box-shadow:0 0 10px ${color};
       border:1.5px solid rgba(255,255,255,0.7);
     "></div>`,
     iconSize: [size, size],

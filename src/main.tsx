@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/index.css'
+import './styles/rebuild-v2.css'
 import App from './App.tsx'
 
 // Ensure mobile clients recover cleanly after deploys (service worker cache).

@@ -1,12 +1,12 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import type { RaceHotspot, Report } from '../../types/database'
-import { marketConfig } from '../../lib/marketConfig'
+import { useCity } from '../../lib/CityContext'
 import { ClusterLayer } from './ClusterLayer'
 import { HotspotLayer } from './HotspotLayer'
 import { ReportPulseLayer } from './ReportPulseLayer'
 
 const LIGHT_TILE =
-  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 interface MapViewProps {
   reports: Report[]
@@ -37,16 +37,18 @@ export function MapView({
   pulseAt,
   onPulseDone,
 }: MapViewProps) {
+  const city = useCity()
   return (
     <MapContainer
-      center={marketConfig.mapCenter}
-      zoom={marketConfig.mapZoom}
+      key={city.slug}
+      center={[city.center.lat, city.center.lng]}
+      zoom={city.mapZoom}
       className="h-full w-full"
       zoomControl={false}
     >
       <MapInteractor onInteract={onInteract} />
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url={LIGHT_TILE}
       />
       <ClusterLayer reports={reports} onSelectReport={onSelectReport} />

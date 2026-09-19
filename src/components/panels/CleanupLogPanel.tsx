@@ -142,13 +142,13 @@ export function CleanupLogPanel({
 
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {!user ? (
-                <Card className="bg-gray-50">
+                <Card className="bg-canvas">
                   <p className="mb-3 text-sm text-[var(--text-primary)]">Sign in to log cleanups.</p>
                   <SignInButton />
                 </Card>
               ) : (
                 <>
-                  <Card className="bg-gray-50">
+                  <Card className="bg-canvas">
                     <p className="text-xs text-[var(--text-muted)]">Estimated tokens</p>
                     <p className="text-4xl font-extrabold text-[var(--brand-teal)]">
                       {previewPoints}
@@ -162,13 +162,13 @@ export function CleanupLogPanel({
                     </p>
                   </Card>
 
-                  <Card className="bg-gray-50">
+                  <Card className="bg-canvas">
                     <label className="block text-xs text-[var(--text-muted)]">Hours spent</label>
                     <input
                       value={hours}
                       onChange={(e) => setHours(e.target.value)}
                       inputMode="decimal"
-                      className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
+                      className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
                     />
 
                     <label className="mt-3 block text-xs text-[var(--text-muted)]">KG collected</label>
@@ -176,7 +176,7 @@ export function CleanupLogPanel({
                       value={kg}
                       onChange={(e) => setKg(e.target.value)}
                       inputMode="decimal"
-                      className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
+                      className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
                     />
 
                     <label className="mt-3 block text-xs text-[var(--text-muted)]">Ecological impact</label>
@@ -202,11 +202,11 @@ export function CleanupLogPanel({
                       value={locationText}
                       onChange={(e) => setLocationText(e.target.value)}
                       placeholder="e.g. Gikomba market entrance"
-                      className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
+                      className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
                     />
                   </Card>
 
-                  <Card className="bg-gray-50">
+                  <Card className="bg-canvas">
                     <p className="text-xs text-[var(--text-muted)]">Before/After photos (optional)</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Button

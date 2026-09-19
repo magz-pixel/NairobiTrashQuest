@@ -77,7 +77,7 @@ export function MissionsPanel({ open, onClose }: MissionsPanelProps) {
                   ? Math.min(100, Math.round((p.progress / m.target_count) * 100))
                   : 0
                 return (
-                  <Card key={m.id} className="border-[var(--border-subtle)] bg-gray-50">
+                  <Card key={m.id} className="border-[var(--border-subtle)] bg-canvas">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <h3 className="font-semibold text-[var(--text-primary)]">{m.title}</h3>

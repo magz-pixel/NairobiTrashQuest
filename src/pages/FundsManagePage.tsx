@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { AuthGate } from '../components/auth/AuthGate'
-import { SiteFooter, SiteNav } from '../components/site/SiteNav'
+import { OpsFrame } from '../components/site/PagePrimitives'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { useFundLedger } from '../hooks/useFundLedger'
-import { formatKes } from '../lib/fundLedger'
+import { useCity } from '../lib/CityContext'
+import { formatCityMoney } from '../lib/cities'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 function LedgerManageInner() {
   const { profile, signOut, loading } = useAuth()
-  const { entries, addEntry, voidEntry, usingLocal, refetch } = useFundLedger()
+  const city = useCity()
+  const money = (n: number) => formatCityMoney(n, city)
+  const { entries, addEntry, voidEntry, usingLocal, refetch } = useFundLedger(city.slug)
   const [kind, setKind] = useState<'donation' | 'expense'>('donation')
   const [amount, setAmount] = useState('')
   const [name, setName] = useState('')
@@ -49,21 +51,21 @@ function LedgerManageInner() {
   }
 
   if (loading) {
-    return <p className="text-sm text-teal-100/60">Checking admin access…</p>
+    return <p className="text-sm text-[#5d746e]">Checking admin access…</p>
   }
 
   if (!isAdmin && !usingLocal) {
     return (
-      <div className="rounded-2xl border border-amber-400/30 bg-amber-950/40 p-6 text-amber-100">
+      <div className="fn-warn">
         <p className="font-semibold">Admin access required</p>
-        <p className="mt-2 text-sm text-amber-100/80">
-          Your profile needs <code className="text-amber-200">is_admin = true</code> in
+        <p className="mt-2">
+          Your profile needs <code>is_admin = true</code> in
           Supabase to edit the shared ledger. Ask Arnold to flag your account, or use local
           seed mode until migration 006 is applied.
         </p>
         <button
           type="button"
-          className="mt-4 text-sm underline"
+          className="mt-4 text-sm font-bold underline"
           onClick={() => void signOut()}
         >
           Sign out
@@ -75,14 +77,14 @@ function LedgerManageInner() {
   return (
     <div className="space-y-8">
       {usingLocal && (
-        <p className="rounded-lg border border-amber-400/40 bg-amber-950/30 px-3 py-2 text-sm text-amber-100">
+        <p className="fn-warn">
           Local ledger mode (browser only). Run{' '}
           <code>supabase/migrations/006_fund_ledger.sql</code> for the shared live ledger.
         </p>
       )}
 
-      <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-white">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-[#063b32]">
           Log entry
         </h2>
         <div className="flex gap-2">
@@ -91,59 +93,55 @@ function LedgerManageInner() {
               key={k}
               type="button"
               onClick={() => setKind(k)}
-              className={`rounded-lg px-3 py-2 text-sm font-semibold capitalize ${
-                kind === k
-                  ? 'bg-[#2dd4bf] text-[#042f2e]'
-                  : 'border border-white/15 text-teal-100'
-              }`}
+              className={`fn-chip-btn capitalize ${kind === k ? 'is-on' : ''}`}
             >
               {k}
             </button>
           ))}
         </div>
-        <label className="block text-xs text-teal-200/80">
-          Amount (KES)
+        <label className="fn-label">
+          Amount ({city.currency.code})
           <input
             type="number"
             min="1"
             step="1"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#071613] px-3 py-2 text-white"
+            className="fn-field"
             required
           />
         </label>
-        <label className="block text-xs text-teal-200/80">
+        <label className="fn-label">
           Donor / payee
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#071613] px-3 py-2 text-white"
+            className="fn-field"
             required
           />
         </label>
-        <label className="block text-xs text-teal-200/80">
+        <label className="fn-label">
           Note
           <input
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-white/15 bg-[#071613] px-3 py-2 text-white"
+            className="fn-field"
             placeholder="Optional"
           />
         </label>
         <Button type="submit" disabled={busy} className="w-full">
           {busy ? 'Saving…' : 'Add to ledger'}
         </Button>
-        {status && <p className="text-sm text-[#5eead4]">{status}</p>}
+        {status && <p className="text-sm font-semibold text-[#0b8c76]">{status}</p>}
       </form>
 
       <div>
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-white">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-[#063b32]">
           All entries
         </h2>
-        <ul className="mt-3 divide-y divide-white/10 border-t border-white/10">
+        <ul className="mt-3 divide-y divide-[#e5efeb] border-t border-[#e5efeb]">
           {entries.map((e) => (
             <li
               key={e.id}
@@ -152,15 +150,15 @@ function LedgerManageInner() {
               }`}
             >
               <div>
-                <p className="text-sm font-semibold text-white">
-                  {e.kind} · {e.donor_or_payee} · {formatKes(Number(e.amount_kes))}
+                <p className="text-sm font-semibold text-[#063b32]">
+                  {e.kind} · {e.donor_or_payee} · {money(Number(e.amount_kes))}
                 </p>
-                <p className="text-xs text-teal-100/60">{e.note}</p>
+                <p className="text-xs text-[#71867f]">{e.note}</p>
               </div>
               {!e.voided && (
                 <button
                   type="button"
-                  className="text-xs text-orange-300 hover:underline"
+                  className="text-xs font-bold text-[#8b6207] hover:underline"
                   onClick={() => void voidEntry(e.id)}
                 >
                   Void
@@ -171,7 +169,7 @@ function LedgerManageInner() {
         </ul>
       </div>
 
-      <button type="button" className="text-sm text-teal-200 underline" onClick={() => void signOut()}>
+      <button type="button" className="text-sm font-bold text-[#0b8c76] underline" onClick={() => void signOut()}>
         Sign out
       </button>
     </div>
@@ -180,29 +178,19 @@ function LedgerManageInner() {
 
 export function FundsManagePage() {
   return (
-    <div className="min-h-full bg-[#071613] text-[#e8f5f1]">
-      <SiteNav />
-      <main className="mx-auto max-w-lg px-4 py-12 md:px-6">
-        <Link to="/funds" className="text-sm text-teal-300 hover:text-white">
-          ← Public ledger
-        </Link>
-        <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-bold text-white">
-          Team ledger console
-        </h1>
-        <p className="mt-2 text-sm text-teal-100/70">
-          Sign in to log donations and expenses. Admins only on the shared Supabase ledger.
-        </p>
-        <div className="mt-8">
-          {!isSupabaseConfigured ? (
-            <LedgerManageInner />
-          ) : (
-            <AuthGate>
-              <LedgerManageInner />
-            </AuthGate>
-          )}
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
+    <OpsFrame
+      title="Team ledger console"
+      eyebrow="Public money"
+      description="Sign in to log donations and expenses. Admins only on the shared Supabase ledger."
+      backTo="/funds"
+    >
+      {!isSupabaseConfigured ? (
+        <LedgerManageInner />
+      ) : (
+        <AuthGate>
+          <LedgerManageInner />
+        </AuthGate>
+      )}
+    </OpsFrame>
   )
 }

@@ -131,7 +131,7 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
-              <Card className="bg-gray-50">
+              <Card className="bg-canvas">
                 <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                   Create post
                 </p>
@@ -142,13 +142,13 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Title"
-                  className="mt-2 w-full rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
+                  className="mt-2 w-full rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
                 />
                 <textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="What did you clean? How much? Where?"
-                  className="mt-2 h-24 w-full resize-none rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
+                  className="mt-2 h-24 w-full resize-none rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]/60"
                 />
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Button
@@ -206,13 +206,13 @@ export function BlogPanel({ open, onClose }: BlogPanelProps) {
               {loading ? (
                 <p className="text-sm text-[var(--text-muted)]">Loading posts…</p>
               ) : posts.length === 0 ? (
-                <Card className="bg-gray-50">
+                <Card className="bg-canvas">
                   <p className="text-sm text-[var(--text-primary)]">No posts yet.</p>
                 </Card>
               ) : (
                 <div className="space-y-3">
                   {posts.map((p) => (
-                    <Card key={p.id} className="bg-gray-50">
+                    <Card key={p.id} className="bg-canvas">
                       <p className="font-semibold text-[var(--text-primary)]">{p.title}</p>
                       <p className="mt-1 text-xs text-[var(--text-muted)]">
                         {new Date(p.created_at).toLocaleString()}

@@ -35,7 +35,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className="max-h-[min(90dvh,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem))] w-full max-w-md overflow-y-auto overscroll-contain rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-md)]"
+            className="max-h-[min(90dvh,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-2rem))] w-full max-w-md overflow-y-auto overscroll-contain rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-md)]"
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}

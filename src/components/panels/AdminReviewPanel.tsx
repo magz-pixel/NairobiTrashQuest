@@ -65,7 +65,7 @@ export function AdminReviewPanel({ open, onClose, onReviewed }: AdminReviewPanel
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {loading && <p className="text-sm text-[var(--text-muted)]">Loading…</p>}
               {pending.map((r) => (
-                <div key={r.id} className="rounded-xl border border-[var(--border-subtle)] bg-gray-50 p-3">
+                <div key={r.id} className="rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-canvas p-3">
                   <img src={r.image_url} alt="" className="mb-2 aspect-video w-full rounded-lg object-cover" />
                   <p className="text-xs text-[var(--text-muted)]">
                     Severity {r.severity_score} · {r.area_name ?? 'Unknown'}

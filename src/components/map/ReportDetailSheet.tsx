@@ -206,15 +206,15 @@ export function ReportDetailSheet({
             )}
 
             <div className="mt-3 grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-canvas p-2">
                 <p className="font-bold text-[var(--text-primary)]">1</p>
                 <p className="text-[10px] text-[var(--text-muted)]">Reports</p>
               </div>
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-canvas p-2">
                 <p className="font-bold text-[var(--text-primary)]">{daysSince(report.created_at)}</p>
                 <p className="text-[10px] text-[var(--text-muted)]">Days</p>
               </div>
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-gray-50 p-2">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-canvas p-2">
                 <p className="truncate text-xs font-bold text-[var(--text-primary)]">
                   {report.waste_type ?? 'Mixed'}
                 </p>

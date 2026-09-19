@@ -24,7 +24,7 @@ export function ReportListView({ reports, onSelect }: ReportListViewProps) {
             <button
               type="button"
               onClick={() => onSelect(r)}
-              className="flex w-full gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 text-left shadow-[var(--shadow-sm)] hover:border-[var(--brand-teal)]/40"
+              className="flex w-full gap-3 rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-3 text-left shadow-[var(--shadow-sm)] hover:border-[var(--brand-teal)]/40"
             >
               <img
                 src={r.image_url}

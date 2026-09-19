@@ -113,7 +113,7 @@ export function CrowdfundPanel({
     PAYMENT_METHODS.find((m) => m.id === selectedMethod)?.label ?? 'Payment'
 
   return (
-    <div className="mt-3 rounded-xl border border-[var(--border-subtle)] bg-gradient-to-br from-teal-50 to-white p-3">
+    <div className="mt-3 rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-gradient-to-br from-teal-50 to-white p-3">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--brand-teal)]">
         Crowd-funded cleanup
       </p>

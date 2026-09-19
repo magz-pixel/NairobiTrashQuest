@@ -15,7 +15,7 @@ interface AuthModalProps {
 export function AuthModal({
   open,
   onClose,
-  title = 'Join Fix Nairobi',
+  title = 'Join Ramani-Taka',
   blurb = 'Make an account to report trash, join cleanups, and save your impact points. Free — use Google or email.',
   onAuthenticated,
 }: AuthModalProps) {
@@ -72,7 +72,7 @@ export function AuthModal({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@email.com"
-        className="mb-3 w-full rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]"
+        className="mb-3 w-full rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand-teal)]"
       />
       {message && <p className="mb-2 text-xs text-[var(--brand-teal)]">{message}</p>}
       <Button

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { marketConfig } from '../../lib/marketConfig'
+import { useCity } from '../../lib/CityContext'
 import { complaintMailto } from '../../lib/wards'
 
 export interface AccountabilityStep {
@@ -15,9 +15,6 @@ interface AccountabilityFlowProps {
   reportId: string
   isDemo?: boolean
 }
-
-const FALLBACK_STEPS: Omit<AccountabilityStep, 'name'>[] =
-  marketConfig.accountabilityFallback
 
 function roleOrder(role: string): number {
   const r = role.toLowerCase()
@@ -34,6 +31,8 @@ export function AccountabilityFlow({
   reportId,
   isDemo,
 }: AccountabilityFlowProps) {
+  const city = useCity()
+  const fallbackSteps = city.accountabilityFallback
   const [wardName, setWardName] = useState(areaName)
   const [subCounty, setSubCounty] = useState<string | null>(null)
   const [officials, setOfficials] = useState<AccountabilityStep[]>([])
@@ -43,7 +42,7 @@ export function AccountabilityFlow({
     if (!wardId) {
       setSubCounty(null)
       setOfficials(
-        FALLBACK_STEPS.map((s) => ({
+        fallbackSteps.map((s) => ({
           ...s,
           name: s.role.includes('MCA')
             ? 'Ward MCA (placeholder)'
@@ -91,7 +90,7 @@ export function AccountabilityFlow({
           setOfficials(fromDb)
         } else {
           setOfficials(
-            FALLBACK_STEPS.map((s) => ({
+            fallbackSteps.map((s) => ({
               ...s,
               name: s.role.includes('MCA')
                 ? 'Ward MCA (placeholder)'
@@ -104,7 +103,7 @@ export function AccountabilityFlow({
           )
         }
       })
-  }, [wardId, areaName])
+  }, [wardId, areaName, fallbackSteps])
 
   const steps: { label: string; detail: string; contactEmail: string | null }[] = [
     {
@@ -132,7 +131,7 @@ export function AccountabilityFlow({
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-[var(--border-subtle)] bg-gray-50 p-3">
+    <div className="mt-4 rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-canvas p-3">
       <div className="mb-3 flex items-center justify-between gap-2">
         <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
           Accountability chain
@@ -168,7 +167,7 @@ export function AccountabilityFlow({
       </ol>
 
       <a
-        href={complaintMailto(areaName, reportId)}
+        href={complaintMailto(areaName, reportId, city.slug)}
         className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-teal)]"
       >
         File a complaint with responsible officials →

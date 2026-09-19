@@ -34,7 +34,7 @@ export function MobileNav({ activeTab, onTabChange, userLoggedIn }: MobileNavPro
     : [...NAV_BASE, ...NAV_TAIL]
 
   return (
-    <nav className="pointer-events-auto fixed inset-x-0 bottom-0 z-[1300] border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] md:hidden">
+    <nav className="pointer-events-auto fixed inset-x-3 bottom-3 z-[1300] rounded-2xl border border-white/70 bg-white/95 shadow-[0_16px_45px_rgba(6,59,50,.18)] backdrop-blur-md md:hidden">
       <div
         className="mx-auto flex max-w-lg items-stretch justify-between px-2"
         style={{
@@ -49,12 +49,12 @@ export function MobileNav({ activeTab, onTabChange, userLoggedIn }: MobileNavPro
               key={item.id}
               type="button"
               onClick={() => onTabChange(item.id)}
-              className={`relative flex w-full flex-col items-center justify-center gap-0.5 py-2 text-xs ${
-                active ? 'text-[var(--brand-teal)]' : 'text-[var(--text-muted)]'
+              className={`relative flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-2 text-xs ${
+                active ? 'bg-emerald-950 text-white' : 'text-[var(--text-muted)]'
               }`}
             >
               {active && (
-                <span className="absolute top-1 h-1 w-1 rounded-full bg-[var(--brand-teal)]" />
+                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-gold-400" />
               )}
               <span className="text-lg leading-none">{item.icon}</span>
               <span className="text-[10px] font-medium">{item.label}</span>

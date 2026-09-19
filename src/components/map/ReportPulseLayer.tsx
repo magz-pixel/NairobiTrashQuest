@@ -23,7 +23,7 @@ export function ReportPulseLayer({ latitude, longitude, onDone }: ReportPulseLay
         radius={24}
         pathOptions={{
           color: 'transparent',
-          fillColor: '#f97316',
+          fillColor: '#d99a16',
           fillOpacity: 0.15,
           weight: 0,
           className: 'pulse-ring',
@@ -34,7 +34,7 @@ export function ReportPulseLayer({ latitude, longitude, onDone }: ReportPulseLay
         radius={10}
         pathOptions={{
           color: '#ffffff',
-          fillColor: '#f97316',
+          fillColor: '#d99a16',
           fillOpacity: 0.95,
           weight: 3,
         }}

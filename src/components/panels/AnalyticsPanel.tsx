@@ -56,7 +56,7 @@ export function AnalyticsPanel({ open, onClose, stats }: AnalyticsPanelProps) {
                   {stats.worstAreas.map((w, i) => (
                     <li
                       key={w.area}
-                      className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-gray-50 px-3 py-2"
+                      className="flex items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-canvas px-3 py-2"
                     >
                       <span className="text-sm text-[var(--text-primary)]">
                         {i + 1}. {w.area}

@@ -132,7 +132,7 @@ export function ClearTrashModal({
         {preview ? (
           <img src={preview} alt="Cleared preview" className="aspect-video w-full rounded-lg object-cover" />
         ) : (
-          <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-gray-50 text-sm text-[var(--text-muted)]">
+          <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed border-[var(--border-subtle)] bg-canvas text-sm text-[var(--text-muted)]">
             After photo required
           </div>
         )}

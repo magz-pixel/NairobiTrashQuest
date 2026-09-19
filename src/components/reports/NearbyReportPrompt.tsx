@@ -15,7 +15,7 @@ export function NearbyReportPrompt({
   onCancel,
 }: NearbyReportPromptProps) {
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+    <div className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50 p-3">
       <p className="text-sm font-semibold text-amber-900">Already reported nearby</p>
       <p className="mt-1 text-xs text-amber-800">
         <strong>{report.area_name ?? 'This hotspot'}</strong> is on the map within 50 m.
