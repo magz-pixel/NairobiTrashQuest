@@ -1,12 +1,15 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { assignWard } from '../../lib/wards'
+import { resolvePlace } from '../../lib/wards'
 import { getSessionId } from '../../lib/session'
 import { uploadReportImage, analyzeTrashImage } from '../../lib/gemini'
 import { nearestActiveReport } from '../../lib/nearbyReports'
+import { assertCanSubmitReport, recordReportSubmit } from '../../lib/reportGuard'
 import { useCity } from '../../lib/CityContext'
 import type { Report, ReportWasteCategory, TrashAnalysis } from '../../types/database'
 import { WasteCategoryPicker } from './WasteCategoryPicker'
+import { SeverityPicker } from './SeverityPicker'
+import { ReportPinMap } from './ReportPinMap'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 import { NearbyReportPrompt } from './NearbyReportPrompt'
@@ -45,7 +48,9 @@ export function QuickReportModal({
   const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [severity, setSeverity] = useState(5)
+  const [severity, setSeverity] = useState(6)
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
+  const [note, setNote] = useState('')
   const [wasteCategories, setWasteCategories] = useState<ReportWasteCategory[]>([])
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -55,7 +60,9 @@ export function QuickReportModal({
   const reset = () => {
     setFile(null)
     setPreview(null)
-    setSeverity(5)
+    setSeverity(6)
+    setPin(null)
+    setNote('')
     setWasteCategories([])
     setStatus(null)
     setNearbyDuplicate(null)
@@ -67,13 +74,35 @@ export function QuickReportModal({
     onClose()
   }
 
+  useEffect(() => {
+    if (!open || !file || pin) return
+    let cancel = false
+    getCurrentPosition()
+      .then((position) => {
+        if (!cancel) setPin({ lat: position.coords.latitude, lng: position.coords.longitude })
+      })
+      .catch(() => {
+        if (!cancel) setPin({ lat: city.center.lat, lng: city.center.lng })
+      })
+    return () => {
+      cancel = true
+    }
+  }, [open, file, pin, city.center.lat, city.center.lng])
+
   const submitReport = async (forceDuplicate = false) => {
     if (!file || wasteCategories.length === 0) return
+    if (!pin) {
+      setStatus('Still finding the pin. Drag it onto the pile once the map appears.')
+      return
+    }
     setSubmitting(true)
-    setStatus('Getting location…')
+    setStatus('Checking the pin…')
 
     try {
-      const position = await getCurrentPosition()
+      assertCanSubmitReport(city, pin.lat, pin.lng)
+      const position = {
+        coords: { latitude: pin.lat, longitude: pin.lng },
+      } as GeolocationPosition
 
       if (!forceDuplicate && !skipDuplicateCheck) {
         const nearby = nearestActiveReport(
@@ -95,7 +124,7 @@ export function QuickReportModal({
       let analysis: TrashAnalysis = {
         is_trash: true,
         severity,
-        tags: ['citizen-report'],
+        tags: wasteCategories,
         moderation_action: 'approve',
       }
       try {
@@ -111,7 +140,7 @@ export function QuickReportModal({
       }
 
       const imageUrl = await uploadReportImage('anonymous', reportId, file)
-      const ward = assignWard(position.coords.latitude, position.coords.longitude, city.slug)
+      const place = await resolvePlace(position.coords.latitude, position.coords.longitude, city.slug)
 
       const autoLive =
         AUTO_APPROVE && analysis.moderation_action !== 'review'
@@ -129,16 +158,19 @@ export function QuickReportModal({
         ai_tags: analysis.tags,
         is_anonymous: true,
         reporter_session: getSessionId(),
-        ward_id: ward?.wardId ?? null,
-        area_name: ward?.areaName ?? null,
+        ward_id: place?.wardId ?? null,
+        area_name: place?.areaName ?? null,
         waste_type: wasteCategories,
         approved_at: autoLive ? new Date().toISOString() : null,
         moderation_note:
-          analysis.moderation_action === 'review' ? 'Queued for human review' : null,
+          [note.trim() || null, analysis.moderation_action === 'review' ? 'Queued for human review' : null]
+            .filter(Boolean)
+            .join(' — ') || null,
         city: city.slug,
       })
 
       if (error) throw error
+      recordReportSubmit()
 
       setStatus(
         nextStatus === 'pending'
@@ -204,20 +236,28 @@ export function QuickReportModal({
           setPreview(URL.createObjectURL(f))
         }}
       />
-      <div className="mb-3 rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-canvas p-3">
-        <div className="mb-2 flex justify-between text-xs">
-          <span className="text-[var(--text-muted)]">Intensity</span>
-          <span className="font-bold text-[var(--brand-teal)]">{severity}/10</span>
-        </div>
-        <input
-          type="range"
-          min={1}
-          max={10}
-          value={severity}
-          onChange={(e) => setSeverity(Number(e.target.value))}
-          className="w-full accent-[var(--brand-teal)]"
-        />
+      <div className="mb-3">
+        <SeverityPicker value={severity} onChange={setSeverity} />
       </div>
+      <div className="mb-3">
+        <p className="mb-1 text-xs font-semibold text-[var(--text-primary)]">Pin</p>
+        {pin ? (
+          <ReportPinMap lat={pin.lat} lng={pin.lng} onChange={(lat, lng) => setPin({ lat, lng })} />
+        ) : (
+          <p className="text-xs text-[var(--text-muted)]">Finding your location…</p>
+        )}
+        <p className="mt-1 text-[10px] text-[var(--text-muted)]">Drag the pin onto the pile.</p>
+      </div>
+      <label className="mb-3 block text-xs font-semibold text-[var(--text-primary)]">
+        Note (optional)
+        <textarea
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+          maxLength={240}
+          rows={2}
+          className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-white px-2 py-2 text-xs font-normal"
+        />
+      </label>
       <div className="mb-3">
         <WasteCategoryPicker value={wasteCategories} onChange={setWasteCategories} />
       </div>

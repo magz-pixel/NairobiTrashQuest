@@ -72,9 +72,9 @@ export const missionScrapbook: ScrapItem[] = [
     : {
         id: 's2-reg',
         kind: 'link',
-        title: 'Season 2 registration closed',
+        title: 'Season 2 results',
         dateLabel: 'ATR S2',
-        body: 'Ticket registration is closed until the next season opens.',
+        body: 'Season 3 is coming. The leaderboard still shows the season that already ran.',
         href: '/race',
         imageSrc: '/mission/placeholder-race.svg',
         tilt: 'rotate-2',

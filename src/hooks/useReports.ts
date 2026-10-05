@@ -34,6 +34,7 @@ function normalizeReport(row: Record<string, unknown>): Report {
     rejected_reason: (row.rejected_reason as string | null) ?? null,
     ward_id: (row.ward_id as string | null) ?? null,
     area_name: (row.area_name as string | null) ?? null,
+    moderation_note: (row.moderation_note as string | null) ?? null,
     is_anonymous: (row.is_anonymous as boolean) ?? false,
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,

@@ -1,6 +1,15 @@
 import { useMap } from 'react-leaflet'
 import { getCurrentPosition } from '../../lib/geo'
 
+function LocateIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </svg>
+  )
+}
+
 interface MapControlsProps {
   onLocated: (lat: number, lng: number) => void
 }
@@ -38,21 +47,21 @@ export function MapControls({ onLocated }: MapControlsProps) {
         </button>
         <button
           type="button"
-          aria-label="Use my location"
+          aria-label="Show my location"
           onClick={() => void locate()}
           className="grid h-11 w-11 place-items-center rounded-2xl border border-white/80 bg-[#063b32] text-white shadow-[0_12px_30px_rgba(6,59,50,.24)]"
         >
-          ⌖
+          <LocateIcon />
         </button>
       </div>
 
       <button
         type="button"
-        aria-label="Use my location"
+        aria-label="Show my location"
         onClick={() => void locate()}
-        className="map-thumb-control pointer-events-auto absolute left-3 z-[1070] grid h-12 w-12 place-items-center rounded-full border border-white/80 bg-[#063b32] text-lg text-white shadow-[0_14px_32px_rgba(6,59,50,.28)] md:hidden"
+        className="map-thumb-control pointer-events-auto absolute left-3 z-[1070] grid h-12 w-12 place-items-center rounded-full border border-white/80 bg-[#063b32] text-white shadow-[0_14px_32px_rgba(6,59,50,.28)] md:hidden"
       >
-        ⌖
+        <LocateIcon />
       </button>
     </>
   )

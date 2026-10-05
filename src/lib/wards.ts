@@ -2,6 +2,29 @@ import type { Report } from '../types/database'
 import { getCity } from './cities'
 
 /** Rough ward assignment by lat/lng bounding boxes (MVP — replace with GeoJSON point-in-polygon). */
+export async function resolvePlace(
+  lat: number,
+  lng: number,
+  citySlug?: string,
+): Promise<{ wardId: string | null; areaName: string } | null> {
+  const ward = assignWard(lat, lng, citySlug)
+  if (ward) return ward
+  try {
+    const url = new URL('https://api.bigdatacloud.net/data/reverse-geocode-client')
+    url.searchParams.set('latitude', String(lat))
+    url.searchParams.set('longitude', String(lng))
+    url.searchParams.set('localityLanguage', 'en')
+    const response = await fetch(url)
+    if (!response.ok) return null
+    const data = (await response.json()) as { locality?: string; city?: string }
+    const areaName = data.locality?.trim() || data.city?.trim()
+    if (!areaName) return null
+    return { wardId: null, areaName }
+  } catch {
+    return null
+  }
+}
+
 export function assignWard(
   lat: number,
   lng: number,

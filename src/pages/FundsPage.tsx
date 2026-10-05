@@ -31,7 +31,7 @@ export function FundsPage() {
           action={
             <div className="flex flex-wrap gap-3">
               <button type="button" onClick={() => setDonateOpen(true)} className="fn-action fn-action-gold">
-                Support the work <span>↗</span>
+                Support the work <span>→</span>
               </button>
               <Link to={path('/funds/manage')} className="fn-action fn-action-light">
                 Team console
@@ -57,6 +57,7 @@ export function FundsPage() {
           </div>
         </section>
         <section className="fn-panel-dark bg-[#063b32] px-5 py-16 text-white sm:px-8 lg:px-12">
+          {city.fundCampaignLive ? (
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.7fr_1.3fr] lg:items-center">
             <div>
               <SectionLabel>Season 2 campaign</SectionLabel>
@@ -90,6 +91,15 @@ export function FundsPage() {
               </button>
             </div>
           </div>
+          ) : (
+            <div className="mx-auto max-w-7xl">
+              <SectionLabel>Campaign</SectionLabel>
+              <h2 className="fn-display mt-4 text-4xl font-extrabold">Launching soon</h2>
+              <p className="mt-4 max-w-xl leading-7 text-teal-100/75">
+                {city.chapterName} does not have a live fundraising target yet. Money that has already been logged still shows in the ledger below.
+              </p>
+            </div>
+          )}
         </section>
         <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -110,6 +120,8 @@ export function FundsPage() {
                     <p className="mt-1 text-xs text-[#71867f]">
                       {e.kind === 'donation' ? 'Donation' : 'Expense'}
                       {e.note ? ` · ${e.note}` : ''} · {new Date(e.created_at).toLocaleDateString()}
+                      {e.created_by ? ' · logged by a signed-in team member' : ''}
+                      {e.kind === 'expense' ? ' · receipt photo not attached' : ''}
                     </p>
                   </div>
                   <p

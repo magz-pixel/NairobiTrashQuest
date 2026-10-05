@@ -172,21 +172,33 @@ export function RaceRegisterPage() {
     <PublicShell>
       <main>
         <PageIntro
-          eyebrow="Season 2"
-          title="Amazing Trash Race"
+          eyebrow={city.slug === 'nairobi' ? 'Season 2' : city.chapterName}
+          title={city.slug === 'nairobi' ? 'Amazing Trash Race' : 'No race yet'}
           body={
-            raceLive
+            city.slug !== 'nairobi'
+              ? `No race in ${city.label} yet — get notified when this chapter announces one.`
+              : raceLive
               ? 'Register for a digital ticket, join a squad, and bring your code on race day.'
-              : 'Season 2 registration is closed. The leaderboard is still available for the season that already ran.'
+              : 'Season 2 results are on the leaderboard. Season 3 is coming.'
           }
           action={introAction}
         />
         <section className="mx-auto max-w-xl px-5 pb-20 sm:px-8 lg:px-12">
-          {!raceLive ? (
+          {city.slug !== 'nairobi' ? (
+            <div className="rounded-[1.5rem] border border-[#d9e9e4] bg-white p-6 shadow-[var(--shadow-card)]">
+              <p className="fn-eyebrow">No race yet</p>
+              <h2 className="fn-display mt-2 text-2xl font-extrabold text-[#063b32]">
+                No race in {city.label} yet
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#36564e]">
+                Season 2 was a Nairobi event. This chapter will say so here when it has its own race.
+              </p>
+            </div>
+          ) : !raceLive ? (
             <div className="rounded-[1.5rem] border border-[#d9e9e4] bg-white p-6 shadow-[var(--shadow-card)]">
               <p className="fn-eyebrow">Registration closed</p>
               <h2 className="fn-display mt-2 text-2xl font-extrabold text-[#063b32]">
-                Season 2 registration is closed
+                Season 2 results · Season 3 coming
               </h2>
               <p className="mt-3 text-sm leading-6 text-[#36564e]">
                 Tickets are not being issued. When the next season opens, this page will take

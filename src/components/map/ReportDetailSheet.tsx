@@ -182,6 +182,9 @@ export function ReportDetailSheet({
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">
               {ward?.areaName ?? 'Hotspot'}
             </h2>
+            {report.moderation_note && !report.moderation_note.startsWith('Queued') ? (
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{report.moderation_note}</p>
+            ) : null}
             <div className="mt-2 flex flex-wrap gap-2">
               <a
                 href={directionsUrl}

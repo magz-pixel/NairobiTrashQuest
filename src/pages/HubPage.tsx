@@ -1,13 +1,43 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { SiteFooter } from '../components/site/SiteNav'
 import { FixNairobiMark } from '../components/site/BrandMark'
-import { ChapterPageChips } from '../components/site/ChapterDesk'
 import { CHAPTER_NAV } from '../lib/chapterPages'
-import { cityPath, getActiveCities } from '../lib/cities'
+import { cityPath, getActiveCities, type CityConfig } from '../lib/cities'
+import { getCurrentPosition } from '../lib/geo'
+
+const CITY_LINES: Record<string, string> = {
+  nairobi: 'Open reports and the Amazing Trash Race results live on this chapter.',
+  kampala: 'The map is open here. A race has not started in Kampala yet.',
+  'dar-es-salaam': 'The map is open, and community cleanup funding sits on this chapter.',
+}
+
+function nearestCity(lat: number, lng: number): CityConfig {
+  const cities = getActiveCities()
+  return cities.reduce((best, city) => {
+    const bestD = (best.center.lat - lat) ** 2 + (best.center.lng - lng) ** 2
+    const nextD = (city.center.lat - lat) ** 2 + (city.center.lng - lng) ** 2
+    return nextD < bestD ? city : best
+  }, cities[0])
+}
 
 const chapters = getActiveCities()
 
 export function HubPage() {
+  const navigate = useNavigate()
+  const [locating, setLocating] = useState(false)
+
+  const reportTrash = () => {
+    setLocating(true)
+    getCurrentPosition()
+      .then((position) => {
+        const city = nearestCity(position.coords.latitude, position.coords.longitude)
+        navigate(cityPath(city.slug, '/map'))
+      })
+      .catch(() => navigate('/nairobi/map'))
+      .finally(() => setLocating(false))
+  }
+
   return (
     <div className="fn-rebuild min-h-full bg-[#f4f7f2] text-[#12332d]">
       <header className="sticky inset-x-0 top-0 z-50 border-b border-white/10 bg-emerald-950/95 text-white backdrop-blur-md">
@@ -18,16 +48,18 @@ export function HubPage() {
               Ramani-Taka
             </span>
           </Link>
-          <p className="hidden text-xs font-semibold text-teal-100/70 sm:block">East Africa trash map</p>
+          <button
+            type="button"
+            onClick={reportTrash}
+            className="inline-flex min-h-11 items-center rounded-full bg-gold-400 px-4 text-sm font-extrabold text-emerald-950"
+          >
+            {locating ? 'Finding your city…' : 'Report trash'}
+          </button>
         </div>
       </header>
 
       <main>
         <header className="fn-intro">
-          <div className="fn-intro-index" aria-hidden="true">
-            <span>RT</span>
-            <b>2026</b>
-          </div>
           <div className="fn-intro-copy">
             <p className="fn-eyebrow">One product · many cities</p>
             <h1 className="fn-display">Ramani-Taka is the trash map. Each city is a chapter.</h1>
@@ -63,15 +95,13 @@ export function HubPage() {
                   {city.chapterName}
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-teal-100/75">
-                  {city.label} chapter of Ramani-Taka. Map, race, cleanups, funds, and mission —
-                  already waiting inside this city.
+                  {CITY_LINES[city.slug] ?? `${city.label} chapter of Ramani-Taka.`}
                 </p>
-                <ChapterPageChips slug={city.slug} />
                 <Link
                   to={cityPath(city.slug)}
                   className="mt-auto inline-flex min-h-12 items-center pt-6 text-sm font-extrabold text-gold-300"
                 >
-                  Enter {city.chapterName} ↗
+                  Enter {city.chapterName} →
                 </Link>
               </article>
             ))}

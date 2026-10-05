@@ -36,6 +36,7 @@ export interface Report {
   rejected_reason: string | null
   ward_id: string | null
   area_name: string | null
+  moderation_note?: string | null
   is_anonymous: boolean
   created_at: string
   updated_at: string

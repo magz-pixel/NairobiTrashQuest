@@ -49,7 +49,9 @@ export function ReportListView({ reports, selectedId, onSelect }: ReportListView
                   open · {formatWasteTypes(r.waste_type)}
                 </p>
                 <p className={`mt-1 text-[10px] font-bold uppercase tracking-[.12em] ${selected ? 'text-gold-300' : 'text-[#0b8c76]'}`}>
-                  {r.seen_count} neighbours have seen this
+                  {r.seen_count === 1
+                    ? '1 neighbour has seen this'
+                    : `${r.seen_count} neighbours have seen this`}
                 </p>
               </div>
             </button>

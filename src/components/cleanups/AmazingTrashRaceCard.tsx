@@ -4,6 +4,7 @@ import { isSupabaseConfigured, supabase } from '../../lib/supabase'
 import { useCity, useCityPath } from '../../lib/CityContext'
 import {
   AMAZING_TRASH_RACE_S2,
+  isRaceLive,
   type RaceRegistration,
 } from '../../types/database'
 import { loadLocalRaceRegistrations } from '../../lib/raceRegistration'
@@ -78,10 +79,23 @@ export function AmazingTrashRaceCard() {
     return () => window.clearInterval(id)
   }, [load])
 
-  const daysLeft = Math.max(
-    0,
-    Math.ceil((ATR2_EVENT.when.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-  )
+  const daysLeft = Math.ceil((ATR2_EVENT.when.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const raceOver = !isRaceLive() || daysLeft < 0
+
+  if (city.slug !== 'nairobi') {
+    return (
+      <article className="rounded-2xl border border-[#d9e9e4] bg-white p-6 shadow-[var(--shadow-card)]">
+        <p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#0b8c76]">Race</p>
+        <h2 className="mt-2 text-2xl font-extrabold text-[#063b32]">No race in {city.label} yet</h2>
+        <p className="mt-2 text-sm leading-6 text-[#36564e]">
+          Amazing Trash Race Season 2 was a Nairobi event. Get notified when this chapter announces its own.
+        </p>
+        <Link to={path('/mission')} className="mt-4 inline-flex min-h-11 items-center text-sm font-extrabold text-[#0b8c76]">
+          Follow the mission →
+        </Link>
+      </article>
+    )
+  }
 
   return (
     <article className="fn-panel-dark overflow-hidden rounded-2xl border border-gold-400/40 bg-gradient-to-br from-[#1a1208] via-[#0c1a14] to-[#0a192f] shadow-[0_0_40px_rgba(255,107,0,0.12)]">
@@ -103,7 +117,7 @@ export function AmazingTrashRaceCard() {
             </p>
           </div>
           <span className="rounded-lg border border-gold-400/40 bg-black/30 px-3 py-1.5 text-xs font-semibold text-amber-100">
-            {daysLeft === 0 ? 'Race week' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go`}
+            {raceOver ? 'Season 2 results' : daysLeft === 0 ? 'Race week' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go`}
           </span>
         </div>
 
@@ -152,7 +166,7 @@ export function AmazingTrashRaceCard() {
           )}
           {stats.rows.length === 0 ? (
             <p className="mt-2 text-sm text-teal-100/60">
-              Be the first — get your free Season 2 ticket.
+              Season 2 has finished. Season 3 is coming. The leaderboard still shows what was logged.
             </p>
           ) : (
             <ul className="mt-3 max-h-56 space-y-1.5 overflow-y-auto rounded-[var(--radius-card)] border border-white/10 bg-black/20 p-2">

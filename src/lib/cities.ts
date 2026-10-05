@@ -26,6 +26,9 @@ export interface CityConfig {
   accountabilityFallback: { role: string; contactEmail: string | null }[]
   features: { crowdfunding: boolean }
   fundTarget: number
+  /** Chapter fund bar. Hidden cities show “launching soon” instead of a 0% target. */
+  fundCampaignLive: boolean
+  bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }
 }
 
 export const NAIROBI = 'nairobi'
@@ -215,6 +218,8 @@ export const CITIES: Record<string, CityConfig> = {
     ],
     features: { crowdfunding: false },
     fundTarget: 500_000,
+    fundCampaignLive: true,
+    bounds: { minLat: -1.444, maxLat: -1.163, minLng: 36.662, maxLng: 37.104 },
   },
   [KAMPALA]: {
     slug: KAMPALA,
@@ -236,6 +241,8 @@ export const CITIES: Record<string, CityConfig> = {
     ],
     features: { crowdfunding: false },
     fundTarget: 20_000_000,
+    fundCampaignLive: false,
+    bounds: { minLat: 0.23, maxLat: 0.41, minLng: 32.51, maxLng: 32.68 },
   },
   [DAR_ES_SALAAM]: {
     slug: DAR_ES_SALAAM,
@@ -257,6 +264,8 @@ export const CITIES: Record<string, CityConfig> = {
     ],
     features: { crowdfunding: true },
     fundTarget: 10_000_000,
+    fundCampaignLive: false,
+    bounds: { minLat: -6.92, maxLat: -6.62, minLng: 39.1, maxLng: 39.42 },
   },
 }
 

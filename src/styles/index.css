@@ -59,5 +59,5 @@
 .fn-panel-dark [class*="text-teal-50"],.fn-rebuild main .bg-emerald-900 [class*="text-teal-50"],.fn-rebuild main .bg-emerald-950 [class*="text-teal-50"],.fn-rebuild main .bg-\[\#063b32\] [class*="text-teal-50"]{color:rgba(240,253,250,.86)}
 .fn-panel-dark [class*="text-gold-200"],.fn-panel-dark [class*="text-amber-100"],.fn-rebuild main .bg-emerald-900 [class*="text-gold-200"],.fn-rebuild main .bg-emerald-950 [class*="text-gold-200"],.fn-rebuild main .bg-\[\#063b32\] [class*="text-gold-200"],.fn-rebuild main .bg-\[\#063b32\] [class*="text-amber-100"]{color:#fde68a}
 .fn-panel-dark [class*="border-white/"],.fn-rebuild main .bg-emerald-900 [class*="border-white/"],.fn-rebuild main .bg-emerald-950 [class*="border-white/"],.fn-rebuild main .bg-\[\#063b32\] [class*="border-white/"]{border-color:rgba(255,255,255,.2)}
-@media(max-width:767px){.fn-landing>main{padding-bottom:5rem}.fn-display{letter-spacing:-.05em}.fn-table{display:block;overflow-x:auto;white-space:nowrap}}
+@media(max-width:767px){.fn-landing>main{padding-bottom:5rem}.fn-display{letter-spacing:-.025em}.fn-table{display:block;overflow-x:auto;white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}

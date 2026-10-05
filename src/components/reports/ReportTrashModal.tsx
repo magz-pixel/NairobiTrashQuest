@@ -1,19 +1,23 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { analyzeTrashImage, uploadReportImage } from '../../lib/gemini'
 import {
   GPS_ACCURACY_LIMIT_M,
+  getCurrentPosition,
   getPositionWithAccuracyRetry,
   isGpsAccuracyAcceptable,
 } from '../../lib/geo'
 import { compressImageFile } from '../../lib/uploads'
-import { assignWard } from '../../lib/wards'
+import { resolvePlace } from '../../lib/wards'
+import { assertCanSubmitReport, recordReportSubmit } from '../../lib/reportGuard'
 import { nearestActiveReport } from '../../lib/nearbyReports'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useCity } from '../../lib/CityContext'
 import { useAuth } from '../../hooks/useAuth'
 import type { Report, ReportWasteCategory, TrashAnalysis } from '../../types/database'
 import { WasteCategoryPicker } from './WasteCategoryPicker'
+import { SeverityPicker } from './SeverityPicker'
+import { ReportPinMap } from './ReportPinMap'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 import { NearbyReportPrompt } from './NearbyReportPrompt'
@@ -53,7 +57,9 @@ export function ReportTrashModal({
   const [preview, setPreview] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [cameraOn, setCameraOn] = useState(false)
-  const [manualSeverity, setManualSeverity] = useState(5)
+  const [manualSeverity, setManualSeverity] = useState(6)
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
+  const [note, setNote] = useState('')
   const [wasteCategories, setWasteCategories] = useState<ReportWasteCategory[]>([])
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -102,6 +108,21 @@ export function ReportTrashModal({
     )
   }
 
+  useEffect(() => {
+    if (!open || !file || pin) return
+    let cancel = false
+    getCurrentPosition()
+      .then((position) => {
+        if (!cancel) setPin({ lat: position.coords.latitude, lng: position.coords.longitude })
+      })
+      .catch(() => {
+        if (!cancel) setPin({ lat: city.center.lat, lng: city.center.lng })
+      })
+    return () => {
+      cancel = true
+    }
+  }, [open, file, pin, city.center.lat, city.center.lng])
+
   const handleFileChange = (selected: File | null) => {
     if (!selected) return
     setFile(selected)
@@ -113,6 +134,9 @@ export function ReportTrashModal({
     if (!user) return
 
     const { compressed, analysis, aiNote, position } = prepared
+    const latitude = pin?.lat ?? position.coords.latitude
+    const longitude = pin?.lng ?? position.coords.longitude
+    assertCanSubmitReport(city, latitude, longitude)
     const severity = Math.min(
       10,
       Math.max(1, Math.round(manualSeverity || analysis.severity)),
@@ -121,25 +145,27 @@ export function ReportTrashModal({
     const reportId = crypto.randomUUID()
     setStatus('Uploading photo…')
     const imageUrl = await uploadReportImage(user.id, reportId, compressed)
-    const ward = assignWard(position.coords.latitude, position.coords.longitude, city.slug)
+    const place = await resolvePlace(latitude, longitude, city.slug)
 
     setStatus(aiNote ? `Saving report… (${aiNote})` : 'Saving report…')
     const { error } = await supabase.from('reports').insert({
       id: reportId,
       user_id: user.id,
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
+      latitude,
+      longitude,
       severity_score: severity,
       status: 'active',
       image_url: imageUrl,
       ai_tags: analysis.tags,
-      ward_id: ward?.wardId ?? null,
-      area_name: ward?.areaName ?? null,
+      ward_id: place?.wardId ?? null,
+      area_name: place?.areaName ?? null,
+      moderation_note: note.trim() || null,
       waste_type: wasteCategories,
       city: city.slug,
     })
 
     if (error) throw error
+    recordReportSubmit()
 
     await bumpMissionProgress(user.id, 'report')
 
@@ -283,7 +309,9 @@ export function ReportTrashModal({
     stopCamera()
     setPreview(null)
     setFile(null)
-    setManualSeverity(5)
+    setManualSeverity(6)
+    setPin(null)
+    setNote('')
     setWasteCategories([])
     setStatus(null)
     setNearbyDuplicate(null)
@@ -401,27 +429,31 @@ export function ReportTrashModal({
               />
             </div>
 
-            <div className="rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-black/30 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-xs font-semibold text-[var(--text-primary)]">
-                  Intensity (your rating)
+            <SeverityPicker value={manualSeverity} onChange={setManualSeverity} />
+            <div>
+              <p className="mb-1 text-xs font-semibold text-[var(--text-primary)]">Pin</p>
+              {pin ? (
+                <ReportPinMap
+                  lat={pin.lat}
+                  lng={pin.lng}
+                  onChange={(lat, lng) => setPin({ lat, lng })}
+                />
+              ) : (
+                <p className="text-xs text-[var(--text-muted)]">
+                  Add a photo and the pin will appear. Drag it onto the pile.
                 </p>
-                <p className="text-xs font-bold text-[var(--brand-teal)]">
-                  {manualSeverity}/10
-                </p>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={manualSeverity}
-                onChange={(e) => setManualSeverity(Number(e.target.value))}
-                className="w-full accent-[var(--brand-teal)]"
-              />
-              <p className="mt-2 text-[10px] text-[var(--text-muted)]">
-                AI helps tag the report; your rating controls the heatmap shading.
-              </p>
+              )}
             </div>
+            <label className="block text-xs font-semibold text-[var(--text-primary)]">
+              Note (optional)
+              <textarea
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                maxLength={240}
+                rows={2}
+                className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-white px-2 py-2 text-xs font-normal"
+              />
+            </label>
 
             <WasteCategoryPicker value={wasteCategories} onChange={setWasteCategories} />
 

@@ -42,7 +42,7 @@ export function ChapterDesk({ slug, chapterName }: ChapterDeskProps) {
                 <span className="text-xs font-extrabold uppercase tracking-[.18em] opacity-65">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <span className="text-2xl transition group-hover:translate-x-1">↗</span>
+                <span className="text-2xl transition group-hover:translate-x-1">→</span>
               </div>
               <div className="mt-auto pt-10">
                 <h3 className="text-2xl font-extrabold tracking-[-.04em]">{page.label}</h3>

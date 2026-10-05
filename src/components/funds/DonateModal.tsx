@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
-import { getDonateConfig } from '../../lib/donateConfig'
+import { getDonateConfig, isPublishedPaymentDetail } from '../../lib/donateConfig'
 import { useCity } from '../../lib/CityContext'
 
 interface DonateModalProps {
@@ -106,6 +106,7 @@ export function DonateModal({ open, onClose }: DonateModalProps) {
             {activeMoney ? (
               <div className="mt-5 space-y-3 text-sm">
                 <p className="text-teal-100/75">{activeMoney.intro}</p>
+                {isPublishedPaymentDetail(activeMoney.number) ? (
                 <div className="rounded-[var(--radius-card)] border border-dashed border-teal-400/30 bg-black/20 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-teal-300/80">
                     {activeMoney.paybillOrTill}
@@ -121,6 +122,11 @@ export function DonateModal({ open, onClose }: DonateModalProps) {
                     Copy number
                   </button>
                 </div>
+                ) : (
+                  <p className="rounded-[var(--radius-card)] border border-dashed border-gold-400/40 bg-black/20 p-3 text-xs leading-5 text-gold-200">
+                    The {activeMoney.label} till or paybill is not published yet. Do not send money to a placeholder number. The public ledger is updated only after a real transfer is logged.
+                  </p>
+                )}
                 <p>
                   <span className="text-teal-100/60">Account name · </span>
                   <strong>{activeMoney.accountName}</strong>
@@ -138,10 +144,16 @@ export function DonateModal({ open, onClose }: DonateModalProps) {
             ) : (
               <div className="mt-5 space-y-3 text-sm">
                 <p className="text-teal-100/75">Crypto on-ramp — USDT only on the network below:</p>
+                {isPublishedPaymentDetail(config.usdt.address) ? (
                 <div className="rounded-[var(--radius-card)] border border-dashed border-orange-400/30 bg-black/20 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-gold-300/80">
                     Network · {config.usdt.network}
                   </p>
+                  <img
+                    alt={`QR code for the ${config.usdt.network} USDT address`}
+                    className="mt-3 h-40 w-40 bg-white p-2"
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(config.usdt.address)}`}
+                  />
                   <p className="mt-2 break-all font-mono text-xs leading-relaxed text-white">
                     {config.usdt.address}
                   </p>
@@ -153,6 +165,11 @@ export function DonateModal({ open, onClose }: DonateModalProps) {
                     Copy address
                   </button>
                 </div>
+                ) : (
+                  <p className="rounded-[var(--radius-card)] border border-dashed border-gold-400/40 bg-black/20 p-3 text-xs leading-5 text-gold-200">
+                    The USDT address is not published yet. Sending on the wrong network can lose the funds, so no address is shown until the exact network and wallet are set.
+                  </p>
+                )}
                 <p className="text-xs text-gold-200/90">{config.usdt.note}</p>
               </div>
             )}

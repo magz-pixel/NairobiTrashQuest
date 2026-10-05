@@ -265,7 +265,7 @@ export function SiteFooter({ hub = false }: { hub?: boolean }) {
                     to={cityPath(c.slug)}
                     className="inline-flex min-h-12 items-center rounded-full bg-gold-400 px-5 text-sm font-extrabold text-emerald-950"
                   >
-                    {c.chapterName} ↗
+                    {c.chapterName} →
                   </Link>
                 ))}
               </div>
@@ -304,7 +304,7 @@ function ChapterFooter() {
                 to={path('/map')}
                 className="inline-flex min-h-12 items-center rounded-full bg-gold-400 px-6 text-sm font-extrabold text-emerald-950 transition hover:-translate-y-0.5 hover:bg-gold-300"
               >
-                Put a spot on the map <span className="ml-3 text-lg">↗</span>
+                Put a spot on the map <span className="ml-3 text-lg">→</span>
               </Link>
               <Link
                 to={path('/mission')}

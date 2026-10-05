@@ -6,9 +6,7 @@ import { ClusterLayer } from './ClusterLayer'
 import { HotspotLayer } from './HotspotLayer'
 import { MapControls } from './MapControls'
 import { ReportPulseLayer } from './ReportPulseLayer'
-
-const OSM_TILE = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-const MAP_MAX_ZOOM = 17
+import { MAP_MAX_ZOOM, MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from '../../lib/mapTiles'
 
 export interface MapFocusTarget {
   lat: number
@@ -96,8 +94,8 @@ export function MapView({
       <MapInteractor onMapClick={onMapClick} onDragStart={onDragStart} />
       <MapFocus target={focusAt} paddingBottom={paddingBottom} />
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url={OSM_TILE}
+        attribution={MAP_TILE_ATTRIBUTION}
+        url={MAP_TILE_URL}
         maxZoom={MAP_MAX_ZOOM}
       />
       <ClusterLayer reports={reports} selectedId={selectedId} onSelectReport={onSelectReport} />

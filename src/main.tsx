@@ -3,9 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import './styles/rebuild-v2.css'
 import App from './App.tsx'
+import { initMonitoring } from './lib/monitoring'
+import { registerSW } from 'virtual:pwa-register'
+
+initMonitoring()
 
 // Ensure mobile clients recover cleanly after deploys (service worker cache).
-import { registerSW } from 'virtual:pwa-register'
 
 registerSW({
   immediate: true,

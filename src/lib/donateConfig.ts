@@ -124,6 +124,11 @@ function darDonate(city: CityConfig): DonateConfig {
   }
 }
 
+export function isPublishedPaymentDetail(value: string): boolean {
+  const text = value.trim()
+  return text.length > 0 && text !== '000000' && !/replace/i.test(text)
+}
+
 export function getDonateConfig(city: CityConfig): DonateConfig {
   if (city.slug === 'kampala') return kampalaDonate(city)
   if (city.slug === 'dar-es-salaam') return darDonate(city)
