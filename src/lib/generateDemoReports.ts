@@ -245,7 +245,7 @@ function generateNairobiDemoReports(): Report[] {
       updated_at: updatedAt,
       area_name: spot.area_name,
       ward_id: spot.ward_id,
-      waste_type: spot.waste_type,
+      waste_type: [spot.waste_type],
       city: 'nairobi',
     })
   })

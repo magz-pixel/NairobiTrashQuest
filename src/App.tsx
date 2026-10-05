@@ -16,6 +16,7 @@ import { RaceAdminPage } from './pages/RaceAdminPage'
 import { RaceLeaderboardPage } from './pages/RaceLeaderboardPage'
 import { RaceMarshalPage } from './pages/RaceMarshalPage'
 import { RaceRegisterPage } from './pages/RaceRegisterPage'
+import { ReportPage } from './pages/ReportPage'
 
 const MapboxTestPage = lazy(() => import('./pages/spike/MapboxTestPage'))
 
@@ -55,6 +56,7 @@ function App() {
           <Route path="/:city" element={<CityGate />}>
             <Route index element={<CommandCenterPage />} />
             <Route path="map" element={<HomePage />} />
+            <Route path="report/:id" element={<ReportPage />} />
             <Route path="me" element={<ImpactMePage />} />
             <Route path="cleanups" element={<CleanupsPage />} />
             <Route path="cleanups/manage" element={<CleanupsManagePage />} />

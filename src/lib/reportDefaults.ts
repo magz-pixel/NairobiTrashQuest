@@ -36,7 +36,9 @@ export function demoReportDefaults(
       ? { wardId: partial.ward_id, areaName: partial.area_name }
       : assignWard(partial.latitude, partial.longitude, partial.city)
   return {
-    waste_type: partial.waste_type ?? WASTE_TYPES[Math.floor(Math.random() * WASTE_TYPES.length)],
+    waste_type: partial.waste_type?.length
+      ? partial.waste_type
+      : [WASTE_TYPES[Math.floor(Math.random() * WASTE_TYPES.length)]],
     seen_count: partial.seen_count ?? Math.floor(Math.random() * 8) + 1,
     flag_count: partial.flag_count ?? 0,
     approved_at: partial.approved_at ?? partial.created_at,

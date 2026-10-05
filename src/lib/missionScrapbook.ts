@@ -1,3 +1,5 @@
+import { isRaceLive } from '../types/database'
+
 export type ScrapKind = 'photo' | 'link' | 'milestone'
 
 export interface ScrapItem {
@@ -50,22 +52,33 @@ export const missionScrapbook: ScrapItem[] = [
     kind: 'link',
     title: 'On TikTok',
     dateLabel: 'Social',
-    body: 'Field clips, race energy, and before/after stories — replace with your real @handle.',
+    body: 'Field clips, race energy, and before/after stories from @fixnairobi.',
     href: 'https://www.tiktok.com/@fixnairobi',
     external: true,
     imageSrc: '/mission/placeholder-tiktok.svg',
     tilt: '-rotate-3',
   },
-  {
-    id: 's2-reg',
-    kind: 'link',
-    title: 'Season 2 registration open',
-    dateLabel: 'ATR S2',
-    body: 'Digital tickets for eco-warriors — claim yours and bring the code to check-in.',
-    href: '/race',
-    imageSrc: '/mission/placeholder-race.svg',
-    tilt: 'rotate-2',
-  },
+  isRaceLive()
+    ? {
+        id: 's2-reg',
+        kind: 'link',
+        title: 'Season 2 registration open',
+        dateLabel: 'ATR S2',
+        body: 'Digital tickets for eco-warriors — claim yours and bring the code to check-in.',
+        href: '/race',
+        imageSrc: '/mission/placeholder-race.svg',
+        tilt: 'rotate-2',
+      }
+    : {
+        id: 's2-reg',
+        kind: 'link',
+        title: 'Season 2 registration closed',
+        dateLabel: 'ATR S2',
+        body: 'Ticket registration is closed until the next season opens.',
+        href: '/race',
+        imageSrc: '/mission/placeholder-race.svg',
+        tilt: 'rotate-2',
+      },
   {
     id: 'funds',
     kind: 'link',
@@ -75,14 +88,5 @@ export const missionScrapbook: ScrapItem[] = [
     href: '/funds',
     imageSrc: '/mission/placeholder-funds.svg',
     tilt: '-rotate-1',
-  },
-  {
-    id: 'photo-field',
-    kind: 'photo',
-    title: 'Field day (placeholder)',
-    dateLabel: 'Swap me',
-    body: 'Drop your real cleanup photo in public/mission/ and update imageSrc.',
-    imageSrc: '/mission/placeholder-field.svg',
-    tilt: 'rotate-2',
   },
 ]

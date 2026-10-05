@@ -11,8 +11,31 @@ interface ReferenceHeroProps {
 
 const arrow = 'M5 12h14M13 6l6 6-6 6'
 
+const HERO_POSTER = '/hero-nairobi-cleanup.jpg'
+
+function usePrefersReducedMotion() {
+  const [reduce, setReduce] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReduce(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  return reduce
+}
+
 export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [videoFailed, setVideoFailed] = useState(false)
+  const reduceMotion = usePrefersReducedMotion()
+  const showVideo = !reduceMotion && !videoFailed
   const city = useCity()
   const path = useCityPath()
 
@@ -43,9 +66,12 @@ export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
 
       <div className="order-1 isolate relative min-h-[430px] overflow-hidden rounded-[26px] bg-emerald-950 shadow-[0_24px_80px_rgba(6,59,50,.18)] lg:order-2 lg:min-h-0 max-[768px]:absolute max-[768px]:inset-0 max-[768px]:min-h-0 max-[768px]:rounded-none max-[768px]:shadow-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(251,191,36,.28),transparent_22%),radial-gradient(circle_at_22%_68%,rgba(45,212,191,.3),transparent_24%),linear-gradient(140deg,#063b32,#0b8c76 54%,#e0a426)]" />
-        <video className="absolute inset-0 h-full w-full object-cover opacity-100" autoPlay muted loop playsInline preload="metadata" aria-hidden>
-          <source src="/hero-nairobi-cleanup.mp4" type="video/mp4" />
-        </video>
+        <img src={HERO_POSTER} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        {showVideo && (
+          <video className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline poster={HERO_POSTER} preload="metadata" aria-hidden onError={() => setVideoFailed(true)}>
+            <source src="/hero-nairobi-cleanup.mp4" type="video/mp4" onError={() => setVideoFailed(true)} />
+          </video>
+        )}
         <div className="pointer-events-none absolute inset-0 hidden max-[768px]:block max-[768px]:bg-[linear-gradient(180deg,rgba(4,18,28,.74)_0%,rgba(4,18,28,.48)_42%,rgba(4,18,28,.9)_100%)]" />
         <div className="absolute bottom-0 right-0 rounded-tl-[36px] bg-white px-5 py-4 text-ink sm:px-7 sm:py-5 max-[768px]:hidden"><Link to={path('/map')} aria-label="Open the field map" className="text-xs font-extrabold uppercase tracking-[.12em] hover:text-emerald-700">Open the map ↗</Link></div>
       </div>

@@ -48,16 +48,16 @@ export async function compressImageFile(
 }
 
 export async function uploadCleanupMedia(
-  userId: string,
-  objectName: string,
+  _userId: string,
+  _objectName: string,
   file: File,
 ): Promise<string> {
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `${userId}/${objectName}.${ext}`
+  const path = `${crypto.randomUUID()}.${ext}`
 
   const { error } = await supabase.storage
     .from('cleanup-media')
-    .upload(path, file, { upsert: true, contentType: file.type })
+    .upload(path, file, { upsert: false, contentType: file.type })
 
   if (error) throw error
 

@@ -77,10 +77,10 @@ export function ClearTrashModal({
         return
       }
 
-      const clearedPath = `${user.id}/${nearest.id}-cleared.jpg`
+      const clearedPath = `${crypto.randomUUID()}.jpg`
       const { error: uploadError } = await supabase.storage
         .from('report-images')
-        .upload(clearedPath, file, { upsert: true, contentType: file.type })
+        .upload(clearedPath, file, { upsert: false, contentType: file.type })
 
       if (uploadError) throw uploadError
 

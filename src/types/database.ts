@@ -29,7 +29,7 @@ export interface Report {
   cleared_image_url: string | null
   cleared_at: string | null
   cleared_by: string | null
-  waste_type: string | null
+  waste_type: string[] | null
   seen_count: number
   flag_count: number
   approved_at: string | null
@@ -183,6 +183,24 @@ export interface RaceRegistration {
   user_id: string | null
   created_at: string
   city: string
+}
+
+/** Citizen report categories. Stored on reports.waste_type, separate from race weigh-in WasteCategory. */
+export const REPORT_WASTE_CATEGORIES = [
+  'Plastic bottles',
+  'Sachets/bags',
+  'Organic',
+  'E-waste',
+  'Construction debris',
+  'Textiles',
+  'Mixed',
+] as const
+
+export type ReportWasteCategory = (typeof REPORT_WASTE_CATEGORIES)[number]
+
+export function formatWasteTypes(value: string[] | string | null | undefined): string {
+  const items = Array.isArray(value) ? value.filter(Boolean) : value ? [value] : []
+  return items.length ? items.join(', ') : 'Mixed waste'
 }
 
 export type WasteCategory = 'plastic' | 'organic' | 'mixed' | 'other'

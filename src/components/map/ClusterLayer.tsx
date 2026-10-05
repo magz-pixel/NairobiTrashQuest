@@ -9,6 +9,7 @@ import {
   formatClusterCount,
   pinColor,
   pinSize,
+  type MapCluster,
 } from '../../lib/clusters'
 
 interface ClusterLayerProps {
@@ -47,6 +48,46 @@ function pinIcon(severity: number, status: string, selected = false) {
   })
 }
 
+/** Grid cells in clusterReports can sit closer than their bubble diameters. Fold those together. */
+const CLUSTER_GAP_PX = 8
+
+function mergeOverlappingClusters(clusters: MapCluster[], map: L.Map, zoom: number): MapCluster[] {
+  if (zoom >= 14) return clusters
+  const pending = clusters.map((cluster) => ({ ...cluster, reports: [...cluster.reports] }))
+  let changed = true
+  while (changed) {
+    changed = false
+    for (let i = 0; i < pending.length; i++) {
+      const left = pending[i]
+      const leftPoint = map.project([left.latitude, left.longitude], zoom)
+      for (let j = i + 1; j < pending.length; j++) {
+        const right = pending[j]
+        const rightPoint = map.project([right.latitude, right.longitude], zoom)
+        const distance = Math.hypot(leftPoint.x - rightPoint.x, leftPoint.y - rightPoint.y)
+        const minDistance = (clusterSize(left.count) + clusterSize(right.count)) / 2 + CLUSTER_GAP_PX
+        if (distance >= minDistance) continue
+        const reports = [...left.reports, ...right.reports]
+        pending[i] = {
+          id: reports
+            .map((report) => report.id)
+            .sort()
+            .join(':'),
+          latitude: reports.reduce((sum, report) => sum + report.latitude, 0) / reports.length,
+          longitude: reports.reduce((sum, report) => sum + report.longitude, 0) / reports.length,
+          count: reports.length,
+          maxSeverity: Math.max(...reports.map((report) => report.severity_score)),
+          reports,
+        }
+        pending.splice(j, 1)
+        changed = true
+        break
+      }
+      if (changed) break
+    }
+  }
+  return pending
+}
+
 export function ClusterLayer({ reports, selectedId, onSelectReport }: ClusterLayerProps) {
   const map = useMap()
   const [zoom, setZoom] = useState(() => map.getZoom())
@@ -59,7 +100,7 @@ export function ClusterLayer({ reports, selectedId, onSelectReport }: ClusterLay
     }
   }, [map])
 
-  const clusters = clusterReports(reports, zoom)
+  const clusters = mergeOverlappingClusters(clusterReports(reports, zoom), map, zoom)
 
   return (
     <>

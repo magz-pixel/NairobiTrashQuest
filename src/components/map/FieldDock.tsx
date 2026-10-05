@@ -1,5 +1,11 @@
 import { useRef } from 'react'
-import type { Report, ReportStats, SeverityFilter, StatusFilter } from '../../types/database'
+import {
+  formatWasteTypes,
+  type Report,
+  type ReportStats,
+  type SeverityFilter,
+  type StatusFilter,
+} from '../../types/database'
 import type { WardBox } from '../../lib/cities'
 import { useCity } from '../../lib/CityContext'
 import { daysSince, severityLabel } from '../../lib/wards'
@@ -56,12 +62,17 @@ function FieldBoard({
   onReport: _onReport,
   density = 'rail',
   hideHeading = false,
-}: FieldBoardProps & { density?: 'half' | 'full' | 'rail'; hideHeading?: boolean }) {
+  scrollWithParent = false,
+}: FieldBoardProps & {
+  density?: 'half' | 'full' | 'rail'
+  hideHeading?: boolean
+  scrollWithParent?: boolean
+}) {
   void _onReport
   const compact = density === 'half'
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className={scrollWithParent ? 'flex flex-col' : 'flex min-h-0 flex-1 flex-col'}>
       {!hideHeading ? (
         <div className={`shrink-0 ${compact ? 'px-4 pb-2 pt-0' : 'px-4 pb-3 pt-1'}`}>
           {density !== 'half' ? (
@@ -162,7 +173,13 @@ function FieldBoard({
           </div>
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6">
+      <div
+        className={
+          scrollWithParent
+            ? 'px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6'
+            : 'min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6'
+        }
+      >
         <ReportListView reports={reports} selectedId={selectedId} onSelect={onSelect} />
       </div>
     </div>
@@ -218,7 +235,7 @@ function MobileSpotCard({
       <div className="p-3">
         <h3 className="truncate text-lg font-extrabold tracking-tight text-[#063b32]">{title}</h3>
         <p className="mt-0.5 text-xs font-bold text-[#6a827b]">
-          {daysSince(report.created_at)}d open · {report.waste_type ?? 'Mixed waste'} · {report.seen_count}{' '}
+          {daysSince(report.created_at)}d open · {formatWasteTypes(report.waste_type)} · {report.seen_count}{' '}
           seen
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
@@ -319,14 +336,14 @@ export function FieldDock({
 
   return (
     <section
-      className="pointer-events-auto absolute inset-x-0 bottom-0 z-[1080] flex flex-col overflow-hidden rounded-t-[1.6rem] border border-white/80 bg-white/97 shadow-[0_-18px_50px_rgba(6,59,50,.16)] backdrop-blur-md transition-[height] duration-300 ease-out md:hidden"
+      className="pointer-events-auto absolute inset-x-0 bottom-0 z-[1080] flex flex-col overflow-y-auto overscroll-contain rounded-t-[1.6rem] border border-white/80 bg-white/97 shadow-[0_-18px_50px_rgba(6,59,50,.16)] backdrop-blur-md transition-[height] duration-300 ease-out md:hidden"
       style={{ height: 'var(--map-sheet)' }}
       aria-label="Field reports"
     >
       <div
         role="button"
         tabIndex={0}
-        className="flex shrink-0 touch-none flex-col items-stretch px-4 pb-1 pt-2"
+        className="sticky top-0 z-10 flex shrink-0 touch-none flex-col items-stretch bg-white/97 px-4 pb-1 pt-2 backdrop-blur-md"
         aria-label={
           height === 'peek' ? 'Open nearby spots' : height === 'half' ? 'Expand list' : 'Show more map'
         }
@@ -368,7 +385,7 @@ export function FieldDock({
       </div>
 
       {showingSpot && selectedReport ? (
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <MobileSpotCard
             report={selectedReport}
             onClose={() => {
@@ -393,7 +410,12 @@ export function FieldDock({
           ) : null}
         </div>
       ) : height !== 'peek' ? (
-        <FieldBoard {...board} density={listDensity} hideHeading={height === 'half'} />
+        <FieldBoard
+          {...board}
+          density={listDensity}
+          hideHeading={height === 'half'}
+          scrollWithParent
+        />
       ) : null}
     </section>
   )

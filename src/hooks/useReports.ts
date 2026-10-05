@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { mergeWithDemoReports } from '../lib/demoReports'
+import { mergeWithDemoReports, showDemoData } from '../lib/demoReports'
+import { generateDemoReports } from '../lib/generateDemoReports'
 import { filterReportsBySeverity, filterReportsByStatus } from '../lib/wards'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import type { Report, SeverityFilter, StatusFilter } from '../types/database'
+
+function normalizeWasteTypes(value: unknown): string[] | null {
+  if (Array.isArray(value)) {
+    const items = value.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    return items.length ? items : null
+  }
+  if (typeof value === 'string' && value.trim()) return [value]
+  return null
+}
 
 function normalizeReport(row: Record<string, unknown>): Report {
   return {
@@ -17,7 +27,7 @@ function normalizeReport(row: Record<string, unknown>): Report {
     cleared_image_url: (row.cleared_image_url as string | null) ?? null,
     cleared_at: (row.cleared_at as string | null) ?? null,
     cleared_by: (row.cleared_by as string | null) ?? null,
-    waste_type: (row.waste_type as string | null) ?? null,
+    waste_type: normalizeWasteTypes(row.waste_type),
     seen_count: (row.seen_count as number) ?? 0,
     flag_count: (row.flag_count as number) ?? 0,
     approved_at: (row.approved_at as string | null) ?? null,
@@ -99,4 +109,72 @@ export function useReports(
   )
 
   return { reports, mapReports, allReports, loading, error, refetch: fetchReports }
+}
+
+const forceDemoData = import.meta.env.VITE_FORCE_DEMO_DATA === 'true'
+
+function findDemoReport(id: string): Report | null {
+  if (!showDemoData && !forceDemoData) return null
+  for (const slug of ['nairobi', 'kampala', 'dar-es-salaam']) {
+    const match = generateDemoReports(slug).find((report) => report.id === id)
+    if (match) return match
+  }
+  return null
+}
+
+/** One report by id. Does not filter by the city in the URL. */
+export function useReport(id: string | undefined) {
+  const [report, setReport] = useState<Report | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!id) {
+      setReport(null)
+      setNotFound(true)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    let cancelled = false
+    setLoading(true)
+    setNotFound(false)
+    setError(null)
+
+    const finish = (next: Report | null, fetchError: string | null = null) => {
+      if (cancelled) return
+      setReport(next)
+      setError(fetchError)
+      setNotFound(!fetchError && !next)
+      setLoading(false)
+    }
+
+    if (!isSupabaseConfigured || forceDemoData) {
+      finish(findDemoReport(id))
+      return () => {
+        cancelled = true
+      }
+    }
+
+    supabase
+      .from('reports')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+      .then(({ data, error: fetchError }) => {
+        if (fetchError) {
+          finish(null, fetchError.message)
+          return
+        }
+        finish(data ? normalizeReport(data as Record<string, unknown>) : null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [id])
+
+  return { report, loading, notFound, error }
 }

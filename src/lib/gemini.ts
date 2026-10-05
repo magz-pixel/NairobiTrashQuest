@@ -207,16 +207,16 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export async function uploadReportImage(
-  userId: string,
-  reportId: string,
+  _userId: string,
+  _reportId: string,
   file: File,
 ): Promise<string> {
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `${userId}/${reportId}.${ext}`
+  const path = `${crypto.randomUUID()}.${ext}`
 
   const { error } = await supabase.storage
     .from('report-images')
-    .upload(path, file, { upsert: true, contentType: file.type })
+    .upload(path, file, { upsert: false, contentType: file.type })
 
   if (error) throw error
 

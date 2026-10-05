@@ -8,6 +8,7 @@ import { MapControls } from './MapControls'
 import { ReportPulseLayer } from './ReportPulseLayer'
 
 const OSM_TILE = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+const MAP_MAX_ZOOM = 17
 
 export interface MapFocusTarget {
   lat: number
@@ -59,7 +60,7 @@ function MapFocus({
   const map = useMap()
   useEffect(() => {
     if (!target) return
-    const zoom = target.zoom ?? Math.max(map.getZoom(), 15)
+    const zoom = Math.min(MAP_MAX_ZOOM, target.zoom ?? Math.max(map.getZoom(), 15))
     map.invalidateSize()
     const point = map.project([target.lat, target.lng], zoom)
     point.y += paddingBottom / 2
@@ -87,6 +88,7 @@ export function MapView({
       key={city.slug}
       center={[city.center.lat, city.center.lng]}
       zoom={city.mapZoom}
+      maxZoom={MAP_MAX_ZOOM}
       className="map-canvas h-full w-full"
       zoomControl={false}
       attributionControl
@@ -96,6 +98,7 @@ export function MapView({
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url={OSM_TILE}
+        maxZoom={MAP_MAX_ZOOM}
       />
       <ClusterLayer reports={reports} selectedId={selectedId} onSelectReport={onSelectReport} />
       <HotspotLayer hotspots={hotspots} />

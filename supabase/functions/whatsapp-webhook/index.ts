@@ -56,7 +56,7 @@ serve(async (req) => {
       ai_tags: ['whatsapp', 'citizen-report'],
       is_anonymous: true,
       reporter_session: 'whatsapp',
-      waste_type: 'Mixed waste',
+      waste_type: ['Mixed'],
       approved_at: autoApprove ? new Date().toISOString() : null,
       moderation_note: 'Submitted via WhatsApp webhook',
       city: 'nairobi',

@@ -11,7 +11,9 @@ import {
 import { assignWard, daysSince, severityLabel } from '../../lib/wards'
 import { isDemoReport } from '../../lib/demoReports'
 import { marketConfig } from '../../lib/marketConfig'
-import type { Report } from '../../types/database'
+import { useCity } from '../../lib/CityContext'
+import { cityPath, isCitySlug } from '../../lib/cities'
+import { formatWasteTypes, type Report } from '../../types/database'
 import { Button } from '../ui/Button'
 import { CrowdfundPanel } from '../crowdfund/CrowdfundPanel'
 import { ContributeModal } from '../crowdfund/ContributeModal'
@@ -33,9 +35,11 @@ export function ReportDetailSheet({
   userLoggedIn,
 }: ReportDetailSheetProps) {
   const { user } = useAuth()
+  const city = useCity()
   const [status, setStatus] = useState<string | null>(null)
   const [seenCount, setSeenCount] = useState(0)
   const [contributeOpen, setContributeOpen] = useState(false)
+  const [manualShareUrl, setManualShareUrl] = useState<string | null>(null)
 
   const fundingSeed = useMemo((): FundingSeed | null => {
     if (!report) return null
@@ -105,6 +109,31 @@ export function ReportDetailSheet({
   }
 
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}`
+  const reportCity = isCitySlug(report.city) ? report.city : city.slug
+
+  const shareUrl = `${window.location.origin}${cityPath(reportCity, `/report/${report.id}`)}`
+  const canNativeShare = typeof navigator.share === 'function'
+
+  const shareReport = async () => {
+    setManualShareUrl(null)
+    const title = `${ward?.areaName ?? 'Hotspot'} · Ramani-Taka`
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title, url: shareUrl })
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return
+        setManualShareUrl(shareUrl)
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setStatus('Link copied.')
+    } catch {
+      setStatus((current) => (current === 'Link copied.' ? null : current))
+      setManualShareUrl(shareUrl)
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -153,14 +182,35 @@ export function ReportDetailSheet({
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">
               {ward?.areaName ?? 'Hotspot'}
             </h2>
-            <a
-              href={directionsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 inline-block text-xs text-[var(--brand-teal)]"
-            >
-              Get directions →
-            </a>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a
+                href={directionsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 items-center text-xs font-semibold text-[var(--brand-teal)]"
+              >
+                Get directions →
+              </a>
+              <button
+                type="button"
+                onClick={() => void shareReport()}
+                className="inline-flex min-h-11 items-center rounded-full border border-[var(--border-subtle)] bg-white px-3 text-xs font-semibold text-[var(--text-primary)]"
+              >
+                {canNativeShare ? 'Share' : 'Copy link'}
+              </button>
+            </div>
+            {manualShareUrl ? (
+              <label className="mt-2 block text-xs text-[var(--text-muted)]">
+                Select and copy this link
+                <input
+                  readOnly
+                  value={manualShareUrl}
+                  aria-label="Report link"
+                  onFocus={(event) => event.currentTarget.select()}
+                  className="mt-1 w-full rounded-lg border border-[var(--border-subtle)] bg-white px-2 py-2 text-xs text-[var(--text-primary)]"
+                />
+              </label>
+            ) : null}
 
             {isCleared ? (
               <div className="mt-3">
@@ -216,7 +266,7 @@ export function ReportDetailSheet({
               </div>
               <div className="rounded-lg border border-[var(--border-subtle)] bg-canvas p-2">
                 <p className="truncate text-xs font-bold text-[var(--text-primary)]">
-                  {report.waste_type ?? 'Mixed'}
+                  {formatWasteTypes(report.waste_type)}
                 </p>
                 <p className="text-[10px] text-[var(--text-muted)]">Waste type</p>
               </div>

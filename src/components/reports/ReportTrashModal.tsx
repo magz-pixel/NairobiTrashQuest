@@ -12,7 +12,8 @@ import { nearestActiveReport } from '../../lib/nearbyReports'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useCity } from '../../lib/CityContext'
 import { useAuth } from '../../hooks/useAuth'
-import type { Report, TrashAnalysis } from '../../types/database'
+import type { Report, ReportWasteCategory, TrashAnalysis } from '../../types/database'
+import { WasteCategoryPicker } from './WasteCategoryPicker'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 import { NearbyReportPrompt } from './NearbyReportPrompt'
@@ -53,6 +54,7 @@ export function ReportTrashModal({
   const [file, setFile] = useState<File | null>(null)
   const [cameraOn, setCameraOn] = useState(false)
   const [manualSeverity, setManualSeverity] = useState(5)
+  const [wasteCategories, setWasteCategories] = useState<ReportWasteCategory[]>([])
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [nearbyDuplicate, setNearbyDuplicate] = useState<Report | null>(null)
@@ -133,7 +135,7 @@ export function ReportTrashModal({
       ai_tags: analysis.tags,
       ward_id: ward?.wardId ?? null,
       area_name: ward?.areaName ?? null,
-      waste_type: analysis.tags[0] ?? 'Mixed waste',
+      waste_type: wasteCategories,
       city: city.slug,
     })
 
@@ -269,13 +271,20 @@ export function ReportTrashModal({
     }
   }
 
-  const handleSubmit = () => void submitReport(false)
+  const handleSubmit = () => {
+    if (wasteCategories.length === 0) {
+      setStatus('Pick at least one waste type.')
+      return
+    }
+    void submitReport(false)
+  }
 
   const handleClose = () => {
     stopCamera()
     setPreview(null)
     setFile(null)
     setManualSeverity(5)
+    setWasteCategories([])
     setStatus(null)
     setNearbyDuplicate(null)
     setSkipDuplicateCheck(false)
@@ -414,12 +423,14 @@ export function ReportTrashModal({
               </p>
             </div>
 
+            <WasteCategoryPicker value={wasteCategories} onChange={setWasteCategories} />
+
             {status && <p className="text-xs text-[var(--brand-teal)]">{status}</p>}
 
             <Button
               type="button"
               className="w-full"
-              disabled={!file || submitting}
+              disabled={!file || submitting || wasteCategories.length === 0}
               onClick={handleSubmit}
             >
               {submitting ? 'Processing…' : 'Submit report'}

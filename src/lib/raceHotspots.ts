@@ -86,17 +86,17 @@ export function clearLocalRaceHotspot(
 }
 
 export async function uploadRaceHotspotImage(
-  userId: string,
-  hotspotId: string,
+  _userId: string,
+  _hotspotId: string,
   file: File,
-  index = 0,
+  _index = 0,
 ): Promise<string> {
   const compressed = await compressImageFile(file)
-  const path = `${userId}/${hotspotId}-${index}.jpg`
+  const path = `${crypto.randomUUID()}.jpg`
 
   const { error } = await supabase.storage
     .from('race-hotspot-images')
-    .upload(path, compressed, { upsert: true, contentType: 'image/jpeg' })
+    .upload(path, compressed, { upsert: false, contentType: 'image/jpeg' })
 
   if (error) throw error
 

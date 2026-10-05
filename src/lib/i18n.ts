@@ -93,7 +93,7 @@ export function exportReportsGeoJson(
     status: string
     area_name: string | null
     created_at: string
-    waste_type?: string | null
+    waste_type?: string[] | string | null
   }[],
 ) {
   const geojson = {

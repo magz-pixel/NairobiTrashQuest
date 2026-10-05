@@ -5,7 +5,8 @@ import { getSessionId } from '../../lib/session'
 import { uploadReportImage, analyzeTrashImage } from '../../lib/gemini'
 import { nearestActiveReport } from '../../lib/nearbyReports'
 import { useCity } from '../../lib/CityContext'
-import type { Report, TrashAnalysis } from '../../types/database'
+import type { Report, ReportWasteCategory, TrashAnalysis } from '../../types/database'
+import { WasteCategoryPicker } from './WasteCategoryPicker'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 import { NearbyReportPrompt } from './NearbyReportPrompt'
@@ -45,6 +46,7 @@ export function QuickReportModal({
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [severity, setSeverity] = useState(5)
+  const [wasteCategories, setWasteCategories] = useState<ReportWasteCategory[]>([])
   const [status, setStatus] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [nearbyDuplicate, setNearbyDuplicate] = useState<Report | null>(null)
@@ -54,6 +56,7 @@ export function QuickReportModal({
     setFile(null)
     setPreview(null)
     setSeverity(5)
+    setWasteCategories([])
     setStatus(null)
     setNearbyDuplicate(null)
     setSkipDuplicateCheck(false)
@@ -65,7 +68,7 @@ export function QuickReportModal({
   }
 
   const submitReport = async (forceDuplicate = false) => {
-    if (!file) return
+    if (!file || wasteCategories.length === 0) return
     setSubmitting(true)
     setStatus('Getting location…')
 
@@ -128,7 +131,7 @@ export function QuickReportModal({
         reporter_session: getSessionId(),
         ward_id: ward?.wardId ?? null,
         area_name: ward?.areaName ?? null,
-        waste_type: analysis.tags[0] ?? 'Mixed waste',
+        waste_type: wasteCategories,
         approved_at: autoLive ? new Date().toISOString() : null,
         moderation_note:
           analysis.moderation_action === 'review' ? 'Queued for human review' : null,
@@ -215,8 +218,16 @@ export function QuickReportModal({
           className="w-full accent-[var(--brand-teal)]"
         />
       </div>
+      <div className="mb-3">
+        <WasteCategoryPicker value={wasteCategories} onChange={setWasteCategories} />
+      </div>
       {status && <p className="mb-2 text-xs text-[var(--brand-teal)]">{status}</p>}
-      <Button type="button" className="w-full" disabled={!file || submitting} onClick={handleSubmit}>
+      <Button
+        type="button"
+        className="w-full"
+        disabled={!file || submitting || wasteCategories.length === 0}
+        onClick={handleSubmit}
+      >
         {submitting ? 'Submitting…' : 'Submit report'}
       </Button>
         </>

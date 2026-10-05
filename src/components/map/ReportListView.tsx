@@ -1,4 +1,4 @@
-import type { Report } from '../../types/database'
+import { formatWasteTypes, type Report } from '../../types/database'
 import { useCity } from '../../lib/CityContext'
 import { daysSince, severityLabel } from '../../lib/wards'
 
@@ -46,7 +46,7 @@ export function ReportListView({ reports, selectedId, onSelect }: ReportListView
                 </p>
                 <p className={`mt-1 text-xs ${selected ? 'text-teal-100/80' : 'text-[#5d746e]'}`}>
                   {cleared ? 'Cleared' : severityLabel(r.severity_score)} · {daysSince(r.created_at)}d
-                  open · {r.waste_type ?? 'Mixed waste'}
+                  open · {formatWasteTypes(r.waste_type)}
                 </p>
                 <p className={`mt-1 text-[10px] font-bold uppercase tracking-[.12em] ${selected ? 'text-gold-300' : 'text-[#0b8c76]'}`}>
                   {r.seen_count} neighbours have seen this

@@ -16,6 +16,7 @@ import {
 } from '../lib/raceRegistration'
 import {
   AMAZING_TRASH_RACE_S2,
+  isRaceLive,
   type RaceRegistration,
 } from '../types/database'
 
@@ -27,6 +28,7 @@ export function RaceRegisterPage() {
   const city = useCity()
   const path = useCityPath()
   const citySlug = city.slug
+  const raceLive = isRaceLive()
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -47,6 +49,10 @@ export function RaceRegisterPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!raceLive) {
+      setError('Season 2 registration is closed.')
+      return
+    }
     if (isSupabaseConfigured && !user) {
       setError('Sign in to register for Season 2.')
       return
@@ -168,11 +174,29 @@ export function RaceRegisterPage() {
         <PageIntro
           eyebrow="Season 2"
           title="Amazing Trash Race"
-          body="Register for a digital ticket, join a squad, and bring your code on race day."
+          body={
+            raceLive
+              ? 'Register for a digital ticket, join a squad, and bring your code on race day.'
+              : 'Season 2 registration is closed. The leaderboard is still available for the season that already ran.'
+          }
           action={introAction}
         />
         <section className="mx-auto max-w-xl px-5 pb-20 sm:px-8 lg:px-12">
-          {loading && isSupabaseConfigured && !ticket ? (
+          {!raceLive ? (
+            <div className="rounded-[1.5rem] border border-[#d9e9e4] bg-white p-6 shadow-[var(--shadow-card)]">
+              <p className="fn-eyebrow">Registration closed</p>
+              <h2 className="fn-display mt-2 text-2xl font-extrabold text-[#063b32]">
+                Season 2 registration is closed
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#36564e]">
+                Tickets are not being issued. When the next season opens, this page will take
+                sign-ups again. The leaderboard from the season that already ran is still up.
+              </p>
+              <div className="mt-4">
+                <ActionLink to={path('/race/leaderboard')}>Live leaderboard</ActionLink>
+              </div>
+            </div>
+          ) : loading && isSupabaseConfigured && !ticket ? (
             <p className="text-sm text-[#5d746e]">Checking your account…</p>
           ) : needsSignIn && !ticket ? (
             <div className="rounded-[1.5rem] border border-[#d9e9e4] bg-white p-6 shadow-[var(--shadow-card)]">

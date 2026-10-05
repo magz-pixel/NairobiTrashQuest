@@ -262,7 +262,7 @@ export function generateDemoReportsDar(): Report[] {
       updated_at: updatedAt,
       area_name: spot.area_name,
       ward_id: spot.ward_id,
-      waste_type: spot.waste_type,
+      waste_type: [spot.waste_type],
       funding_goal_tzs: spot.funding_goal_tzs,
       funding_raised_tzs: spot.funding_raised_tzs,
       funding_contributors: spot.funding_contributors,
