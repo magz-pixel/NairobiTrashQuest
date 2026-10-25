@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabase } from './supabase'
+import { reportClientError } from './monitoring'
 import type { ClearVerification, TrashAnalysis } from '../types/database'
+
+export const PHOTO_UPLOAD_FAILED_MESSAGE =
+  'Photo upload failed. Please try again, or sign in and retry.'
 
 const TRASH_PROMPT = `Analyze if this image contains significant trash or pollution in an urban environment.
 Return ONLY valid JSON with no markdown: {"is_trash": boolean, "severity": number 1-10, "tags": string[]}`
@@ -212,13 +216,25 @@ export async function uploadReportImage(
   file: File,
 ): Promise<string> {
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `${crypto.randomUUID()}.${ext}`
+  // Path must match storage RLS: anon inserts require folder "anonymous"
+  // (migration 004). Authenticated inserts allow any path (migration 001).
+  // Use the real session — not the unused userId argument.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const path = session
+    ? `${crypto.randomUUID()}.${ext}`
+    : `anonymous/${crypto.randomUUID()}.${ext}`
 
   const { error } = await supabase.storage
     .from('report-images')
     .upload(path, file, { upsert: false, contentType: file.type })
 
-  if (error) throw error
+  if (error) {
+    console.error('report-images upload failed', error)
+    reportClientError(error, { source: 'uploadReportImage', path })
+    throw new Error(PHOTO_UPLOAD_FAILED_MESSAGE)
+  }
 
   const { data } = supabase.storage.from('report-images').getPublicUrl(path)
   return data.publicUrl
