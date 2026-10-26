@@ -18,6 +18,7 @@ import { Button } from '../ui/Button'
 import { CrowdfundPanel } from '../crowdfund/CrowdfundPanel'
 import { ContributeModal } from '../crowdfund/ContributeModal'
 import { AccountabilityFlow } from './AccountabilityFlow'
+import { isCleanupUnderReview } from '../../lib/cleanupReview'
 
 interface ReportDetailSheetProps {
   report: Report | null
@@ -64,9 +65,11 @@ export function ReportDetailSheet({
   const displaySeen = seenCount || report.seen_count
   const isCleared =
     report.status === 'verified_cleared' && Boolean(report.cleared_image_url)
+  const cleanupUnderReview = isCleanupUnderReview(report)
   const showCrowdfund =
     marketConfig.features.crowdfunding &&
     report.status === 'active' &&
+    !cleanupUnderReview &&
     funding != null
 
   const handleSeen = async () => {
@@ -160,13 +163,17 @@ export function ReportDetailSheet({
                   <span className="rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--brand-teal)]">
                     Resolved
                   </span>
+                ) : cleanupUnderReview ? (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                    Cleanup under review
+                  </span>
                 ) : (
                   <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--urgent-orange-deep)]">
                     {severityLabel(report.severity_score)}
                   </span>
                 )}
                 <span className="rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] uppercase text-[var(--text-muted)]">
-                  {report.status.replaceAll('_', ' ')}
+                  {cleanupUnderReview ? 'active' : report.status.replaceAll('_', ' ')}
                 </span>
                 {demo && (
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-700">
@@ -182,8 +189,16 @@ export function ReportDetailSheet({
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">
               {ward?.areaName ?? 'Hotspot'}
             </h2>
-            {report.moderation_note && !report.moderation_note.startsWith('Queued') ? (
+            {report.moderation_note &&
+            !report.moderation_note.startsWith('Queued') &&
+            !cleanupUnderReview ? (
               <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">{report.moderation_note}</p>
+            ) : null}
+            {cleanupUnderReview ? (
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
+                A cleanup photo was submitted and is waiting for admin review. The hotspot stays on
+                the map until it is approved.
+              </p>
             ) : null}
             <div className="mt-2 flex flex-wrap gap-2">
               <a
@@ -215,9 +230,9 @@ export function ReportDetailSheet({
               </label>
             ) : null}
 
-            {isCleared ? (
+            {isCleared || cleanupUnderReview ? (
               <div className="mt-3">
-                {report.cleared_at && (
+                {isCleared && report.cleared_at && (
                   <p className="mb-2 text-xs text-[var(--brand-teal)]">
                     Cleaned {daysSince(report.cleared_at)} days ago
                   </p>
@@ -235,7 +250,7 @@ export function ReportDetailSheet({
                   </div>
                   <div>
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                      After
+                      After{cleanupUnderReview ? ' (pending)' : ''}
                     </p>
                     <img
                       src={report.cleared_image_url!}
@@ -302,7 +317,10 @@ export function ReportDetailSheet({
               <Button type="button" variant="ghost" onClick={handleSeen}>
                 👍 I've seen this ({displaySeen})
               </Button>
-              {userLoggedIn && onVerify && report.status !== 'verified_cleared' && (
+              {userLoggedIn &&
+                onVerify &&
+                report.status !== 'verified_cleared' &&
+                !cleanupUnderReview && (
                 <Button type="button" onClick={onVerify}>
                   ✓ Verify cleanup
                 </Button>

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { findNearestActiveReport } from '../../lib/geo'
-import { verifyClearedImage } from '../../lib/gemini'
+import { AiCheckUnavailableError, verifyClearedImage } from '../../lib/gemini'
 import { bumpMissionProgress } from '../../lib/missions'
 import { useAuth } from '../../hooks/useAuth'
 import type { Report } from '../../types/database'
@@ -52,6 +52,7 @@ export function ClearTrashModal({
     if (!file || !user) return
     setSubmitting(true)
     setStatus('Verifying cleanup…')
+    let succeeded = false
 
     try {
       const position = await getCurrentPosition()
@@ -64,17 +65,22 @@ export function ClearTrashModal({
 
       if (!nearest) {
         setStatus('No active hotspot within 50m. Move closer to a marked area.')
-        setSubmitting(false)
         return
       }
 
-      const verification = await verifyClearedImage(nearest.image_url, file)
-      if (!verification.is_cleared || !verification.matches_location) {
-        setStatus(
-          'AI could not verify this cleanup. Ensure the after photo shows the same cleared spot.',
-        )
-        setSubmitting(false)
-        return
+      let aiUnavailable = false
+      try {
+        const verification = await verifyClearedImage(nearest.image_url, file)
+        if (!verification.is_cleared || !verification.matches_location) {
+          setStatus(
+            'AI could not verify this cleanup. Ensure the after photo shows the same cleared spot.',
+          )
+          return
+        }
+      } catch (err) {
+        if (!(err instanceof AiCheckUnavailableError)) throw err
+        aiUnavailable = true
+        setStatus('Saving your photo for review…')
       }
 
       const clearedPath = `${crypto.randomUUID()}.jpg`
@@ -88,6 +94,20 @@ export function ClearTrashModal({
         .from('report-images')
         .getPublicUrl(clearedPath)
 
+      if (aiUnavailable) {
+        const { error: reviewError } = await supabase.rpc('submit_cleanup_for_review', {
+          report_uuid: nearest.id,
+          cleared_image: urlData.publicUrl,
+        })
+        if (reviewError) throw reviewError
+
+        setStatus('Thanks! Your cleanup was submitted and will be reviewed shortly.')
+        onCleared()
+        succeeded = true
+        setTimeout(handleClose, 2200)
+        return
+      }
+
       const { error: rpcError } = await supabase.rpc('verify_report_cleared', {
         report_uuid: nearest.id,
         cleared_image: urlData.publicUrl,
@@ -99,11 +119,12 @@ export function ClearTrashModal({
       await refreshProfile()
       setStatus(`Cleared! +${Math.max(10, nearest.severity_score * 5)} impact points`)
       onCleared()
+      succeeded = true
       setTimeout(handleClose, 1000)
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'Verification failed')
     } finally {
-      setSubmitting(false)
+      if (!succeeded) setSubmitting(false)
     }
   }
 

@@ -132,10 +132,8 @@ if (url && anon) {
 
 if (env.VITE_DEMO_MODE === 'true') {
   pass('VITE_DEMO_MODE=true (AI steps will not block pilot)')
-} else if (env.VITE_GEMINI_API_KEY) {
-  pass('VITE_GEMINI_API_KEY set locally')
 } else {
-  warn('No VITE_DEMO_MODE or Gemini key locally — confirm Vercel env for production')
+  warn('VITE_DEMO_MODE is off — production photo checks use the analyze-trash edge function')
 }
 
 if (env.VITE_AUTO_APPROVE_REPORTS !== 'false') {

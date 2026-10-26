@@ -26,7 +26,6 @@
     "verify:race-week": "node scripts/verify-donate-module-b.mjs"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.7.0",
     "@sentry/react": "^11.4.0",

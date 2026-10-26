@@ -36,12 +36,10 @@ if (!url || !anon) {
   console.log('✓ Supabase env vars present')
 }
 
-if (env.VITE_GEMINI_API_KEY) {
-  console.log('✓ VITE_GEMINI_API_KEY set (live Gemini)')
-} else if (env.VITE_DEMO_MODE === 'true') {
+if (env.VITE_DEMO_MODE === 'true') {
   console.log('✓ VITE_DEMO_MODE=true (mock AI for demo)')
 } else {
-  console.warn('⚠ No Gemini key and demo mode off — report flow may fail')
+  console.warn('⚠ Demo mode off — photo checks use the analyze-trash edge function (GEMINI_API_KEY secret)')
 }
 
 if (url && anon) {

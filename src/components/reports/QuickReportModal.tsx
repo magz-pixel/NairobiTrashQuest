@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { resolvePlace } from '../../lib/wards'
 import { getSessionId } from '../../lib/session'
-import { uploadReportImage, analyzeTrashImage } from '../../lib/gemini'
+import {
+  analyzeTrashImage,
+  PHOTO_UPLOAD_FAILED_MESSAGE,
+  uploadReportImage,
+} from '../../lib/gemini'
+import { reportClientError } from '../../lib/monitoring'
 import { nearestActiveReport } from '../../lib/nearbyReports'
 import { assertCanSubmitReport, recordReportSubmit } from '../../lib/reportGuard'
 import { useCity } from '../../lib/CityContext'
@@ -184,7 +189,17 @@ export function QuickReportModal({
       })
       setTimeout(handleClose, 900)
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : 'Failed to submit')
+      console.error('Quick report failed', err)
+      reportClientError(err, { source: 'QuickReportModal' })
+      const raw = err instanceof Error ? err.message : ''
+      if (
+        raw === PHOTO_UPLOAD_FAILED_MESSAGE ||
+        /row-level security|violates.*policy/i.test(raw)
+      ) {
+        setStatus(PHOTO_UPLOAD_FAILED_MESSAGE)
+      } else {
+        setStatus(raw || 'Failed to submit')
+      }
     } finally {
       setSubmitting(false)
     }

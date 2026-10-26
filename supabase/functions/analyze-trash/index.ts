@@ -7,6 +7,8 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+const DEFAULT_MODEL = 'gemini-2.5-flash'
+
 const MODERATION_PROMPT = `You are moderating photos for a civic trash-reporting app in Nairobi.
 Return ONLY valid JSON with no markdown:
 {
@@ -28,8 +30,67 @@ Rules:
 const CLEAR_PROMPT = `Compare these two images of the same urban location (before and after cleanup).
 Return ONLY valid JSON with no markdown: {"is_cleared": boolean, "matches_location": boolean, "confidence": number 0-1}`
 
+class HttpError extends Error {
+  status: number
+  constructor(status: number, message: string, options?: { cause?: unknown }) {
+    super(message, options)
+    this.name = 'HttpError'
+    this.status = status
+  }
+}
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
+
+/** Keep provider errors useful in logs without echoing a query-string API key. */
+function scrub(message: string): string {
+  return message.replace(/key=[^&\s]+/gi, 'key=redacted').slice(0, 500)
+}
+
+function errorMessage(err: unknown, fallback: string): string {
+  const raw = err instanceof Error && err.message ? err.message : fallback
+  return scrub(raw)
+}
+
+function parseModelJson(text: string): unknown {
+  const cleaned = text.replace(/```json|```/g, '').trim()
+  try {
+    return JSON.parse(cleaned)
+  } catch (err) {
+    throw new HttpError(502, 'Gemini returned an unreadable result', { cause: err })
+  }
+}
+
 async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string }> {
-  const res = await fetch(url)
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch (err) {
+    throw new HttpError(400, 'Could not load the before photo. The image URL is not valid.', {
+      cause: err,
+    })
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new HttpError(400, 'Could not load the before photo. The image URL is not valid.')
+  }
+
+  let res: Response
+  try {
+    res = await fetch(parsed)
+  } catch (err) {
+    throw new HttpError(400, 'Could not load the before photo.', { cause: err })
+  }
+  if (!res.ok) {
+    throw new HttpError(
+      400,
+      `Could not load the before photo (HTTP ${res.status}).`,
+    )
+  }
+
   const blob = await res.blob()
   const buffer = await blob.arrayBuffer()
   const bytes = new Uint8Array(buffer)
@@ -43,6 +104,30 @@ async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType
   }
 }
 
+type ModelPart =
+  | string
+  | { inlineData: { data: string; mimeType: string } }
+
+async function generateJson(
+  model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>,
+  parts: ModelPart[],
+): Promise<unknown> {
+  let result: Awaited<ReturnType<typeof model.generateContent>>
+  try {
+    result = await model.generateContent(parts)
+  } catch (err) {
+    throw new HttpError(502, errorMessage(err, 'Gemini request failed'), { cause: err })
+  }
+
+  let text = ''
+  try {
+    text = result.response.text()
+  } catch (err) {
+    throw new HttpError(502, 'Gemini returned no result', { cause: err })
+  }
+  return parseModelJson(text)
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -51,53 +136,69 @@ serve(async (req) => {
   try {
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY secret is not set')
+      console.error('analyze-trash: GEMINI_API_KEY secret is not set')
+      return jsonResponse({ error: 'GEMINI_API_KEY secret is not set' }, 500)
     }
 
-    const body = await req.json()
+    let body: Record<string, unknown>
+    try {
+      body = await req.json()
+    } catch (err) {
+      console.error('analyze-trash: invalid request body', err)
+      return jsonResponse({ error: 'Request body must be JSON' }, 400)
+    }
+
+    const modelName = Deno.env.get('GEMINI_MODEL')?.trim() || DEFAULT_MODEL
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    const model = genAI.getGenerativeModel({ model: modelName })
 
     if (body.mode === 'clear') {
+      if (typeof body.beforeImageUrl !== 'string' || !body.beforeImageUrl.trim()) {
+        return jsonResponse({ error: 'beforeImageUrl is required' }, 400)
+      }
+      if (typeof body.clearedImageBase64 !== 'string' || !body.clearedImageBase64) {
+        return jsonResponse({ error: 'clearedImageBase64 is required' }, 400)
+      }
+
       const before = await fetchImageAsBase64(body.beforeImageUrl)
-      const result = await model.generateContent([
+      const parsed = await generateJson(model, [
         CLEAR_PROMPT,
         { inlineData: { data: before.data, mimeType: before.mimeType } },
         {
           inlineData: {
             data: body.clearedImageBase64,
-            mimeType: body.clearedMimeType || 'image/jpeg',
+            mimeType:
+              typeof body.clearedMimeType === 'string' && body.clearedMimeType
+                ? body.clearedMimeType
+                : 'image/jpeg',
           },
         },
       ])
-      const text = result.response.text().replace(/```json|```/g, '').trim()
-      return new Response(text, {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return jsonResponse(parsed)
     }
 
-    const result = await model.generateContent([
+    if (typeof body.imageBase64 !== 'string' || !body.imageBase64) {
+      return jsonResponse({ error: 'imageBase64 is required' }, 400)
+    }
+
+    const parsed = await generateJson(model, [
       MODERATION_PROMPT,
       {
         inlineData: {
           data: body.imageBase64,
-          mimeType: body.mimeType || 'image/jpeg',
+          mimeType:
+            typeof body.mimeType === 'string' && body.mimeType ? body.mimeType : 'image/jpeg',
         },
       },
     ])
-    const text = result.response.text().replace(/```json|```/g, '').trim()
-    return new Response(text, {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return jsonResponse(parsed)
   } catch (err) {
-    return new Response(
-      JSON.stringify({
-        error: err instanceof Error ? err.message : 'Analysis failed',
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    )
+    const status = err instanceof HttpError ? err.status : 500
+    const message =
+      err instanceof HttpError
+        ? err.message
+        : errorMessage(err, 'Analysis failed')
+    console.error('analyze-trash failed', message, err instanceof HttpError ? err.cause ?? err : err)
+    return jsonResponse({ error: message }, status)
   }
 })

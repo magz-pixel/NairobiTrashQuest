@@ -32,7 +32,7 @@ Project: `momkbsgfypjfujkhrtxb` → https://supabase.com/dashboard/project/momkb
 ## AI for reports
 
 - **Demo now:** `VITE_DEMO_MODE=true` in `.env` (mock AI, no API key).
-- **Real Gemini:** set `VITE_GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) and set `VITE_DEMO_MODE=false`.
+- **Production:** deploy the `analyze-trash` edge function and set the `GEMINI_API_KEY` secret on Supabase. The browser bundle does not call Gemini.
 
 ## Seed from terminal (optional)
 
@@ -59,7 +59,7 @@ npx vercel --prod
 4. Environment variables:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_DEMO_MODE` = `true` (or `VITE_GEMINI_API_KEY` for live AI)
+   - `VITE_DEMO_MODE` = `true` for a demo without the edge function. Leave it unset in production so photo checks use `analyze-trash`.
 5. Deploy, then add your `https://….vercel.app` URL to Supabase redirect URLs (see above).
 
 **SQL via CLI** (after `npx supabase login`):

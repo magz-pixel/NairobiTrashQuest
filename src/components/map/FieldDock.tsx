@@ -9,6 +9,7 @@ import {
 import type { WardBox } from '../../lib/cities'
 import { useCity } from '../../lib/CityContext'
 import { daysSince, severityLabel } from '../../lib/wards'
+import { isCleanupUnderReview } from '../../lib/cleanupReview'
 import { ReportListView } from './ReportListView'
 
 export type SheetHeight = 'peek' | 'half' | 'full'
@@ -215,6 +216,7 @@ function MobileSpotCard({
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${report.latitude},${report.longitude}`
   const title = report.area_name ?? `${city.label} hotspot`
   const cleared = report.status === 'verified_cleared'
+  const underReview = isCleanupUnderReview(report)
 
   return (
     <article className="mx-3 mb-3 overflow-hidden rounded-2xl border border-[#e5efeb] bg-[#f7fbf9] shadow-[0_10px_28px_rgba(6,59,50,.08)]">
@@ -229,7 +231,11 @@ function MobileSpotCard({
           ✕
         </button>
         <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#063b32]">
-          {cleared ? 'Cleared' : severityLabel(report.severity_score)}
+          {cleared
+            ? 'Cleared'
+            : underReview
+              ? 'Cleanup under review'
+              : severityLabel(report.severity_score)}
         </span>
       </div>
       <div className="p-3">
@@ -255,7 +261,7 @@ function MobileSpotCard({
             Full report
           </button>
         </div>
-        {userLoggedIn && onVerify && !cleared ? (
+        {userLoggedIn && onVerify && !cleared && !underReview ? (
           <button
             type="button"
             onClick={onVerify}

@@ -52,7 +52,7 @@ Gamified PWA for tracking urban pollution hotspots on a live heatmap, civic repo
    npx supabase functions deploy whatsapp-inbound
    ```
 
-   Optional secrets: `RESEND_API_KEY` (digest emails), `WHATSAPP_WEBHOOK_SECRET`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` (WhatsApp inbound bridge), `AUTO_APPROVE_REPORTS`.
+   Optional secrets: `GEMINI_MODEL` (defaults to `gemini-2.5-flash`), `RESEND_API_KEY` (digest emails), `WHATSAPP_WEBHOOK_SECRET`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` (WhatsApp inbound bridge), `AUTO_APPROVE_REPORTS`.
 
    Point Twilio's inbound WhatsApp webhook at `https://YOUR_PROJECT.supabase.co/functions/v1/whatsapp-inbound`.
 
