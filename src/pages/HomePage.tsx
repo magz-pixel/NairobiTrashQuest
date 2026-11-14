@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents'
@@ -46,7 +46,8 @@ function reportsInWard(list: Report[], ward: WardBox | null) {
 }
 
 export function HomePage() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const navigate = useNavigate()
   const city = useCity()
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('active')
@@ -235,6 +236,7 @@ export function HomePage() {
     events: upcoming,
     going,
     onSelectEvent: openEvent,
+    onPostEvent: profile?.is_admin ? () => navigate(`/${city.slug}/cleanups/manage`) : undefined,
   }
 
   return (

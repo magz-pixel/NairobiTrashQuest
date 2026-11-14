@@ -13,6 +13,8 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        // Never make phones pre-download experiments or admin-only bulk; they load on demand if opened.
+        globIgnores: ['**/MapboxTestPage-*', '**/node_modules/**'],
       },
       manifest: {
         id: '/',
