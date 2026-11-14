@@ -30,3 +30,6 @@ NUL
 
 .vercel
 supabase/.temp
+
+# Personal admin grants: run locally, never commit
+supabase/backfills/make_admin_*.sql
