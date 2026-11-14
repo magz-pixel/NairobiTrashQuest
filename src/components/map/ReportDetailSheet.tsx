@@ -307,7 +307,14 @@ export function ReportDetailSheet({
             />
 
             {!demo ? (
-              <BountyPanel reportId={report.id} place={report.area_name ?? city.label} city={city.slug} currency={city.currency.code} />
+              <BountyPanel
+                reportId={report.id}
+                place={report.area_name ?? city.label}
+                city={city.slug}
+                currency={city.currency.code}
+                severity={report.severity_score}
+                seenCount={report.seen_count ?? 0}
+              />
             ) : null}
             {!demo ? <ReportDiscussion reportId={report.id} /> : null}
 

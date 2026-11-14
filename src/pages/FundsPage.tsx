@@ -1,6 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { DonateModal } from '../components/funds/DonateModal'
+import { BountyGallery } from '../components/funds/BountyGallery'
+import { CampaignGrid, SpendBreakdown } from '../components/funds/FundModules'
+import { CAMPAIGNS } from '../data/fundCampaigns'
+import { useReports } from '../hooks/useReports'
+import { useCityBounties } from '../lib/bounties'
 import { FundProgressBar } from '../components/funds/FundProgressBar'
 import { SiteFooter } from '../components/site/SiteNav'
 import { PageIntro, PublicShell, SectionLabel, StatTile, StatusChip } from '../components/site/PagePrimitives'
@@ -14,8 +19,19 @@ export function FundsPage() {
   const path = useCityPath()
   const money = (n: number) => formatCityMoney(n, city)
   const target = city.fundTarget
-  const { feed, totals, loading, usingLocal } = useFundLedger(city.slug)
+  const { feed, totals, loading, usingLocal, entries } = useFundLedger(city.slug)
   const [donateOpen, setDonateOpen] = useState(false)
+  const bounties = useCityBounties(city.slug)
+  const { allReports } = useReports('all', 'all', city.slug)
+  const campaigns = useMemo(() => CAMPAIGNS.filter((c) => c.city === city.slug || c.city === 'all'), [city.slug])
+  const b = useMemo(() => {
+    const all = [...bounties.values()]
+    return {
+      raised: all.reduce((x, y) => x + y.raised, 0),
+      live: all.filter((y) => y.status === 'funding' || y.status === 'open').length,
+      paid: all.filter((y) => y.status === 'paid').reduce((x, y) => x + y.target_amount, 0),
+    }
+  }, [bounties])
   const donateLabels = getDonateConfig(city)
     .money.map((m) => m.label)
     .concat('USDT')
@@ -33,6 +49,9 @@ export function FundsPage() {
               <button type="button" onClick={() => setDonateOpen(true)} className="fn-action fn-action-gold">
                 Support the work <span>→</span>
               </button>
+              <a href="#bounty-drops" className="fn-action fn-action-light">
+                Fund a hotspot
+              </a>
               <Link to={path('/funds/manage')} className="fn-action fn-action-light">
                 Team console
               </Link>
@@ -56,11 +75,36 @@ export function FundsPage() {
             />
           </div>
         </section>
+        {/* Modular sections: reorder or remove entries in FUND_SECTIONS below. */}
+        {FUND_SECTIONS.map((id) => {
+          const section: Record<FundSection, ReactNode> = {
+            bounties: (
+              <Block key={id} id="bounty-drops" label="Bounty drops" title="Hotspots you can fund right now" tint>
+                <p className="-mt-3 mb-6 max-w-2xl text-sm leading-6 text-[#5d746e]">
+                  Every spot here is a real place on the map. Pledge until it hits its target, then a verified local crew claims it,
+                  cleans it, and gets paid. {b.live} live · {money(b.raised)} pledged so far.
+                </p>
+                <BountyGallery bounties={bounties} reports={allReports} reportPath={(rid) => path(`/report/${rid}`)} mapPath={path('/map')} />
+              </Block>
+            ),
+            campaigns: campaigns.length ? (
+              <Block key={id} label="What we're raising for" title="Campaigns">
+                <CampaignGrid campaigns={campaigns} entries={entries} currency={city.currency.code} onDonate={() => setDonateOpen(true)} />
+              </Block>
+            ) : null,
+            spending: (
+              <Block key={id} label="Where the money goes" title="Spending, by what it paid for" tint>
+                <SpendBreakdown entries={entries} bountiesPaid={b.paid} format={money} />
+              </Block>
+            ),
+          }
+          return section[id]
+        })}
         <section className="fn-panel-dark bg-[#063b32] px-5 py-16 text-white sm:px-8 lg:px-12">
           {city.fundCampaignLive ? (
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.7fr_1.3fr] lg:items-center">
             <div>
-              <SectionLabel>Season 2 campaign</SectionLabel>
+              <SectionLabel>{city.chapterName} general fund</SectionLabel>
               <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.03em]">
                 The ledger is part of the impact.
               </h2>
@@ -142,5 +186,21 @@ export function FundsPage() {
       <SiteFooter />
       <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
     </PublicShell>
+  )
+}
+
+type FundSection = 'bounties' | 'campaigns' | 'spending'
+/** Page order. The org-wide totals, chapter campaign and ledger always show around these. */
+const FUND_SECTIONS: FundSection[] = ['bounties', 'campaigns', 'spending']
+
+function Block({ id, label, title, tint, children }: { id?: string; label: string; title: string; tint?: boolean; children: ReactNode }) {
+  return (
+    <section id={id} className={`px-5 py-12 sm:px-8 lg:px-12 ${tint ? 'bg-[#e5f0eb]' : ''}`}>
+      <div className="mx-auto max-w-7xl">
+        <SectionLabel>{label}</SectionLabel>
+        <h2 className="fn-display mb-6 mt-3 text-3xl font-extrabold tracking-[-.03em] text-[#063b32]">{title}</h2>
+        {children}
+      </div>
+    </section>
   )
 }

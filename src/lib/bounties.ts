@@ -235,3 +235,22 @@ export async function createBounty(reportId: string, city: string, currency: str
     .insert({ report_id: reportId, city, currency, target_amount: target, created_by: userId })
   if (error) throw error
 }
+
+/* ------------------------------------------------------- suggested target */
+
+/**
+ * A per-spot starting estimate (admins can change it), instead of one generic number.
+ * cost ≈ crew day + bags/transport, scaled by severity (0–10) and how many neighbours confirmed it.
+ * Amounts are in KES; other currencies are converted with rough fixed rates.
+ */
+const PER_KES: Record<string, number> = { KES: 1, UGX: 28.5, TZS: 20 }
+export function suggestTarget(r: { severity_score: number; seen_count?: number | null }, currency: string): number {
+  const sev = Math.max(1, Math.min(10, r.severity_score || 5))
+  const base = 3000 // gloves, bags, water for a small crew
+  const perSeverity = 1200 // labour + transport grows with the size of the pile
+  const crowd = Math.min(5, r.seen_count ?? 0) * 300 // spots many people see are usually bigger
+  const kes = base + sev * perSeverity + crowd
+  const rate = PER_KES[currency] ?? 1
+  const step = currency === 'KES' ? 500 : 10000
+  return Math.round((kes * rate) / step) * step
+}
