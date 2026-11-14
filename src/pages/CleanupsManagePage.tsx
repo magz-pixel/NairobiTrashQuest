@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { useCity } from '../lib/CityContext'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import type { Event } from '../types/database'
+import { ReportPinMap } from '../components/reports/ReportPinMap'
+import { getCurrentPosition } from '../lib/geo'
 
 interface RsvpRow {
   id: string
@@ -25,6 +27,7 @@ function ManageInner() {
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
   const [eventDate, setEventDate] = useState('')
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
   const [points, setPoints] = useState(50)
 
   const loadEvents = useCallback(async () => {
@@ -88,8 +91,8 @@ function ManageInner() {
       location: location.trim() || city.label,
       event_date: new Date(eventDate).toISOString(),
       organizer_id: user.id,
-      latitude: null,
-      longitude: null,
+      latitude: pin?.lat ?? null,
+      longitude: pin?.lng ?? null,
       city: city.slug,
     })
     if (error) {
@@ -100,7 +103,8 @@ function ManageInner() {
     setLocation('')
     setDescription('')
     setEventDate('')
-    setStatus('Cleanup posted.')
+    setStatus(pin ? 'Cleanup posted — it now shows on the map.' : 'Cleanup posted (no map pin).')
+    setPin(null)
     await loadEvents()
   }
 
@@ -148,6 +152,46 @@ function ManageInner() {
           onChange={(e) => setEventDate(e.target.value)}
           className="fn-field"
         />
+        <div className="rounded-xl border border-[#d9e9e4] bg-[#f8fbf9] p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-bold text-[#063b32]">Meeting point on the map</p>
+            {pin ? (
+              <button type="button" onClick={() => setPin(null)} className="text-xs font-bold text-[#a44738]">
+                Remove pin
+              </button>
+            ) : null}
+          </div>
+          {pin ? (
+            <>
+              <div className="mt-2 overflow-hidden rounded-lg">
+                <ReportPinMap lat={pin.lat} lng={pin.lng} onChange={(lat, lng) => setPin({ lat, lng })} />
+              </div>
+              <p className="mt-1 text-xs text-[#71867f]">Drag the pin to where people should meet.</p>
+            </>
+          ) : (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="fn-chip-btn"
+                onClick={() =>
+                  void getCurrentPosition()
+                    .then((p) => setPin({ lat: p.coords.latitude, lng: p.coords.longitude }))
+                    .catch(() => setStatus('Could not read your location — drop the pin from the city centre instead.'))
+                }
+              >
+                📍 Use my location
+              </button>
+              <button
+                type="button"
+                className="fn-chip-btn"
+                onClick={() => setPin({ lat: city.center.lat, lng: city.center.lng })}
+              >
+                🗺️ Drop pin in {city.label}
+              </button>
+            </div>
+          )}
+          <p className="mt-2 text-xs text-[#71867f]">With a pin, the cleanup appears on the public map.</p>
+        </div>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}

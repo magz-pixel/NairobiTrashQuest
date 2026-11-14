@@ -136,7 +136,14 @@ export function CleanupsPage() {
                     </div>
                     <span className="text-xl">◎</span>
                   </div>
-                  <p className="mt-3 text-sm font-bold text-[#0b8c76]">{ev.location}</p>
+                  <p className="mt-3 text-sm font-bold text-[#0b8c76]">
+                    {ev.location}
+                    {ev.latitude != null && ev.longitude != null ? (
+                      <Link to={`${path('/map')}?event=${ev.id}`} className="ml-2 text-xs underline">
+                        See on map →
+                      </Link>
+                    ) : null}
+                  </p>
                   {ev.description && <p className="mt-3 leading-6 text-[#617972]">{ev.description}</p>}
                   <div className="mt-6">
                     {!user ? (

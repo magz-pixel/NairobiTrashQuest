@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { resolvePlace } from '../../lib/wards'
 import { getSessionId } from '../../lib/session'
@@ -18,6 +18,7 @@ import { ReportPinMap } from './ReportPinMap'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 import { NearbyReportPrompt } from './NearbyReportPrompt'
+import { PhotoPicker } from './PhotoPicker'
 
 interface QuickReportModalProps {
   open: boolean
@@ -50,7 +51,6 @@ export function QuickReportModal({
   onViewExistingReport,
 }: QuickReportModalProps) {
   const city = useCity()
-  const fileRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [severity, setSeverity] = useState(6)
@@ -235,22 +235,15 @@ export function QuickReportModal({
           Take or upload a photo
         </div>
       )}
-      <Button type="button" variant="ghost" className="mb-3" onClick={() => fileRef.current?.click()}>
-        {file ? 'Change photo' : 'Add photo'}
-      </Button>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (!f) return
-          setFile(f)
-          setPreview(URL.createObjectURL(f))
-        }}
-      />
+      <div className="mb-3">
+        <PhotoPicker
+          hasPhoto={!!file}
+          onPick={(f) => {
+            setFile(f)
+            setPreview(URL.createObjectURL(f))
+          }}
+        />
+      </div>
       <div className="mb-3">
         <SeverityPicker value={severity} onChange={setSeverity} />
       </div>

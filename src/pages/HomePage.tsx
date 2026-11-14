@@ -3,6 +3,9 @@ import { flushSync } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
+import { useUpcomingEvents } from '../hooks/useUpcomingEvents'
+import { EventDetailSheet } from '../components/events/EventDetailSheet'
+import { formatEventWhen, hasPin, relativeDays } from '../lib/events'
 import { useReportStats } from '../hooks/useReportStats'
 import { useCity } from '../lib/CityContext'
 import { FieldDock, FieldRail, type SheetHeight } from '../components/map/FieldDock'
@@ -23,7 +26,7 @@ import { ClearTrashModal } from '../components/reports/ClearTrashModal'
 import { isDemoReport } from '../lib/demoReports'
 import type { WardBox } from '../lib/cities'
 import { useAuth } from '../hooks/useAuth'
-import type { Report, SeverityFilter, StatusFilter } from '../types/database'
+import type { Event, Report, SeverityFilter, StatusFilter } from '../types/database'
 import type { GameTab } from '../components/layout/GameShell'
 import type { MapFocusTarget } from '../components/map/MapView'
 
@@ -53,6 +56,9 @@ export function HomePage() {
     city.slug,
   )
   const { activeHotspots: raceMapHotspots } = useRaceHotspots()
+  const { events: upcoming, going, mine, toggleGoing } = useUpcomingEvents(city.slug)
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const selectedEvent = upcoming.find((e) => e.id === selectedEventId) ?? null
   const stats = useReportStats(allReports)
   const [activePanel, setActivePanel] = useState<GameTab | null>(null)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
@@ -117,6 +123,36 @@ export function HomePage() {
   }
 
   const openScan = () => (user ? openReport() : openQuickReport())
+
+  // Shared cleanup links: /nairobi/map?event=<id> opens that cleanup's details.
+  const eventParam = searchParams.get('event')
+  const [openedEventParam, setOpenedEventParam] = useState<string | null>(null)
+  if (eventParam && eventParam !== openedEventParam && upcoming.some((e) => e.id === eventParam)) {
+    setOpenedEventParam(eventParam)
+    setSelectedEventId(eventParam)
+  }
+
+  const openEvent = (event: Event) => {
+    flushSync(() => {
+      setActivePanel(null)
+      setSelectedReport(null)
+      setDetailsOpen(false)
+    })
+    setSelectedEventId(event.id)
+    if (hasPin(event)) setFocusAt({ lat: event.latitude, lng: event.longitude, zoom: 16 })
+  }
+
+  const closeEvent = () => {
+    setSelectedEventId(null)
+    if (searchParams.has('event')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('event')
+      setSearchParams(next, { replace: true })
+    }
+  }
+
+  const nextEvent = upcoming[0] ?? null
+  const eventPageUrl = (id: string) => `${window.location.origin}/${city.slug}/map?event=${id}`
 
   // Drop ?action=report from the URL once it has opened the quick report (see useState above).
   useEffect(() => {
@@ -196,6 +232,9 @@ export function HomePage() {
     onSelectWard: flyToWard,
     onSelect: selectReport,
     onReport: openScan,
+    events: upcoming,
+    going,
+    onSelectEvent: openEvent,
   }
 
   return (
@@ -212,6 +251,9 @@ export function HomePage() {
           <MapView
             reports={visibleMapReports}
             hotspots={raceMapHotspots}
+            events={upcoming}
+            selectedEventId={selectedEventId}
+            onSelectEvent={openEvent}
             selectedId={selectedReport?.id}
             focusAt={focusAt}
             paddingBottom={sheetPad}
@@ -237,6 +279,23 @@ export function HomePage() {
         <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
           {city.label} · {city.country}
         </p>
+        {nextEvent && sheet === 'peek' && !selectedReport ? (
+          <button
+            type="button"
+            onClick={() => openEvent(nextEvent)}
+            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+4.75rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0b8c76] text-sm">🧹</span>
+            <span className="min-w-0">
+              <span className="block text-[10px] font-extrabold uppercase tracking-[.12em] text-[#ef8268]">
+                Next cleanup · {relativeDays(nextEvent.event_date)}
+              </span>
+              <span className="block truncate text-xs font-bold text-[#063b32]">
+                {nextEvent.title} · {formatEventWhen(nextEvent.event_date)}
+              </span>
+            </span>
+          </button>
+        ) : null}
         {sheet !== 'full' ? (
           <button
             type="button"
@@ -268,6 +327,15 @@ export function HomePage() {
         />
       </div>
 
+      <EventDetailSheet
+        event={selectedEvent}
+        goingCount={selectedEvent ? going.get(selectedEvent.id) : undefined}
+        isGoing={selectedEvent ? mine.has(selectedEvent.id) : false}
+        signedIn={!!user}
+        pageUrl={selectedEvent ? eventPageUrl(selectedEvent.id) : ''}
+        onToggleGoing={toggleGoing}
+        onClose={closeEvent}
+      />
       <ReportDetailSheet
         report={detailsOpen ? selectedReport : null}
         onClose={() => {
