@@ -141,7 +141,6 @@ function FieldBoard({
   hideHeading?: boolean
   scrollWithParent?: boolean
 }) {
-  void _onReport
   const compact = density === 'half'
 
   return (
@@ -253,6 +252,22 @@ function FieldBoard({
             : 'min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6'
         }
       >
+        {!loading && cityLabel !== 'Nairobi' && stats.active < 10 ? (
+          // New city: say so, instead of an empty-looking map.
+          <button
+            type="button"
+            onClick={_onReport}
+            className="mb-3 w-full rounded-2xl bg-[#063b32] p-4 text-left text-white"
+          >
+            <span className="block text-[10px] font-extrabold uppercase tracking-[.16em] text-[#fbbf24]">
+              {cityLabel} is just getting started
+            </span>
+            <span className="mt-1 block text-sm font-bold">
+              Be one of the first 10 people to put {cityLabel}'s dirty spots on the map.
+            </span>
+            <span className="mt-2 inline-block text-xs font-extrabold text-[#fbbf24]">Report a spot →</span>
+          </button>
+        ) : null}
         {onSelectEvent ? (
           <UpcomingCleanupsStrip
             events={events}

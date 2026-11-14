@@ -83,13 +83,6 @@ export function MapTopBar({ onVerify, onOpenPanel, onAdmin, onPin }: MapTopBarPr
           </select>
         </label>
 
-        <Link
-          to="/"
-          className="hidden min-h-10 items-center rounded-xl px-2 text-[10px] font-extrabold uppercase tracking-[.12em] text-[#0b8c76] hover:bg-emerald-50 md:inline-flex"
-        >
-          Cities
-        </Link>
-
         {!loading && !user ? (
           <SignInButton label="Join" className="hidden min-h-10 shadow-none md:inline-flex" />
         ) : null}
@@ -115,6 +108,14 @@ export function MapTopBar({ onVerify, onOpenPanel, onAdmin, onPin }: MapTopBarPr
                   <SignInButton label="Join" className="w-full shadow-none" />
                 </div>
               ) : null}
+              <Link
+                role="menuitem"
+                to="/"
+                className="block px-4 py-2.5 text-sm font-semibold text-[#12332d] hover:bg-emerald-50"
+                onClick={() => setMoreOpen(false)}
+              >
+                All cities
+              </Link>
               <Link
                 role="menuitem"
                 to={cityPath(city.slug)}

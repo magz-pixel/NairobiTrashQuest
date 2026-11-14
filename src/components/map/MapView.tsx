@@ -41,6 +41,8 @@ interface MapViewProps {
   pulseAt?: { latitude: number; longitude: number } | null
   /** Ward boundaries with open/cleared counts (see useCityWards). Replaces the hexagons when present. */
   wards?: GeoJSON.FeatureCollection | null
+  /** Money chips over hotspots with a bounty (migration 025). */
+  bountyPins?: { reportId: string; lat: number; lng: number; label: string; open: boolean }[]
   selectedWard?: string | null
   onSelectWard?: (wardId: number) => void
   onPulseDone?: () => void
@@ -318,6 +320,7 @@ export function MapView({
   pulseAt,
   onPulseDone,
   wards,
+  bountyPins,
   selectedWard,
   onSelectWard,
   focusBounds,
@@ -432,17 +435,19 @@ export function MapView({
     ;(map.getSource('hexes') as GeoJSONSource | undefined)?.setData(hexbinReports(open, 700))
 
     // First time we have data for this map: frame every open spot so the story is visible at a glance.
-    if (!framed.current && open.length > 1) {
+    // Only frame spots in this city (~60 km), so a stale list from the last city can't drag the view away.
+    const local = open.filter((r) => Math.abs(r.latitude - city.center.lat) < 0.55 && Math.abs(r.longitude - city.center.lng) < 0.55)
+    if (!framed.current && local.length > 1) {
       framed.current = true
       const bounds = new maplibregl.LngLatBounds()
-      for (const r of open) bounds.extend([r.longitude, r.latitude])
+      for (const r of local) bounds.extend([r.longitude, r.latitude])
       map.fitBounds(bounds, {
         padding: { top: 200, bottom: 150 + latest.current.paddingBottom, left: 80, right: 90 },
         maxZoom: 14.5,
         duration: 0,
       })
     }
-  }, [ready, reports])
+  }, [ready, reports, city.center.lat, city.center.lng])
 
   // Ward polygons (with counts). When wards are available they tell the city-zoom story, so hide the hexes.
   useEffect(() => {
@@ -501,6 +506,26 @@ export function MapView({
     })
     return () => markers.forEach((m) => m.remove())
   }, [ready, events, selectedEventId, onSelectEvent])
+
+  // Bounty chips: "💰 62%" while raising, pulsing "💰 KES 15,000" once claimable.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map || !bountyPins?.length) return
+    const markers = bountyPins.map((b) => {
+      const el = document.createElement('button')
+      el.type = 'button'
+      el.className = `rt-bounty-chip${b.open ? ' is-open' : ''}`
+      el.textContent = `💰 ${b.label}`
+      el.setAttribute('aria-label', `Bounty: ${b.label}`)
+      el.addEventListener('click', (ev) => {
+        ev.stopPropagation()
+        const r = latest.current.reportsById.get(b.reportId)
+        if (r) latest.current.onSelectReport(r)
+      })
+      return new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -14] }).setLngLat([b.lng, b.lat]).addTo(map)
+    })
+    return () => markers.forEach((m) => m.remove())
+  }, [ready, bountyPins])
 
   // Race hotspot chips.
   useEffect(() => {

@@ -1,58 +1,82 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { SignInButton } from '../components/auth/SignInButton'
-import { RaceTicket3D } from '../components/site/art/RaceTicket3D'
-import { ActionLink, PageIntro, PublicShell, SectionLabel, StatusChip } from '../components/site/PagePrimitives'
-import { useAuth } from '../hooks/useAuth'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { AMAZING_TRASH_RACE_S2, type Event, type RaceRegistration } from '../types/database'
-import { useCityPath } from '../lib/CityContext'
-import { MyActivity } from '../components/profile/MyActivity'
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { SignInButton } from "../components/auth/SignInButton";
+import { RaceTicket3D } from "../components/site/art/RaceTicket3D";
+import {
+  ActionLink,
+  PageIntro,
+  PublicShell,
+  SectionLabel,
+  StatusChip,
+} from "../components/site/PagePrimitives";
+import { useAuth } from "../hooks/useAuth";
+import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import {
+  AMAZING_TRASH_RACE_S2,
+  type Event,
+  type RaceRegistration,
+} from "../types/database";
+import { useCityPath } from "../lib/CityContext";
+import { MyActivity } from "../components/profile/MyActivity";
 interface EventRsvp {
-  id: string
-  event_id: string
-  status: string
-  points_awarded: number
-  events?: Event | null
+  id: string;
+  event_id: string;
+  status: string;
+  points_awarded: number;
+  events?: Event | null;
 }
-const BADGE = { scout: 'Scout', ranger: 'Ranger', guardian: 'Guardian' } as const
+const BADGE = {
+  scout: "Scout",
+  ranger: "Ranger",
+  guardian: "Guardian",
+} as const;
 export function ImpactMePage() {
-  const path = useCityPath()
-  const { user, profile, loading, signOut, refreshProfile } = useAuth()
-  const [tickets, setTickets] = useState<RaceRegistration[]>([])
-  const [rsvps, setRsvps] = useState<EventRsvp[]>([])
-  const [mapStats, setMapStats] = useState({ reports: 0, clears: 0 })
-  const [busy, setBusy] = useState(false)
+  const path = useCityPath();
+  const { user, profile, loading, signOut, refreshProfile } = useAuth();
+  const [tickets, setTickets] = useState<RaceRegistration[]>([]);
+  const [rsvps, setRsvps] = useState<EventRsvp[]>([]);
+  const [mapStats, setMapStats] = useState({ reports: 0, clears: 0 });
+  const [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
-    if (!user || !isSupabaseConfigured) return
-    setBusy(true)
+    if (!user || !isSupabaseConfigured) return;
+    setBusy(true);
     try {
-      const [{ data: regs }, { data: rsvpRows }, reportsRes, clearsRes] = await Promise.all([
-        supabase
-          .from('race_registrations')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('event_slug', AMAZING_TRASH_RACE_S2)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('event_rsvps')
-          .select('id,event_id,status,points_awarded,events(*)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
-        supabase.from('reports').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('reports').select('id', { count: 'exact', head: true }).eq('cleared_by', user.id),
-      ])
-      setTickets((regs ?? []) as RaceRegistration[])
-      setRsvps((rsvpRows ?? []) as unknown as EventRsvp[])
-      setMapStats({ reports: reportsRes.count ?? 0, clears: clearsRes.count ?? 0 })
-      await refreshProfile()
+      const [{ data: regs }, { data: rsvpRows }, reportsRes, clearsRes] =
+        await Promise.all([
+          supabase
+            .from("race_registrations")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("event_slug", AMAZING_TRASH_RACE_S2)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("event_rsvps")
+            .select("id,event_id,status,points_awarded,events(*)")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("reports")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id),
+          supabase
+            .from("reports")
+            .select("id", { count: "exact", head: true })
+            .eq("cleared_by", user.id),
+        ]);
+      setTickets((regs ?? []) as RaceRegistration[]);
+      setRsvps((rsvpRows ?? []) as unknown as EventRsvp[]);
+      setMapStats({
+        reports: reportsRes.count ?? 0,
+        clears: clearsRes.count ?? 0,
+      });
+      await refreshProfile();
     } finally {
-      setBusy(false)
+      setBusy(false);
     }
-  }, [user, refreshProfile])
+  }, [user, refreshProfile]);
   useEffect(() => {
-    void load()
-  }, [load])
+    void load();
+  }, [load]);
   return (
     <PublicShell>
       <main>
@@ -61,14 +85,17 @@ export function ImpactMePage() {
           title="My impact, in one place."
           body="Every report, cleanup, and race ticket connected to your account becomes part of a visible civic record."
           action={
-            !user && !loading ? (
-              <SignInButton variant="dark" label="Join / sign in" />
-            ) : user ? (
+            user ? (
               <div className="flex flex-wrap gap-3">
                 <ActionLink to="/map" tone="gold">
                   Open the map
                 </ActionLink>
-                <button type="button" disabled={busy} onClick={() => void load()} className="fn-action fn-action-light">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void load()}
+                  className="fn-action fn-action-light"
+                >
                   Refresh record
                 </button>
               </div>
@@ -80,14 +107,30 @@ export function ImpactMePage() {
           {!loading && !user && (
             <div className="fn-panel-dark rounded-[2rem] bg-[#063b32] p-8 text-white sm:p-12">
               <SectionLabel>Join the record</SectionLabel>
-              <h2 className="fn-display mt-4 max-w-xl text-4xl font-extrabold tracking-[-.03em]">
-                Your next small action can count.
+              <h2 className="fn-display mt-4 max-w-xl text-3xl font-extrabold tracking-[-.03em] sm:text-4xl">
+                Sign in once. Everything you do starts counting.
               </h2>
-              <p className="mt-4 max-w-lg leading-7 text-teal-100/75">
-                Create an account to save reports, cleanup attendance, and your race ticket.
+              {/* Preview of the record they'll get, so the sign-in has a visible payoff. */}
+              <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {[
+                  ["📍", "Spots reported"],
+                  ["✅", "Spots cleared"],
+                  ["🧹", "Cleanups joined"],
+                  ["🌳", "Bins & trees pinned"],
+                ].map(([icon, label]) => (
+                  <div key={label} className="rounded-2xl bg-white/10 p-3">
+                    <p className="text-lg">{icon}</p>
+                    <p className="mt-1 text-2xl font-extrabold tabular-nums">0</p>
+                    <p className="text-xs text-teal-100/75">{label}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-5 max-w-lg text-sm leading-6 text-teal-100/75">
+                Free with Google or an email link. Your reports and cleanups
+                then show up here with their live status.
               </p>
-              <div className="mt-7">
-                <SignInButton variant="dark" label="Join free" />
+              <div className="mt-6">
+                <SignInButton variant="dark" label="Sign in to start my record" />
               </div>
             </div>
           )}
@@ -98,27 +141,37 @@ export function ImpactMePage() {
                   <div>
                     <p className="text-sm text-teal-100/65">{user.email}</p>
                     <h2 className="fn-display mt-2 text-4xl font-extrabold tracking-[-.03em]">
-                      {profile?.username ?? 'Cleaner'}
+                      {profile?.username ?? "Cleaner"}
                     </h2>
                     <p className="mt-2 text-teal-100/75">
-                      {profile ? BADGE[profile.badge_level] : 'Scout'} ·{' '}
-                      <strong className="text-gold-300">{profile?.total_impact_points ?? 0} XP</strong>
+                      {profile ? BADGE[profile.badge_level] : "Scout"} ·{" "}
+                      <strong className="text-gold-300">
+                        {profile?.total_impact_points ?? 0} XP
+                      </strong>
                     </p>
                   </div>
                   <StatusChip tone="gold">Active citizen</StatusChip>
                 </div>
                 <div className="mt-8 grid gap-4 sm:grid-cols-3">
                   <div className="rounded-2xl bg-white/10 p-4">
-                    <p className="text-xs text-teal-100/60">Reports submitted</p>
-                    <p className="mt-2 text-3xl font-extrabold">{mapStats.reports}</p>
+                    <p className="text-xs text-teal-100/60">
+                      Reports submitted
+                    </p>
+                    <p className="mt-2 text-3xl font-extrabold">
+                      {mapStats.reports}
+                    </p>
                   </div>
                   <div className="rounded-2xl bg-white/10 p-4">
                     <p className="text-xs text-teal-100/60">Hotspots cleared</p>
-                    <p className="mt-2 text-3xl font-extrabold">{mapStats.clears}</p>
+                    <p className="mt-2 text-3xl font-extrabold">
+                      {mapStats.clears}
+                    </p>
                   </div>
                   <div className="rounded-2xl bg-white/10 p-4">
                     <p className="text-xs text-teal-100/60">Impact points</p>
-                    <p className="mt-2 text-3xl font-extrabold text-gold-300">{profile?.total_impact_points ?? 0}</p>
+                    <p className="mt-2 text-3xl font-extrabold text-gold-300">
+                      {profile?.total_impact_points ?? 0}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -131,29 +184,46 @@ export function ImpactMePage() {
               </section>
               <MyActivity
                 userId={user.id}
-                cleanupsAttended={rsvps.filter((r) => r.status === 'going' || r.status === 'attended').length}
+                cleanupsAttended={
+                  rsvps.filter(
+                    (r) => r.status === "going" || r.status === "attended",
+                  ).length
+                }
               />
               <div className="grid gap-5 lg:grid-cols-2">
                 <section className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
                   <SectionLabel>Community days</SectionLabel>
-                  <h2 className="fn-display mt-3 text-2xl font-extrabold text-[#063b32]">Cleanups attended</h2>
+                  <h2 className="fn-display mt-3 text-2xl font-extrabold text-[#063b32]">
+                    Cleanups attended
+                  </h2>
                   {rsvps.length === 0 ? (
                     <p className="mt-5 text-sm text-[#617972]">
-                      No cleanups yet.{' '}
-                      <Link to={path('/cleanups')} className="font-bold text-[#0b8c76]">
+                      No cleanups yet.{" "}
+                      <Link
+                        to={path("/cleanups")}
+                        className="font-bold text-[#0b8c76]"
+                      >
                         See weekly cleanups →
                       </Link>
                     </p>
                   ) : (
                     <ul className="mt-5 space-y-2">
                       {rsvps.map((r) => (
-                        <li key={r.id} className="flex justify-between gap-3 rounded-xl bg-[#f3f7f4] p-3 text-sm">
+                        <li
+                          key={r.id}
+                          className="flex justify-between gap-3 rounded-xl bg-[#f3f7f4] p-3 text-sm"
+                        >
                           <span className="font-semibold text-[#36564e]">
-                            {(r.events as Event | null | undefined)?.title ?? 'Cleanup'}
-                            <span className="ml-2 text-xs font-normal text-[#71867f]">{r.status}</span>
+                            {(r.events as Event | null | undefined)?.title ??
+                              "Cleanup"}
+                            <span className="ml-2 text-xs font-normal text-[#71867f]">
+                              {r.status}
+                            </span>
                           </span>
                           {r.points_awarded > 0 && (
-                            <span className="font-bold text-[#087766]">+{r.points_awarded} XP</span>
+                            <span className="font-bold text-[#087766]">
+                              +{r.points_awarded} XP
+                            </span>
                           )}
                         </li>
                       ))}
@@ -162,11 +232,16 @@ export function ImpactMePage() {
                 </section>
                 <section className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
                   <SectionLabel>Season 2</SectionLabel>
-                  <h2 className="fn-display mt-3 text-2xl font-extrabold text-[#063b32]">Trash Race tickets</h2>
+                  <h2 className="fn-display mt-3 text-2xl font-extrabold text-[#063b32]">
+                    Trash Race tickets
+                  </h2>
                   {tickets.length === 0 ? (
                     <p className="mt-5 text-sm text-[#617972]">
-                      No ticket yet.{' '}
-                      <Link to={path('/race')} className="font-bold text-[#0b8c76]">
+                      No ticket yet.{" "}
+                      <Link
+                        to={path("/race")}
+                        className="font-bold text-[#0b8c76]"
+                      >
                         Register free →
                       </Link>
                     </p>
@@ -193,5 +268,5 @@ export function ImpactMePage() {
         </section>
       </main>
     </PublicShell>
-  )
+  );
 }

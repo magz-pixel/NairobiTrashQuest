@@ -1,3 +1,4 @@
+import { money, useCityBounties } from '../lib/bounties'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -94,18 +95,25 @@ export function HomePage() {
     return () => mq.removeEventListener('change', sync)
   }, [])
 
-  useEffect(() => {
-    setActiveWard(null)
-    setSelectedReport(null)
-    setDetailsOpen(false)
-    setFocusAt(null)
-    setSheet('peek')
-  }, [city.slug])
+  // City changes remount this page (see CityMapPage in App.tsx), so no reset effect is needed.
 
   const realReports = useMemo(() => allReports.filter((r) => !isDemoReport(r)), [allReports])
   const { wards, summaries: wardSummaries } = useCityWards(city.slug, realReports)
   const { features: mapFeatures, ready: featuresReady, reload: reloadFeatures } = useMapFeatures(city.slug)
   const featuresGeo = useMemo(() => featuresToGeoJSON(mapFeatures), [mapFeatures])
+  const cityBounties = useCityBounties(city.slug)
+  const bountyPins = useMemo(() => {
+    const byId = new Map(realReports.map((r) => [r.id, r]))
+    return [...cityBounties.values()]
+      .filter((b) => b.status === 'funding' || b.status === 'open')
+      .flatMap((b) => {
+        const r = byId.get(b.report_id)
+        if (!r) return []
+        const open = b.status === 'open'
+        const label = open ? money(b.currency, b.target_amount) : `${Math.min(99, Math.round((b.raised / b.target_amount) * 100))}%`
+        return [{ reportId: r.id, lat: r.latitude, lng: r.longitude, label, open }]
+      })
+  }, [cityBounties, realReports])
   const [layers, setLayers] = useState({ trash: true, bins: true, trees: true })
   const [pinKind, setPinKind] = useState<FeatureKind | null>(null)
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null)
@@ -320,6 +328,7 @@ export function HomePage() {
             selectedEventId={selectedEventId}
             onSelectEvent={openEvent}
             wards={wards}
+            bountyPins={bountyPins}
             selectedWard={selectedWard?.name ?? null}
             onSelectWard={selectWard}
             focusBounds={focusBounds}
@@ -356,7 +365,8 @@ export function HomePage() {
         <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
           {city.label} · {city.country}
         </p>
-        <div className="pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+5.1rem)] z-[1061] flex justify-center md:inset-x-6 md:top-[5.4rem]">
+        {/* Summary pill with the layer toggles directly under it (one column, so they never overlap). */}
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+5.1rem)] z-[1061] flex flex-col items-center gap-2 md:inset-x-6 md:top-[5.4rem]">
           <MapSummaryPill
             reports={realReports}
             cleanups={upcoming.length}
@@ -364,9 +374,8 @@ export function HomePage() {
             rankingLabel="Worst wards right now"
             onFlyTo={(lat, lng) => setFocusAt({ lat, lng, zoom: 15 })}
           />
-        </div>
-        {/* Layer toggles: Trash · Bins · Trees */}
-        <div className="pointer-events-auto absolute inset-x-0 top-[calc(env(safe-area-inset-top)+8.4rem)] z-[1060] flex justify-center gap-1.5 md:inset-x-auto md:right-[4.75rem] md:top-[5.4rem]">
+          {/* Layer toggles: Trash · Bins · Trees */}
+          <div className="pointer-events-auto flex justify-center gap-1.5">
           {(
             [
               ['trash', '📍', 'Trash', null],
@@ -387,12 +396,13 @@ export function HomePage() {
               {typeof n === 'number' && featuresReady ? <span className="opacity-70">· {n}</span> : null}
             </button>
           ))}
+          </div>
         </div>
         {nextEvent && sheet === 'peek' && !selectedReport ? (
           <button
             type="button"
             onClick={() => openEvent(nextEvent)}
-            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+11.2rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
+            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+11.2rem)] z-[1060] hidden md:inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0b8c76] text-sm">🧹</span>
             <span className="min-w-0">

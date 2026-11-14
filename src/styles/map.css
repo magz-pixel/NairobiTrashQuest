@@ -58,3 +58,13 @@
 .rt-region-label .dot { width: 7px; height: 7px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25); }
 .rt-region-label b { margin-left: 2px; padding: 1px 7px; border-radius: 999px; background: rgba(249, 115, 22, 0.9); font-size: 11px; }
 @keyframes rt-slide-progress { from { width: 0; } to { width: 100%; } }
+
+/* Bounties: a soft shine across funding bars, and a pulse on claimable bounties. */
+.rt-bar-shine { background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: rt-shine 2.4s ease-in-out infinite; }
+@keyframes rt-shine { from { background-position: -60% 0; } to { background-position: 160% 0; } }
+.rt-glow { animation: rt-glow 1.8s ease-in-out infinite; }
+@keyframes rt-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,.55); } 50% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } }
+@media (prefers-reduced-motion: reduce) { .rt-bar-shine, .rt-glow { animation: none; } }
+
+.rt-bounty-chip { padding: 3px 8px; border-radius: 999px; border: 2px solid #fff; background: #fbbf24; color: #063b32; font: 800 11px 'Plus Jakarta Sans', system-ui, sans-serif; box-shadow: 0 6px 16px rgba(6,59,50,.3); white-space: nowrap; cursor: pointer; }
+.rt-bounty-chip.is-open { background: #0b8c76; color: #fff; animation: rt-glow 1.8s ease-in-out infinite; }

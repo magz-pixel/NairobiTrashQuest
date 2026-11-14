@@ -23,6 +23,7 @@ const FundsPage = lazy(() => import('./pages/FundsPage').then((m) => ({ default:
 const FundsManagePage = lazy(() =>
   import('./pages/FundsManagePage').then((m) => ({ default: m.FundsManagePage })),
 )
+const BountiesPage = lazy(() => import('./pages/BountiesPage').then((m) => ({ default: m.BountiesPage })))
 const FeedPage = lazy(() => import('./pages/FeedPage').then((m) => ({ default: m.FeedPage })))
 const RaceAdminPage = lazy(() => import('./pages/RaceAdminPage').then((m) => ({ default: m.RaceAdminPage })))
 const RaceLeaderboardPage = lazy(() =>
@@ -136,7 +137,7 @@ function App() {
           ))}
           <Route path="/:city" element={<CityGate />}>
             <Route index element={<CommandCenterPage />} />
-            <Route path="map" element={<HomePage />} />
+            <Route path="map" element={<CityMapPage />} />
             <Route path="report/:id" element={<ReportPage />} />
             <Route path="me" element={<ImpactMePage />} />
             <Route path="cleanups" element={<Lazy><CleanupsPage /></Lazy>} />
@@ -149,6 +150,7 @@ function App() {
             <Route path="funds/manage" element={<Lazy><FundsManagePage /></Lazy>} />
             <Route path="mission" element={<MissionPage />} />
             <Route path="feed" element={<Lazy><FeedPage /></Lazy>} />
+            <Route path="bounties" element={<Lazy><BountiesPage /></Lazy>} />
           </Route>
           {MapboxTestPage ? (
             <Route
@@ -174,3 +176,9 @@ function App() {
 }
 
 export default App
+
+/** Remount the map page per city so nothing (focus, ward, framing) carries over from the last city. */
+function CityMapPage() {
+  const { city } = useParams()
+  return <HomePage key={city} />
+}
