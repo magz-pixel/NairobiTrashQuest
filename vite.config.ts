@@ -14,7 +14,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         // Never make phones pre-download experiments or admin-only bulk; they load on demand if opened.
-        globIgnores: ['**/MapboxTestPage-*', '**/node_modules/**'],
+        globIgnores: ['**/MapboxTestPage-*', '**/MapView-*', '**/node_modules/**'],
       },
       manifest: {
         id: '/',
