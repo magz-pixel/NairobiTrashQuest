@@ -101,8 +101,11 @@ export function RegionSection() {
     spots: scoped.length,
     cleared: scoped.filter((p) => p.cleared).length,
     cleanups: isDemo ? demoSum('cleanups') : (live?.upcomingCleanups ?? 0),
-    bins: isDemo ? demoSum('bins') : 0,
-    trees: isDemo ? demoSum('trees') : 0,
+    bins: isDemo ? demoSum('bins') : (live?.features ?? []).filter((f) => f.kind === 'bin' && slugs.includes(f.city)).length,
+    // "Trees planted" counts newly planted trees, not existing ones that were mapped.
+    trees: isDemo
+      ? demoSum('trees')
+      : (live?.features ?? []).filter((f) => f.kind === 'tree' && f.origin === 'planted' && slugs.includes(f.city)).length,
     kg: isDemo ? demoSum('kg') : isRegion || view === 'nairobi' ? liveKg : 0,
   }
   const feed = isDemo ? DEMO_FEED : (live?.feed ?? [])
@@ -234,8 +237,8 @@ export function RegionSection() {
                 <Tile label="Trash spots logged" value={fmt(stats.spots)} />
                 <Tile label="Spots cleared" value={fmt(stats.cleared)} accent="text-[#5eead4]" />
                 <Tile label="Upcoming cleanups" value={fmt(stats.cleanups)} />
-                <Tile label="Bins spotted" value={fmt(stats.bins)} soon={!isDemo} />
-                <Tile label="Trees planted" value={fmt(stats.trees)} soon={!isDemo} />
+                <Tile label="Bins spotted" value={fmt(stats.bins)} soon={!isDemo && !live?.features} />
+                <Tile label="Trees planted" value={fmt(stats.trees)} soon={!isDemo && !live?.features} />
                 <Tile label="Waste removed" value={stats.kg ? fmtKg(stats.kg) : '—'} accent="text-gold-300" />
               </dl>
             </div>

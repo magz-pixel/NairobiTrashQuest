@@ -8,6 +8,7 @@ import { HomePage } from './pages/HomePage'
 import { HubPage } from './pages/HubPage'
 import { ImpactMePage } from './pages/ImpactMePage'
 import { InstallPage } from './pages/InstallPage'
+import { BottomTabBar } from './components/layout/BottomTabBar'
 import { lastCity } from './lib/pwa'
 import { MissionPage } from './pages/MissionPage'
 import { ReportPage } from './pages/ReportPage'
@@ -20,6 +21,7 @@ const FundsPage = lazy(() => import('./pages/FundsPage').then((m) => ({ default:
 const FundsManagePage = lazy(() =>
   import('./pages/FundsManagePage').then((m) => ({ default: m.FundsManagePage })),
 )
+const FeedPage = lazy(() => import('./pages/FeedPage').then((m) => ({ default: m.FeedPage })))
 const RaceAdminPage = lazy(() => import('./pages/RaceAdminPage').then((m) => ({ default: m.RaceAdminPage })))
 const RaceLeaderboardPage = lazy(() =>
   import('./pages/RaceLeaderboardPage').then((m) => ({ default: m.RaceLeaderboardPage })),
@@ -71,6 +73,7 @@ const ROUTE_TITLES: [string, string][] = [
   ['/mission', 'Mission'],
   ['/map', 'Trash map'],
   ['/me', 'My impact'],
+  ['/feed', 'Feed'],
   ['/install', 'Get the app'],
 ]
 
@@ -109,6 +112,7 @@ function CityGate() {
   return (
     <CityProvider>
       <Outlet />
+      <BottomTabBar />
     </CityProvider>
   )
 }
@@ -139,6 +143,7 @@ function App() {
             <Route path="funds" element={<Lazy><FundsPage /></Lazy>} />
             <Route path="funds/manage" element={<Lazy><FundsManagePage /></Lazy>} />
             <Route path="mission" element={<MissionPage />} />
+            <Route path="feed" element={<Lazy><FeedPage /></Lazy>} />
           </Route>
           {MapboxTestPage ? (
             <Route
