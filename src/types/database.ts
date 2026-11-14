@@ -199,9 +199,14 @@ export const REPORT_WASTE_CATEGORIES = [
 
 export type ReportWasteCategory = (typeof REPORT_WASTE_CATEGORIES)[number]
 
+/** Source/pipeline tags that older rows stored in waste_type. They describe how a report arrived, not the waste. */
+const NON_CATEGORY_TAGS = new Set(['citizen-report', 'whatsapp', 'unclassified'])
+
 export function formatWasteTypes(value: string[] | string | null | undefined): string {
-  const items = Array.isArray(value) ? value.filter(Boolean) : value ? [value] : []
-  return items.length ? items.join(', ') : 'Mixed waste'
+  const items = (Array.isArray(value) ? value : value ? [value] : []).filter(
+    (v) => v && !NON_CATEGORY_TAGS.has(v.toLowerCase()),
+  )
+  return items.length ? items.join(', ') : 'Not categorised'
 }
 
 export type WasteCategory = 'plastic' | 'organic' | 'mixed' | 'other'

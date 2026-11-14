@@ -14,7 +14,7 @@ export function ChapterDesk({ slug, chapterName }: ChapterDeskProps) {
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
       <div className="max-w-2xl">
         <p className="text-xs font-extrabold uppercase tracking-[.2em] text-emerald-700">Chapter desk</p>
-        <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.05em] sm:text-5xl">
+        <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.03em] sm:text-5xl">
           Every page in {chapterName}.
         </h2>
         <p className="mt-4 max-w-lg text-base leading-7 text-[#5d746e]">
@@ -45,7 +45,7 @@ export function ChapterDesk({ slug, chapterName }: ChapterDeskProps) {
                 <span className="text-2xl transition group-hover:translate-x-1">→</span>
               </div>
               <div className="mt-auto pt-10">
-                <h3 className="text-2xl font-extrabold tracking-[-.04em]">{page.label}</h3>
+                <h3 className="text-2xl font-extrabold tracking-[-.025em]">{page.label}</h3>
                 <p className="mt-3 text-sm leading-6 opacity-70">{page.blurb}</p>
               </div>
             </Link>

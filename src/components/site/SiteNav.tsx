@@ -255,7 +255,7 @@ export function SiteFooter({ hub = false }: { hub?: boolean }) {
               <p className="flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[.22em] text-teal-200">
                 <span className="h-px w-10 bg-gold-400" /> The work continues
               </p>
-              <h2 className="mt-6 max-w-3xl text-4xl font-extrabold leading-[.98] tracking-[-.06em] sm:text-6xl">
+              <h2 className="mt-6 max-w-3xl text-4xl font-extrabold leading-[.98] tracking-[-.03em] sm:text-6xl">
                 One map. Many cities. People on the ground.
               </h2>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -296,7 +296,7 @@ function ChapterFooter() {
             <p className="flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[.22em] text-teal-200">
               <span className="h-px w-10 bg-gold-400" /> The work continues
             </p>
-            <h2 className="mt-6 max-w-3xl text-4xl font-extrabold leading-[.98] tracking-[-.06em] sm:text-6xl">
+            <h2 className="mt-6 max-w-3xl text-4xl font-extrabold leading-[.98] tracking-[-.03em] sm:text-6xl">
               Leave {city.label} a little better than you found it.
             </h2>
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -321,7 +321,7 @@ function ChapterFooter() {
                 <span className="h-2 w-2 rounded-full bg-gold-400" /> Live
               </span>
             </div>
-            <p className="mt-6 text-5xl font-extrabold tracking-[-.07em]">{city.label}</p>
+            <p className="mt-6 text-5xl font-extrabold tracking-[-.03em]">{city.label}</p>
             <p className="mt-2 max-w-xs text-sm leading-6 text-teal-100/65">
               A city held together by people who notice, care, and show up.
             </p>

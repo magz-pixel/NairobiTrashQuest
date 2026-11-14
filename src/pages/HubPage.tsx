@@ -79,7 +79,7 @@ export function HubPage() {
 
         <section className="mx-auto max-w-7xl px-5 pb-8 sm:px-8 lg:px-12">
           <p className="text-xs font-extrabold uppercase tracking-[.2em] text-emerald-700">Choose a city</p>
-          <h2 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-[-.05em] text-[#063b32]">
+          <h2 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-[-.03em] text-[#063b32]">
             Enter the chapter where you live.
           </h2>
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
@@ -91,7 +91,7 @@ export function HubPage() {
                 <p className="text-xs font-extrabold uppercase tracking-[.18em] text-gold-300">
                   {city.country}
                 </p>
-                <h3 className="mt-8 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-[-.04em]">
+                <h3 className="mt-8 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-[-.025em]">
                   {city.chapterName}
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-teal-100/75">
@@ -111,7 +111,7 @@ export function HubPage() {
         <section className="bg-[#e5f0eb] px-5 py-16 sm:px-8 lg:px-12">
           <div className="mx-auto max-w-7xl">
             <p className="fn-eyebrow">Same desk, every city</p>
-            <h2 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-[-.05em] text-[#063b32]">
+            <h2 className="mt-3 max-w-2xl text-4xl font-extrabold tracking-[-.03em] text-[#063b32]">
               You keep all the pages. The city is just the filter.
             </h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-[#5d746e]">
@@ -124,7 +124,7 @@ export function HubPage() {
                   <p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#6a827b]">
                     {String(index + 1).padStart(2, '0')}
                   </p>
-                  <h3 className="mt-4 text-2xl font-extrabold tracking-[-.04em] text-[#063b32]">
+                  <h3 className="mt-4 text-2xl font-extrabold tracking-[-.025em] text-[#063b32]">
                     {page.label}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-[#5d746e]">{page.blurb}</p>

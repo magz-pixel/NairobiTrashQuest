@@ -61,7 +61,7 @@ export function FundsPage() {
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.7fr_1.3fr] lg:items-center">
             <div>
               <SectionLabel>Season 2 campaign</SectionLabel>
-              <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.05em]">
+              <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.03em]">
                 The ledger is part of the impact.
               </h2>
               <p className="mt-4 leading-7 text-teal-100/75">
