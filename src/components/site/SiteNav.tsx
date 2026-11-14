@@ -372,6 +372,7 @@ function ChapterFooter() {
               <Link to={path('/funds/manage')} className="hover:text-white">Team login</Link>
               <Link to={path('/cleanups/manage')} className="hover:text-white">Manage cleanups</Link>
               <Link to={path('/race/admin')} className="hover:text-white">Race admin</Link>
+              <Link to="/privacy" className="hover:text-white">Privacy</Link>
             </div>
           </div>
         </div>
