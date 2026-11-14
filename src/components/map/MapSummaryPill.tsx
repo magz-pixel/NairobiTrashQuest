@@ -12,14 +12,26 @@ interface AreaRow {
  * One glanceable line over the map (Namma Kasa-style): open · cleared · cleanups.
  * Tap it to open "Where it's worst" — areas ranked by open spots; tap one to fly there.
  */
+export interface RankedArea {
+  key: string
+  name: string
+  count: number
+  onPick: () => void
+}
+
 export function MapSummaryPill({
   reports,
   cleanups,
   onFlyTo,
+  ranking,
+  rankingLabel = 'Where it’s worst',
 }: {
   reports: Report[]
   cleanups: number
   onFlyTo: (lat: number, lng: number) => void
+  /** Pre-ranked areas (e.g. wards). Falls back to grouping reports by area name. */
+  ranking?: RankedArea[]
+  rankingLabel?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -45,7 +57,11 @@ export function MapSummaryPill({
     }
   }, [reports])
 
-  const max = areas[0]?.count ?? 1
+  const rows: RankedArea[] =
+    ranking && ranking.length > 0
+      ? ranking
+      : areas.map((a) => ({ key: a.name, name: a.name, count: a.count, onPick: () => onFlyTo(a.lat, a.lng) }))
+  const max = rows[0]?.count ?? 1
 
   return (
     <div className="pointer-events-auto">
@@ -81,17 +97,17 @@ export function MapSummaryPill({
         </span>
       </button>
 
-      {open && areas.length > 0 ? (
+      {open && rows.length > 0 ? (
         <div className="mx-auto mt-2 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-white/80 bg-white/97 p-3 shadow-[0_20px_50px_rgba(6,59,50,.2)] backdrop-blur">
-          <p className="px-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0b8c76]">Where it’s worst</p>
+          <p className="px-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0b8c76]">{rankingLabel}</p>
           <ol className="mt-2 space-y-1">
-            {areas.map((a, i) => (
-              <li key={a.name}>
+            {rows.map((a, i) => (
+              <li key={a.key}>
                 <button
                   type="button"
                   onClick={() => {
                     setOpen(false)
-                    onFlyTo(a.lat, a.lng)
+                    a.onPick()
                   }}
                   className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-[#f3f7f4]"
                 >

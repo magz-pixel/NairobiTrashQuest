@@ -6,6 +6,9 @@ import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents'
 import { EventDetailSheet } from '../components/events/EventDetailSheet'
 import { MapSummaryPill } from '../components/map/MapSummaryPill'
+import { WardCard } from '../components/map/WardCard'
+import { MapIntro } from '../components/map/MapIntro'
+import { useCityWards } from '../hooks/useCityWards'
 import { formatEventWhen, hasPin, relativeDays } from '../lib/events'
 import { useReportStats } from '../hooks/useReportStats'
 import { useCity } from '../lib/CityContext'
@@ -95,7 +98,28 @@ export function HomePage() {
     setSheet('peek')
   }, [city.slug])
 
-  const realReports = allReports.filter((r) => !isDemoReport(r))
+  const realReports = useMemo(() => allReports.filter((r) => !isDemoReport(r)), [allReports])
+  const { wards, summaries: wardSummaries } = useCityWards(city.slug, realReports)
+  const [selectedWardId, setSelectedWardId] = useState<number | null>(null)
+  const [focusBounds, setFocusBounds] = useState<[number, number, number, number] | null>(null)
+  const selectedWard = selectedWardId !== null ? (wardSummaries[selectedWardId] ?? null) : null
+  const worstWards = useMemo(
+    () =>
+      wardSummaries
+        .filter((w) => w.open > 0)
+        .sort((a, b) => b.open - a.open)
+        .slice(0, 6)
+        .map((w) => ({
+          key: String(w.id),
+          name: w.name,
+          count: w.open,
+          onPick: () => {
+            setSelectedWardId(w.id)
+            setFocusBounds(w.bbox)
+          },
+        })),
+    [wardSummaries],
+  )
   const activeHotspots = realReports.filter(
     (r) => r.status === 'active' || r.status === 'flagged',
   )
@@ -127,6 +151,28 @@ export function HomePage() {
   const openScan = () => (user ? openReport() : openQuickReport())
 
   // Shared cleanup links: /nairobi/map?event=<id> opens that cleanup's details.
+  // Shared ward links: /nairobi/map?ward=Mwiki opens that ward's card.
+  const wardParam = searchParams.get('ward')
+  const [openedWardParam, setOpenedWardParam] = useState<string | null>(null)
+  if (wardParam && wardParam !== openedWardParam && wardSummaries.length > 0) {
+    const w = wardSummaries.find((x) => x.name.toLowerCase() === wardParam.toLowerCase())
+    setOpenedWardParam(wardParam)
+    if (w) {
+      setSelectedWardId(w.id)
+      setFocusBounds(w.bbox)
+    }
+  }
+
+  const selectWard = (id: number) => {
+    flushSync(() => {
+      setActivePanel(null)
+      setSelectedReport(null)
+      setDetailsOpen(false)
+      setSelectedEventId(null)
+    })
+    setSelectedWardId(id)
+  }
+
   const eventParam = searchParams.get('event')
   const [openedEventParam, setOpenedEventParam] = useState<string | null>(null)
   if (eventParam && eventParam !== openedEventParam && upcoming.some((e) => e.id === eventParam)) {
@@ -136,6 +182,7 @@ export function HomePage() {
 
   const openEvent = (event: Event) => {
     flushSync(() => {
+      setSelectedWardId(null)
       setActivePanel(null)
       setSelectedReport(null)
       setDetailsOpen(false)
@@ -184,7 +231,10 @@ export function HomePage() {
   }
 
   const selectReport = (report: Report) => {
-    flushSync(() => setActivePanel(null))
+    flushSync(() => {
+      setActivePanel(null)
+      setSelectedWardId(null)
+    })
     setSelectedReport(report)
     if (isPhone) {
       setDetailsOpen(false)
@@ -257,6 +307,10 @@ export function HomePage() {
             events={upcoming}
             selectedEventId={selectedEventId}
             onSelectEvent={openEvent}
+            wards={wards}
+            selectedWard={selectedWard?.name ?? null}
+            onSelectWard={selectWard}
+            focusBounds={focusBounds}
             selectedId={selectedReport?.id}
             focusAt={focusAt}
             paddingBottom={sheetPad}
@@ -286,6 +340,8 @@ export function HomePage() {
           <MapSummaryPill
             reports={realReports}
             cleanups={upcoming.length}
+            ranking={worstWards}
+            rankingLabel="Worst wards right now"
             onFlyTo={(lat, lng) => setFocusAt({ lat, lng, zoom: 15 })}
           />
         </div>
@@ -337,6 +393,15 @@ export function HomePage() {
         />
       </div>
 
+      <WardCard
+        ward={selectedWard}
+        city={city}
+        shareUrl={selectedWard ? `${window.location.origin}/${city.slug}/map?ward=${encodeURIComponent(selectedWard.name)}` : ''}
+        onClose={() => setSelectedWardId(null)}
+        onZoom={(w) => setFocusBounds([...w.bbox])}
+        onSelectReport={(r) => selectReport(r)}
+      />
+      <MapIntro city={city} wards={wardSummaries.length} open={stats.active} onReport={openQuickReport} />
       <EventDetailSheet
         event={selectedEvent}
         goingCount={selectedEvent ? going.get(selectedEvent.id) : undefined}
