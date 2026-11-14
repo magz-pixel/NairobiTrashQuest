@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { isStaleBuildError, reloadForNewBuild } from '../../lib/staleBuild'
 
 interface Props {
   children: ReactNode
@@ -16,11 +17,20 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    // Old build asking for files from before the latest deploy: quietly load the new one.
+    if (isStaleBuildError(error) && reloadForNewBuild()) return
     console.error('App error:', error, info.componentStack)
   }
 
   render() {
     if (this.state.error) {
+      if (isStaleBuildError(this.state.error)) {
+        return (
+          <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--bg-app)] p-6 text-sm font-semibold text-[var(--text-muted)]">
+            Updating to the latest version…
+          </div>
+        )
+      }
       return (
         <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-[var(--bg-app)] p-6 text-center">
           <p className="text-lg font-semibold text-[var(--text-primary)]">Something went wrong</p>
