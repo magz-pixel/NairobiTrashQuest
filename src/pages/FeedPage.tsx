@@ -80,7 +80,7 @@ export function FeedPage() {
                 <p className="mt-4 text-xs font-extrabold uppercase tracking-[.16em] text-gold-300">Cleanup · {relativeDays(e.event_date)}</p>
                 <h2 className="fn-display mt-2 text-3xl font-extrabold leading-tight">{e.title}</h2>
                 <p className="mt-2 text-white/80">📅 {formatEventWhen(e.event_date)} · 📍 {e.location}</p>
-                {typeof n === 'number' ? <p className="mt-1 text-white/80">🙋 {n} going</p> : null}
+                {typeof n === 'number' ? <p className="mt-1 text-white/80">🙋 {n > 0 ? `${n} going` : 'Be the first to join'}</p> : null}
                 <div className="mt-5 flex flex-wrap gap-2">
                   <button
                     type="button"

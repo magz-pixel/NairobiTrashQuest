@@ -5,3 +5,6 @@
 
 /* Heavy display type needs a touch more space between words so headlines do not run together. */
 .fn-display,.fn-intro h1,.fn-ops-heading h1{word-spacing:.04em}
+
+/* Secondary buttons sit on dark photo heroes: keep them solid enough to read. */
+.fn-action-light{background:rgba(255,255,255,.94)!important;border-color:rgba(255,255,255,.9)!important}
