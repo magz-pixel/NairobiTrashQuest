@@ -1,14 +1,30 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { useCityPath } from '../../lib/CityContext'
+import { useCity, useCityPath } from '../../lib/CityContext'
+import { CitySky } from './CitySky'
 import { SiteFooter, SiteNav } from './SiteNav'
 
 export function PublicShell({ children, footer = true }: { children: ReactNode; footer?: boolean }) {
   return <div className="fn-rebuild min-h-full bg-[#f4f7f2] text-[#12332d]"><SiteNav />{children}{footer && <SiteFooter />}</div>
 }
 
+/** Inner-page header: the city's skyline as a short band behind the title (no more text-only walls). */
 export function PageIntro({ eyebrow, title, body, action }: { eyebrow: string; title: string; body?: string; action?: ReactNode }) {
-  return <header className="fn-intro"><div className="fn-intro-copy"><p className="fn-eyebrow">{eyebrow}</p><h1 className="fn-display">{title}</h1>{body && <p className="fn-intro-body">{body}</p>}{action && <div className="fn-intro-actions">{action}</div>}</div><div className="fn-intro-signal" aria-hidden="true"><span>FIELD SIGNAL</span><i /><i /><i /><i /></div></header>
+  const city = useCity()
+  return (
+    <CitySky cities={[city.slug]} variant="band">
+      <div className="mx-auto max-w-7xl px-5 pb-14 pt-12 sm:px-8 sm:pt-16 lg:px-12 lg:pb-20 lg:pt-20">
+        <p className="sky-glass sky-ink inline-flex rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.14em]">
+          {eyebrow}
+        </p>
+        <h1 className="sky-ink fn-display mt-4 max-w-3xl text-[clamp(2.2rem,8vw,4.25rem)] font-extrabold leading-[1.04] tracking-[-.035em]">
+          {title}
+        </h1>
+        {body && <p className="sky-ink-soft mt-4 max-w-xl text-[17px] leading-7">{body}</p>}
+        {action && <div className="mt-6 flex flex-wrap gap-3">{action}</div>}
+      </div>
+    </CitySky>
+  )
 }
 
 export function StatTile({ label, value, detail, accent = 'gold' }: { label: string; value: ReactNode; detail?: string; accent?: 'gold' | 'teal' | 'coral' }) {

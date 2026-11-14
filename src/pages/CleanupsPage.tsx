@@ -74,9 +74,15 @@ export function CleanupsPage() {
           body={`Find the next ${city.chapterName} action, bring a friend, and leave with a place that is easier to care for.`}
           action={
             <div className="flex flex-wrap gap-3">
-              <ActionLink to="/race" tone="gold">
-                Enter Trash Race
-              </ActionLink>
+              {raceLive ? (
+                <ActionLink to="/race" tone="gold">
+                  Enter Trash Race
+                </ActionLink>
+              ) : (
+                <ActionLink to="/map" tone="gold">
+                  See cleanups on the map
+                </ActionLink>
+              )}
               <ActionLink to="/me" tone="light">
                 See my impact
               </ActionLink>

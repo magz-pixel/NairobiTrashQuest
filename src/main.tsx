@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import './styles/rebuild-v2.css'
+import './styles/sky.css'
 import App from './App.tsx'
 import { initMonitoring } from './lib/monitoring'
 // Side-effect import: start listening for Chrome's install prompt before any page renders.

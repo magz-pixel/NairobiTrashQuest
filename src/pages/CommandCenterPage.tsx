@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useReports } from '../hooks/useReports'
@@ -54,13 +53,9 @@ export function CommandCenterPage() {
             </h2>
           </div>
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {features.map((feature, index) => (
-              <motion.article
+            {features.map((feature) => (
+              <article
                 key={feature.eyebrow}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
                 className={`min-h-[320px] rounded-[1.5rem] p-6 sm:p-8 ${feature.tone === 'dark' ? 'fn-panel-dark bg-[#063b32] text-white' : feature.tone === 'gold' ? 'bg-gold-100 text-emerald-950' : 'bg-[#dff0e9] text-ink'}`}
               >
                 <div className="flex items-start justify-between">
@@ -73,7 +68,7 @@ export function CommandCenterPage() {
                   <h3 className="text-2xl font-extrabold tracking-[-.025em]">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-6 opacity-70">{feature.copy}</p>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
         </section>

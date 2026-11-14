@@ -10,7 +10,7 @@ import { FixNairobiMark } from './BrandMark'
 import { isStandalone } from '../../lib/pwa'
 
 const navLinkClass = (isActive: boolean, size: 'sm' | 'md' = 'md') =>
-  `inline-flex min-h-[44px] items-center rounded-[var(--radius-control)] transition hover:bg-white/10 hover:text-white ${
+  `inline-flex min-h-[44px] items-center whitespace-nowrap rounded-[var(--radius-control)] transition hover:bg-white/10 hover:text-white ${
     size === 'sm' ? 'w-full px-3 py-2.5 text-sm' : 'px-2.5 py-2 text-sm'
   } ${isActive ? 'bg-white/15 text-white' : 'text-teal-100/80'}`
 
@@ -66,7 +66,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
         <Link to={path('/')} className="group flex min-w-0 items-center gap-2.5" onClick={closeMenu}>
           <FixNairobiMark className="shrink-0" />
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-white md:text-xl">
+            <span className="whitespace-nowrap font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-white md:text-xl">
               Ramani-Taka
             </span>
             <span className="truncate text-[10px] font-bold uppercase tracking-[.14em] text-teal-200/80">
@@ -75,7 +75,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-2 xl:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Primary">
           {CHAPTER_NAV.map((item) => (
             <NavLink key={item.href} to={path(item.href)} className={({ isActive }) => navLinkClass(isActive)}>
               {item.label}
@@ -102,7 +102,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
           </label>
           <Link
             to="/"
-            className="hidden min-h-[44px] items-center px-2 text-[10px] font-bold uppercase tracking-[.12em] text-teal-200/80 hover:text-white md:inline-flex"
+            className="hidden min-h-[44px] items-center whitespace-nowrap px-2 text-[10px] font-bold uppercase tracking-[.12em] text-teal-200/80 hover:text-white md:inline-flex xl:hidden 2xl:inline-flex"
           >
             All cities
           </Link>
@@ -131,7 +131,7 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
             <button
               type="button"
               onClick={() => setAuthOpen(true)}
-              className="hidden min-h-[44px] items-center rounded-lg border border-white/20 px-2.5 py-2 text-xs font-semibold text-teal-50 hover:bg-white/5 xl:inline-flex md:text-sm"
+              className="hidden min-h-[44px] items-center whitespace-nowrap rounded-lg border border-white/20 px-2.5 py-2 text-xs font-semibold text-teal-50 hover:bg-white/5 xl:inline-flex"
             >
               Join / Sign in
             </button>
