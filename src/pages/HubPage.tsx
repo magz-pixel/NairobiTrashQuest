@@ -4,6 +4,7 @@ import { SiteFooter } from '../components/site/SiteNav'
 import { FixNairobiMark } from '../components/site/BrandMark'
 import { BrushStrokes, CitySky } from '../components/site/CitySky'
 import { useCityCounts } from '../hooks/useCityCounts'
+import { RegionSection } from '../components/hub/RegionSection'
 import { cityPath, getActiveCities, getCity, type CityConfig } from '../lib/cities'
 import { getCurrentPosition } from '../lib/geo'
 import { isStandalone, lastCity } from '../lib/pwa'
@@ -166,6 +167,8 @@ export function HubPage() {
             )
           }}
         </CitySky>
+
+        <RegionSection />
 
         <section className="relative mx-auto max-w-7xl px-5 pb-6 pt-14 sm:px-8 lg:px-12">
           <BrushStrokes className="absolute -top-6 right-4 hidden w-56 opacity-80 md:block" />

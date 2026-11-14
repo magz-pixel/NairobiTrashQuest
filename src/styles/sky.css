@@ -82,6 +82,9 @@
     background: linear-gradient(180deg, rgba(var(--sky-wash), 0.78) 0%, rgba(var(--sky-wash), 0.66) 55%, rgba(var(--sky-wash), 0.2) 80%, rgba(var(--sky-wash), 0) 100%);
   }
   .city-sky--band .city-sky__img { object-position: 40% 88%; }
+  /* Portrait skylines are composed for phones: keep the skyline in the middle band. */
+  .city-sky__img--portrait { object-position: 50% 58%; }
+  .city-sky--band .city-sky__img--portrait { object-position: 50% 52%; }
   /* On phones the words sit in the sky, so keep the flock high and faint. */
   .city-sky__birds { bottom: auto; height: 14%; }
   .city-sky__wing { stroke: rgba(30, 40, 45, 0.5); }
