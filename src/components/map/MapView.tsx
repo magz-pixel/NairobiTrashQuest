@@ -39,7 +39,13 @@ interface MapViewProps {
   onSelectReport: (report: Report) => void
   onLocated: (lat: number, lng: number) => void
   pulseAt?: { latitude: number; longitude: number } | null
+  /** Ward boundaries with open/cleared counts (see useCityWards). Replaces the hexagons when present. */
+  wards?: GeoJSON.FeatureCollection | null
+  selectedWard?: string | null
+  onSelectWard?: (wardId: number) => void
   onPulseDone?: () => void
+  /** Fit the view to these bounds [west, south, east, north] (e.g. a ward). */
+  focusBounds?: [number, number, number, number] | null
 }
 
 const MAX_ZOOM = 18
@@ -49,7 +55,70 @@ const FONT_BOLD = ['Noto Sans Bold']
 function addStoryLayers(map: MLMap, mood: MapMood) {
   const ring = mood === 'night' ? '#0c2622' : '#ffffff'
 
+  map.addSource('wards', { type: 'geojson', data: EMPTY })
   map.addSource('hexes', { type: 'geojson', data: EMPTY })
+
+  // 0. Wards (Namma Kasa-style): shaded by open spots, outlined, named when you zoom in.
+  map.addLayer({
+    id: 'ward-fill',
+    type: 'fill',
+    source: 'wards',
+    paint: {
+      'fill-color': [
+        'step',
+        ['get', 'open'],
+        mood === 'night' ? 'rgba(185,216,207,0.04)' : 'rgba(255,255,255,0.01)',
+        1, '#fde3c8',
+        3, '#f9bf8f',
+        6, '#f19466',
+        12, '#dc5c4a',
+        20, '#a8302a',
+      ],
+      'fill-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.7, 13, 0.5, 15.5, 0.14],
+    },
+  })
+  map.addLayer({
+    id: 'ward-line',
+    type: 'line',
+    source: 'wards',
+    paint: {
+      'line-color': mood === 'night' ? '#3d6b61' : '#c3b79d',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.5, 13, 1.2, 16, 2],
+      'line-opacity': 0.9,
+      'line-dasharray': [3, 2],
+    },
+  })
+  map.addLayer({
+    id: 'ward-selected',
+    type: 'line',
+    source: 'wards',
+    filter: ['==', ['get', 'name'], ''],
+    paint: { 'line-color': '#fbbf24', 'line-width': 3.5 },
+  })
+  map.addLayer({
+    id: 'ward-label',
+    type: 'symbol',
+    source: 'wards',
+    minzoom: 12.2,
+    layout: {
+      'text-field': [
+        'case',
+        ['>', ['get', 'open'], 0],
+        ['format', ['upcase', ['get', 'name']], {}, '\n', {}, ['concat', ['to-string', ['get', 'open']], ' open'], { 'font-scale': 0.9 }],
+        ['upcase', ['get', 'name']],
+      ],
+      'text-font': FONT_BOLD,
+      'text-size': ['interpolate', ['linear'], ['zoom'], 12, 9, 15, 12],
+      'text-letter-spacing': 0.08,
+      'text-max-width': 8,
+    },
+    paint: {
+      'text-color': mood === 'night' ? '#cfe6df' : '#6b5d45',
+      'text-halo-color': mood === 'night' ? '#0c2622' : '#f8f5ec',
+      'text-halo-width': 1.6,
+      'text-opacity': ['interpolate', ['linear'], ['zoom'], 12.2, 0, 12.8, 1],
+    },
+  })
   map.addSource('heat', { type: 'geojson', data: EMPTY })
   map.addSource('reports', {
     type: 'geojson',
@@ -199,6 +268,10 @@ export function MapView({
   onLocated,
   pulseAt,
   onPulseDone,
+  wards,
+  selectedWard,
+  onSelectWard,
+  focusBounds,
 }: MapViewProps) {
   const city = useCity()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -216,9 +289,9 @@ export function MapView({
   const reportsById = useMemo(() => new Map(reports.map((r) => [r.id, r])), [reports])
 
   // Latest props for map event handlers registered once per map instance.
-  const latest = useRef({ onSelectReport, onMapClick, onDragStart, onSelectEvent, reportsById, paddingBottom })
+  const latest = useRef({ onSelectReport, onMapClick, onDragStart, onSelectEvent, onSelectWard, reportsById, paddingBottom })
   useLayoutEffect(() => {
-    latest.current = { onSelectReport, onMapClick, onDragStart, onSelectEvent, reportsById, paddingBottom }
+    latest.current = { onSelectReport, onMapClick, onDragStart, onSelectEvent, onSelectWard, reportsById, paddingBottom }
   })
 
   const framed = useRef(false)
@@ -237,7 +310,12 @@ export function MapView({
           center: [city.center.lng, city.center.lat],
           zoom: city.mapZoom,
           maxZoom: MAX_ZOOM,
-          attributionControl: { compact: true },
+          attributionControl: {
+            compact: true,
+            // Ward boundaries: geoBoundaries (KEN wards CC BY 4.0, UGA CC BY 3.0 IGO, TZA ODbL).
+            customAttribution:
+              'Wards: <a href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoBoundaries</a> (CC BY 4.0 / CC BY 3.0 IGO / ODbL)',
+          },
           dragRotate: false,
           pitchWithRotate: false,
         })
@@ -268,7 +346,10 @@ export function MapView({
           if (!map) return
           const hit = map.queryRenderedFeatures(e.point, { layers: ['clusters', 'points'] })
           const onMarker = (e.originalEvent.target as HTMLElement | null)?.closest('.rt-marker')
-          if (hit.length === 0 && !onMarker) latest.current.onMapClick?.()
+          if (hit.length > 0 || onMarker) return
+          const ward = latest.current.onSelectWard ? map.queryRenderedFeatures(e.point, { layers: ['ward-fill'] })[0] : undefined
+          if (ward && ward.id !== undefined) latest.current.onSelectWard?.(Number(ward.id))
+          else latest.current.onMapClick?.()
         })
         map.on('dragstart', () => latest.current.onDragStart?.())
         for (const layer of ['clusters', 'points']) {
@@ -305,6 +386,21 @@ export function MapView({
       })
     }
   }, [ready, reports])
+
+  // Ward polygons (with counts). When wards are available they tell the city-zoom story, so hide the hexes.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map) return
+    ;(map.getSource('wards') as GeoJSONSource | undefined)?.setData(wards ?? EMPTY)
+    const hexVisibility = wards && wards.features.length > 0 ? 'none' : 'visible'
+    for (const id of ['hex-fill', 'hex-line']) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', hexVisibility)
+  }, [ready, wards])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map || !map.getLayer('ward-selected')) return
+    map.setFilter('ward-selected', ['==', ['get', 'name'], selectedWard ?? ''])
+  }, [ready, selectedWard])
 
   // Gold ring on the selected spot.
   useEffect(() => {
@@ -356,6 +452,17 @@ export function MapView({
       essential: true,
     })
   }, [ready, focusAt, paddingBottom])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map || !focusBounds) return
+    map.fitBounds(focusBounds, {
+      // On desktop the ward card sits on the right (24rem), so keep the ward clear of it.
+      padding: { top: 140, bottom: 80 + paddingBottom, left: 40, right: window.innerWidth >= 768 ? 430 : 40 },
+      maxZoom: 16,
+      duration: 900,
+    })
+  }, [ready, focusBounds, paddingBottom])
 
   // "Just reported" pulse.
   useEffect(() => {
