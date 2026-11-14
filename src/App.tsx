@@ -8,7 +8,9 @@ import { HomePage } from './pages/HomePage'
 import { HubPage } from './pages/HubPage'
 import { ImpactMePage } from './pages/ImpactMePage'
 import { InstallPage } from './pages/InstallPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 import { BottomTabBar } from './components/layout/BottomTabBar'
+import { OfflineQueueBanner } from './components/layout/OfflineQueueBanner'
 import { lastCity } from './lib/pwa'
 import { MissionPage } from './pages/MissionPage'
 import { ReportPage } from './pages/ReportPage'
@@ -74,6 +76,7 @@ const ROUTE_TITLES: [string, string][] = [
   ['/map', 'Trash map'],
   ['/me', 'My impact'],
   ['/feed', 'Feed'],
+  ['/privacy', 'Privacy policy'],
   ['/install', 'Get the app'],
 ]
 
@@ -122,10 +125,12 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <RouteMeta />
+        <OfflineQueueBanner />
         <Routes>
           <Route path="/" element={<HubPage />} />
           <Route path="/app" element={<AppLaunch />} />
           <Route path="/install" element={<InstallPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           {LEGACY_TO_NAIROBI.map((path) => (
             <Route key={path} path={path} element={<Navigate to={`/nairobi${path}`} replace />} />
           ))}

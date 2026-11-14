@@ -8,6 +8,7 @@ import {
   uploadReportImage,
 } from '../../lib/gemini'
 import { reportClientError } from '../../lib/monitoring'
+import { isNetworkError, queueReport } from '../../lib/offlineQueue'
 import { nearestActiveReport } from '../../lib/nearbyReports'
 import { assertCanSubmitReport, recordReportSubmit } from '../../lib/reportGuard'
 import { useCity } from '../../lib/CityContext'
@@ -103,6 +104,24 @@ export function QuickReportModal({
     setSubmitting(true)
     setStatus('Checking the pin…')
 
+    // No signal: keep the report on the phone and send it when the connection is back.
+    const saveOffline = async () => {
+      await queueReport({
+        id: crypto.randomUUID(),
+        photo: file,
+        photoName: file.name,
+        latitude: pin.lat,
+        longitude: pin.lng,
+        severity,
+        wasteCategories,
+        note,
+        city: city.slug,
+        queuedAt: new Date().toISOString(),
+      })
+      setStatus('📶 No signal. Saved on your phone; it will send automatically when you’re back online.')
+      setTimeout(handleClose, 1800)
+    }
+
     try {
       assertCanSubmitReport(city, pin.lat, pin.lng)
       const position = {
@@ -121,6 +140,11 @@ export function QuickReportModal({
           setStatus(null)
           return
         }
+      }
+
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        await saveOffline()
+        return
       }
 
       const reportId = crypto.randomUUID()
@@ -189,6 +213,14 @@ export function QuickReportModal({
       })
       setTimeout(handleClose, 900)
     } catch (err) {
+      if (isNetworkError(err)) {
+        try {
+          await saveOffline()
+          return
+        } catch {
+          /* fall through to the normal error message */
+        }
+      }
       console.error('Quick report failed', err)
       reportClientError(err, { source: 'QuickReportModal' })
       const raw = err instanceof Error ? err.message : ''
