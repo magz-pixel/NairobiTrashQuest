@@ -15,18 +15,18 @@ function Icon({ d }: { d: string }) {
 }
 
 /**
- * Phone bottom tab bar: Map · Cleanups · ＋Report · Feed · Me. Hidden on desktop and on the
- * map page itself (which has its own Report button and bottom sheet).
+ * Phone bottom tab bar: Map · Cleanups · ＋Report · Feed · Me. Hidden on desktop. On the map page
+ * the map shrinks to sit above it (see HomePage), so it needs no spacer there.
  */
 export function BottomTabBar() {
   const path = useCityPath()
   const { pathname } = useLocation()
-  if (/\/map$/.test(pathname)) return null
+  const onMap = /\/map$/.test(pathname)
 
   return (
     <>
       {/* Spacer so page content isn't hidden behind the bar (the full-screen feed handles its own). */}
-      {!/\/feed$/.test(pathname) ? <div className="h-[calc(4.25rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden /> : null}
+      {!onMap && !/\/feed$/.test(pathname) ? <div className="h-[calc(4.25rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden /> : null}
       <nav
         aria-label="App"
         className="fixed inset-x-0 bottom-0 z-[1200] flex items-end border-t border-[#e5efeb] bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_rgba(6,59,50,.08)] backdrop-blur md:hidden"

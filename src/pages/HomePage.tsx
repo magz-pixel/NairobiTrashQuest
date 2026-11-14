@@ -311,7 +311,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="map-experience flex h-[100dvh] w-full overflow-hidden bg-[#dce8e1]" data-sheet={sheet}>
+    <div className="map-experience flex h-[calc(100dvh-4.25rem-env(safe-area-inset-bottom))] w-full md:h-[100dvh] overflow-hidden bg-[#dce8e1]" data-sheet={sheet}>
       <FieldRail {...board} />
       <div className="relative min-h-0 min-w-0 flex-1">
         <Suspense
