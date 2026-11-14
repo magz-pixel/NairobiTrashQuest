@@ -28,7 +28,7 @@ export function MissionPage() {
           <div className="grid gap-5 lg:grid-cols-[.8fr_1.2fr]">
             <div className="fn-panel-dark rounded-[2rem] bg-[#063b32] p-7 text-white sm:p-10">
               <SectionLabel>01 / Notice</SectionLabel>
-              <h2 className="fn-display mt-5 text-4xl font-extrabold tracking-[-.05em]">
+              <h2 className="fn-display mt-5 text-4xl font-extrabold tracking-[-.03em]">
                 The first step is paying attention to a specific place.
               </h2>
               <p className="mt-5 leading-7 text-teal-100/75">
@@ -50,7 +50,7 @@ export function MissionPage() {
               ].map(([n, t, b]) => (
                 <article key={n} className="rounded-[2rem] bg-white p-7 shadow-[var(--shadow-card)]">
                   <span className="text-sm font-extrabold text-[#ef8268]">{n}</span>
-                  <h3 className="fn-display mt-14 text-2xl font-extrabold tracking-[-.04em] text-[#063b32]">{t}</h3>
+                  <h3 className="fn-display mt-14 text-2xl font-extrabold tracking-[-.025em] text-[#063b32]">{t}</h3>
                   <p className="mt-3 leading-7 text-[#617972]">{b}</p>
                 </article>
               ))}
@@ -94,7 +94,7 @@ export function MissionPage() {
         <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
           <div className="rounded-[2rem] bg-[#fbbf24] p-8 sm:p-12">
             <p className="fn-eyebrow text-[#063b32]">Your turn</p>
-            <h2 className="fn-display mt-4 max-w-2xl text-4xl font-extrabold tracking-[-.05em] text-[#063b32] sm:text-5xl">
+            <h2 className="fn-display mt-4 max-w-2xl text-4xl font-extrabold tracking-[-.03em] text-[#063b32] sm:text-5xl">
               Put one place on the record.
             </h2>
             <p className="mt-4 max-w-xl text-[#38574f]">

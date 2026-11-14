@@ -80,7 +80,7 @@ export function ImpactMePage() {
           {!loading && !user && (
             <div className="fn-panel-dark rounded-[2rem] bg-[#063b32] p-8 text-white sm:p-12">
               <SectionLabel>Join the record</SectionLabel>
-              <h2 className="fn-display mt-4 max-w-xl text-4xl font-extrabold tracking-[-.05em]">
+              <h2 className="fn-display mt-4 max-w-xl text-4xl font-extrabold tracking-[-.03em]">
                 Your next small action can count.
               </h2>
               <p className="mt-4 max-w-lg leading-7 text-teal-100/75">
@@ -97,7 +97,7 @@ export function ImpactMePage() {
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <div>
                     <p className="text-sm text-teal-100/65">{user.email}</p>
-                    <h2 className="fn-display mt-2 text-4xl font-extrabold tracking-[-.05em]">
+                    <h2 className="fn-display mt-2 text-4xl font-extrabold tracking-[-.03em]">
                       {profile?.username ?? 'Cleaner'}
                     </h2>
                     <p className="mt-2 text-teal-100/75">

@@ -133,7 +133,7 @@ export function RaceLeaderboardPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <SectionLabel>Live standings</SectionLabel>
-                <h2 className="fn-display mt-3 text-4xl font-extrabold tracking-[-.05em]">Who is showing up?</h2>
+                <h2 className="fn-display mt-3 text-4xl font-extrabold tracking-[-.03em]">Who is showing up?</h2>
               </div>
               {usingLocal && <StatusChip tone="gold">Local demo data</StatusChip>}
             </div>

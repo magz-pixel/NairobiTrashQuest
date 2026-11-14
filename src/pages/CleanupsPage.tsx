@@ -88,7 +88,7 @@ export function CleanupsPage() {
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="max-w-xl">
                 <SectionLabel>Featured field action</SectionLabel>
-                <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.05em]">
+                <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.03em]">
                   Amazing Trash Race · Season 2
                 </h2>
                 <p className="mt-4 leading-7 text-teal-100/75">
@@ -107,7 +107,7 @@ export function CleanupsPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <SectionLabel>On the calendar</SectionLabel>
-                <h2 className="fn-display mt-3 text-4xl font-extrabold tracking-[-.05em] text-[#063b32]">
+                <h2 className="fn-display mt-3 text-4xl font-extrabold tracking-[-.03em] text-[#063b32]">
                   Other cleanups
                 </h2>
               </div>

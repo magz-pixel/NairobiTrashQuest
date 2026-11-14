@@ -83,7 +83,7 @@ function FieldBoard({
           ) : null}
           <div className={`flex items-end justify-between gap-3 ${density === 'half' ? '' : 'mt-1'}`}>
             <h2
-              className={`font-extrabold tracking-[-.04em] text-[#063b32] ${
+              className={`font-extrabold tracking-[-.025em] text-[#063b32] ${
                 compact ? 'text-lg' : 'text-2xl'
               }`}
             >

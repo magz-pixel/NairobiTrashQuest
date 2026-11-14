@@ -74,7 +74,7 @@ export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
           <p className="mb-5 text-[11px] font-extrabold uppercase tracking-[.22em] text-muted max-[768px]:text-white/70">
             Ramani-Taka / field note 01
           </p>
-          <h1 className="m-0 max-w-3xl text-[clamp(2.7rem,5.2vw,5.8rem)] font-semibold leading-[1.02] tracking-[-.055em] text-ink max-[768px]:text-[clamp(2rem,9.2vw,3rem)] max-[768px]:leading-[1.14] max-[768px]:text-white max-[420px]:text-[clamp(1.8rem,8.6vw,2.4rem)]">
+          <h1 className="m-0 max-w-3xl text-[clamp(2.7rem,5.2vw,5.8rem)] font-semibold leading-[1.02] tracking-[-.03em] text-ink max-[768px]:text-[clamp(2rem,9.2vw,3rem)] max-[768px]:leading-[1.14] max-[768px]:text-white max-[420px]:text-[clamp(1.8rem,8.6vw,2.4rem)]">
             {city.label}, show us{' '}
             <span className="inline-block rounded-[16px] bg-[radial-gradient(circle_at_30%_30%,#45c6ae,#075e50_56%,#063b32)] px-[.2em] pb-[.14em] pt-[.06em] text-white shadow-[0_12px_30px_rgba(6,59,50,.16)] max-[768px]:rounded-xl">
               where it hurts.
@@ -175,7 +175,7 @@ export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
                     className="group flex items-center gap-4 border-b border-white/10 py-3.5 transition hover:pl-3 hover:text-teal-200 sm:py-4"
                   >
                     <span className="w-7 text-[10px] font-bold text-white/35">0{index + 1}</span>
-                    <span className="text-[clamp(1.45rem,4vw,2.8rem)] font-semibold leading-none tracking-[-.045em]">
+                    <span className="text-[clamp(1.45rem,4vw,2.8rem)] font-semibold leading-none tracking-[-.025em]">
                       {item.label}
                     </span>
                     <span className="ml-auto translate-x-2 text-2xl opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100">
@@ -200,7 +200,7 @@ export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
             <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gold-300/70 blur-2xl" />
             <div className="relative">
               <p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-emerald-700">The field brief</p>
-              <h2 className="mt-5 max-w-xs text-4xl font-extrabold leading-[.95] tracking-[-.06em]">
+              <h2 className="mt-5 max-w-xs text-4xl font-extrabold leading-[.95] tracking-[-.03em]">
                 Put the city back in our hands.
               </h2>
               <p className="mt-5 max-w-xs text-sm leading-6 text-emerald-950/65">
@@ -211,7 +211,7 @@ export function ReferenceHero({ stats, loading }: ReferenceHeroProps) {
               <div className="flex items-end justify-between">
                 <div>
                   <p className="text-[10px] font-extrabold uppercase tracking-[.17em] text-muted">Open places today</p>
-                  <p className="mt-2 text-5xl font-extrabold tracking-[-.07em]">{loading ? '—' : stats.active}</p>
+                  <p className="mt-2 text-5xl font-extrabold tracking-[-.03em]">{loading ? '—' : stats.active}</p>
                 </div>
                 <span className="mb-1 h-3 w-3 rounded-full bg-[#ef8268] shadow-[0_0_0_7px_rgba(239,130,104,.18)]" />
               </div>

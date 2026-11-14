@@ -49,7 +49,7 @@ export function CommandCenterPage() {
             <p className="text-xs font-extrabold uppercase tracking-[.2em] text-emerald-700">
               How it works on the ground
             </p>
-            <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.05em] sm:text-5xl">
+            <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.03em] sm:text-5xl">
               A small action. A visible difference.
             </h2>
           </div>
@@ -70,7 +70,7 @@ export function CommandCenterPage() {
                   <span className="text-2xl">→</span>
                 </div>
                 <div className="mt-24">
-                  <h3 className="text-2xl font-extrabold tracking-[-.04em]">{feature.title}</h3>
+                  <h3 className="text-2xl font-extrabold tracking-[-.025em]">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-6 opacity-70">{feature.copy}</p>
                 </div>
               </motion.article>
@@ -82,7 +82,7 @@ export function CommandCenterPage() {
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[.2em] text-emerald-700">No black boxes</p>
-              <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.05em]">
+              <h2 className="mt-4 text-4xl font-extrabold leading-tight tracking-[-.03em]">
                 If the street changes, you should be able to see it.
               </h2>
               <p className="mt-5 max-w-md text-base leading-7 text-muted">
@@ -96,15 +96,29 @@ export function CommandCenterPage() {
               </Link>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              {!loading && stats.total > 0 && (
+              {!loading && stats.total > 0 && stats.resolved > 0 && (
                 <div className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
-                  <p className="text-5xl font-extrabold tracking-[-.06em] text-emerald-800">{stats.resolutionRate}%</p>
+                  <p className="text-5xl font-extrabold tracking-[-.02em] text-emerald-800">{stats.resolutionRate}%</p>
                   <p className="mt-3 font-bold">resolution rate</p>
-                  <p className="mt-2 text-sm leading-6 text-muted">Reports that moved from signal to verified clear.</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">
+                    {stats.resolved} of {stats.total} reports moved from signal to verified clear.
+                  </p>
                 </div>
               )}
+              {!loading && stats.active > 0 && stats.resolved === 0 && (
+                <Link
+                  to={path('/map')}
+                  className="block rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5"
+                >
+                  <p className="text-5xl font-extrabold tracking-[-.02em] text-[#c2410c]">{stats.active}</p>
+                  <p className="mt-3 font-bold">open hotspots</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">
+                    Waiting for a crew. Be the first to verify a clear →
+                  </p>
+                </Link>
+              )}
               <div className="fn-panel-dark rounded-[1.5rem] bg-[#063b32] p-6 text-white shadow-[var(--shadow-card)]">
-                <p className="text-5xl font-extrabold tracking-[-.06em] text-gold-300">24/7</p>
+                <p className="text-5xl font-extrabold tracking-[-.03em] text-gold-300">24/7</p>
                 <p className="mt-3 font-bold">community signal</p>
                 <p className="mt-2 text-sm leading-6 text-teal-100/65">A living view of what needs attention next.</p>
               </div>
@@ -115,7 +129,7 @@ export function CommandCenterPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="fn-panel-dark rounded-[2rem] bg-[#063b32] px-6 py-12 text-center text-white sm:px-12">
             <p className="text-xs font-extrabold uppercase tracking-[.2em] text-gold-300">Take it from here</p>
-            <h2 className="mx-auto mt-4 max-w-2xl text-4xl font-extrabold tracking-[-.05em] sm:text-5xl">
+            <h2 className="mx-auto mt-4 max-w-2xl text-4xl font-extrabold tracking-[-.03em] sm:text-5xl">
               See a dirty spot? Put it where people can act.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-teal-50/70">
