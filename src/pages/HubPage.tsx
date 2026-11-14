@@ -5,6 +5,7 @@ import { FixNairobiMark } from '../components/site/BrandMark'
 import { CHAPTER_NAV } from '../lib/chapterPages'
 import { cityPath, getActiveCities, type CityConfig } from '../lib/cities'
 import { getCurrentPosition } from '../lib/geo'
+import { isStandalone } from '../lib/pwa'
 
 const CITY_LINES: Record<string, string> = {
   nairobi: 'Open reports and the Amazing Trash Race results live on this chapter.',
@@ -44,17 +45,35 @@ export function HubPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
           <Link to="/" className="flex items-center gap-2.5">
             <FixNairobiMark className="shrink-0" />
-            <span className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight md:text-xl">
+            <span className="whitespace-nowrap font-[family-name:var(--font-display)] text-lg font-bold tracking-tight max-[359px]:sr-only md:text-xl">
               Ramani-Taka
             </span>
           </Link>
-          <button
-            type="button"
-            onClick={reportTrash}
-            className="inline-flex min-h-11 items-center rounded-full bg-gold-400 px-4 text-sm font-extrabold text-emerald-950"
-          >
-            {locating ? 'Finding your city…' : 'Report trash'}
-          </button>
+          <div className="flex items-center gap-2">
+            {!isStandalone() ? (
+              <Link
+                to="/install"
+                aria-label="Get the app"
+                className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full border border-white/20 px-3 text-sm font-bold text-teal-50 hover:bg-white/10 sm:px-3.5"
+              >
+                <span className="sm:hidden">Get app</span>
+                <span className="hidden sm:inline">Get the app</span>
+              </Link>
+            ) : null}
+            <button
+              type="button"
+              onClick={reportTrash}
+              className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-gold-400 px-4 text-sm font-extrabold text-emerald-950"
+            >
+              {locating ? (
+                'Finding…'
+              ) : (
+                <>
+                  Report<span className="hidden sm:inline">&nbsp;trash</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
