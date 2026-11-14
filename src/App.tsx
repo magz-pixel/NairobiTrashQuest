@@ -7,6 +7,8 @@ import { CommandCenterPage } from './pages/CommandCenterPage'
 import { HomePage } from './pages/HomePage'
 import { HubPage } from './pages/HubPage'
 import { ImpactMePage } from './pages/ImpactMePage'
+import { InstallPage } from './pages/InstallPage'
+import { lastCity } from './lib/pwa'
 import { MissionPage } from './pages/MissionPage'
 import { ReportPage } from './pages/ReportPage'
 
@@ -65,6 +67,7 @@ const ROUTE_TITLES: [string, string][] = [
   ['/mission', 'Mission'],
   ['/map', 'Trash map'],
   ['/me', 'My impact'],
+  ['/install', 'Get the app'],
 ]
 
 function RouteMeta() {
@@ -79,6 +82,21 @@ function RouteMeta() {
     }
   }, [pathname])
   return null
+}
+
+const APP_LAUNCH_PAGES = new Set(['map', 'cleanups', 'me', 'race', 'funds'])
+
+/**
+ * Home-screen launch: go to the city this person last used. `?to=cleanups` picks the page
+ * (default map); other params such as `?action=report` are passed through.
+ */
+function AppLaunch() {
+  const params = new URLSearchParams(useLocation().search)
+  const to = params.get('to') ?? 'map'
+  params.delete('to')
+  const page = APP_LAUNCH_PAGES.has(to) ? to : 'map'
+  const query = params.toString()
+  return <Navigate to={`/${lastCity()}/${page}${query ? `?${query}` : ''}`} replace />
 }
 
 function CityGate() {
@@ -98,6 +116,8 @@ function App() {
         <RouteMeta />
         <Routes>
           <Route path="/" element={<HubPage />} />
+          <Route path="/app" element={<AppLaunch />} />
+          <Route path="/install" element={<InstallPage />} />
           {LEGACY_TO_NAIROBI.map((path) => (
             <Route key={path} path={path} element={<Navigate to={`/nairobi${path}`} replace />} />
           ))}

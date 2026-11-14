@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { cityPath, getActiveCities } from '../../lib/cities'
 import { useCity, useCityPath, useCitySwitchPath } from '../../lib/CityContext'
 import { getLocale, setLocale, whatsappReportUrl } from '../../lib/i18n'
+import { isStandalone } from '../../lib/pwa'
 import { SignInButton } from '../auth/SignInButton'
 import { FixNairobiMark } from '../site/BrandMark'
 
@@ -163,6 +164,16 @@ export function MapTopBar({ onVerify, onOpenPanel, onAdmin }: MapTopBarProps) {
               >
                 Report via WhatsApp
               </a>
+              {!isStandalone() ? (
+                <Link
+                  role="menuitem"
+                  to="/install"
+                  className="block px-4 py-2.5 text-sm font-bold text-[#0b8c76] hover:bg-emerald-50"
+                  onClick={() => setMoreOpen(false)}
+                >
+                  📲 Get the app
+                </Link>
+              ) : null}
               <button
                 type="button"
                 role="menuitem"

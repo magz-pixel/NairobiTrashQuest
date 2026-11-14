@@ -7,6 +7,7 @@ import { cityPath, getActiveCities } from '../../lib/cities'
 import { CHAPTER_NAV } from '../../lib/chapterPages'
 import { isRaceLive } from '../../types/database'
 import { FixNairobiMark } from './BrandMark'
+import { isStandalone } from '../../lib/pwa'
 
 const navLinkClass = (isActive: boolean, size: 'sm' | 'md' = 'md') =>
   `inline-flex min-h-[44px] items-center rounded-[var(--radius-control)] transition hover:bg-white/10 hover:text-white ${
@@ -223,6 +224,17 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
                 </button>
               </li>
             )}
+            {!isStandalone() ? (
+              <li>
+                <Link
+                  to="/install"
+                  onClick={closeMenu}
+                  className="inline-flex min-h-[44px] w-full items-center rounded-md px-3 py-2.5 text-sm font-bold text-gold-300 hover:bg-white/5"
+                >
+                  📲 Get the app
+                </Link>
+              </li>
+            ) : null}
             {user ? (
               <li>
                 <button

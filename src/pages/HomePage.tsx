@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useReportStats } from '../hooks/useReportStats'
@@ -55,7 +56,9 @@ export function HomePage() {
   const stats = useReportStats(allReports)
   const [activePanel, setActivePanel] = useState<GameTab | null>(null)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
-  const [quickReportOpen, setQuickReportOpen] = useState(false)
+  // Home-screen shortcut / shared links: /nairobi/map?action=report opens the quick report straight away.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [quickReportOpen, setQuickReportOpen] = useState(() => searchParams.get('action') === 'report')
   const [reportOpen, setReportOpen] = useState(false)
   const [clearOpen, setClearOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
@@ -114,6 +117,14 @@ export function HomePage() {
   }
 
   const openScan = () => (user ? openReport() : openQuickReport())
+
+  // Drop ?action=report from the URL once it has opened the quick report (see useState above).
+  useEffect(() => {
+    if (searchParams.get('action') !== 'report') return
+    const next = new URLSearchParams(searchParams)
+    next.delete('action')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams])
 
   const openReport = () => {
     flushSync(() => {

@@ -1,11 +1,13 @@
-import { createContext, useCallback, useContext, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { cityPath, getCity, getActiveCities, type CityConfig } from './cities'
+import { rememberCity } from './pwa'
 
 const CityContext = createContext<CityConfig | null>(null)
 
 export function CityProvider({ children }: { children: ReactNode }) {
   const city = getCity(useLocation().pathname.split('/')[1])
+  useEffect(() => rememberCity(city.slug), [city.slug])
   return <CityContext.Provider value={city}>{children}</CityContext.Provider>
 }
 
