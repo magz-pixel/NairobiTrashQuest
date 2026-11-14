@@ -13,6 +13,8 @@ interface LiveRegion {
   feed: FeedItem[]
   /** Kilograms weighed in at race/cleanup weigh-ins (race_weight_logs), all Nairobi so far. */
   kgLogged: number
+  /** Bins / trees per city, or null until migration 023 is run. */
+  features: { city: string; kind: string; origin: string | null }[] | null
 }
 
 function ago(iso: string) {
@@ -30,7 +32,7 @@ export function useRegionData() {
     if (!isSupabaseConfigured) return
     let cancelled = false
     void (async () => {
-      const [reportsRes, eventsRes, kgRes] = await Promise.all([
+      const [reportsRes, eventsRes, kgRes, featRes] = await Promise.all([
         supabase
           .from('reports')
           .select('id,latitude,longitude,severity_score,status,city,area_name,created_at,cleared_at')
@@ -44,6 +46,7 @@ export function useRegionData() {
           .order('event_date', { ascending: true })
           .limit(20),
         supabase.from('race_weight_logs').select('kg'),
+        supabase.from('map_features').select('city,kind,origin').limit(20000),
       ])
       if (cancelled) return
       const rows = (reportsRes.data ?? []) as {
@@ -94,6 +97,7 @@ export function useRegionData() {
         cleared: rows.filter((r) => r.status === 'verified_cleared').length,
         upcomingCleanups: events.length,
         feed,
+        features: featRes.error ? null : ((featRes.data ?? []) as { city: string; kind: string; origin: string | null }[]),
         kgLogged: ((kgRes.data ?? []) as { kg: number }[]).reduce((sum, r) => sum + Number(r.kg || 0), 0),
       })
     })()

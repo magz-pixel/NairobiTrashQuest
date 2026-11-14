@@ -12,9 +12,10 @@ interface MapTopBarProps {
   onVerify: () => void
   onOpenPanel: (id: 'log' | 'events' | 'missions' | 'profile') => void
   onAdmin?: () => void
+  onPin?: (kind: 'bin' | 'tree') => void
 }
 
-export function MapTopBar({ onVerify, onOpenPanel, onAdmin }: MapTopBarProps) {
+export function MapTopBar({ onVerify, onOpenPanel, onAdmin, onPin }: MapTopBarProps) {
   const city = useCity()
   const path = useCityPath()
   const switchCity = useCitySwitchPath()
@@ -154,6 +155,32 @@ export function MapTopBar({ onVerify, onOpenPanel, onAdmin }: MapTopBarProps) {
                   {label}
                 </button>
               ))}
+              {onPin ? (
+                <>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="block min-h-11 w-full px-4 py-2.5 text-left text-sm font-semibold text-[#12332d] hover:bg-emerald-50"
+                    onClick={() => {
+                      setMoreOpen(false)
+                      onPin('bin')
+                    }}
+                  >
+                    🗑️ Pin a bin
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="block min-h-11 w-full px-4 py-2.5 text-left text-sm font-semibold text-[#12332d] hover:bg-emerald-50"
+                    onClick={() => {
+                      setMoreOpen(false)
+                      onPin('tree')
+                    }}
+                  >
+                    🌳 Pin a tree
+                  </button>
+                </>
+              ) : null}
               <a
                 role="menuitem"
                 href={whatsappReportUrl()}

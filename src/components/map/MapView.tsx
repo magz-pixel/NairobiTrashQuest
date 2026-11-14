@@ -46,7 +46,14 @@ interface MapViewProps {
   onPulseDone?: () => void
   /** Fit the view to these bounds [west, south, east, north] (e.g. a ward). */
   focusBounds?: [number, number, number, number] | null
+  /** Bins and trees (map_features) as GeoJSON points. */
+  features?: GeoJSON.FeatureCollection | null
+  /** Which layers are shown. Defaults to all. */
+  layers?: { trash: boolean; bins: boolean; trees: boolean }
+  onSelectFeature?: (featureId: string) => void
 }
+
+const TRASH_LAYERS = ['hex-fill', 'hex-line', 'heat', 'cluster-glow', 'clusters', 'cluster-count', 'points', 'selected-ring']
 
 const MAX_ZOOM = 18
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
@@ -251,6 +258,48 @@ function addStoryLayers(map: MLMap, mood: MapMood) {
       'circle-stroke-width': 4,
     },
   })
+
+  // 5. Bins and trees (roadmap #5/#6).
+  map.addSource('features', { type: 'geojson', data: EMPTY })
+  map.addLayer({
+    id: 'bin-dots',
+    type: 'circle',
+    source: 'features',
+    filter: ['==', ['get', 'kind'], 'bin'],
+    paint: {
+      'circle-color': '#ffffff',
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3.5, 15, 7, 18, 10],
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 15, 3.5],
+      'circle-stroke-color': [
+        'match',
+        ['get', 'status'],
+        'ok', '#2563eb',
+        'full', '#d99a16',
+        'damaged', '#d9483b',
+        'missing', '#7b8c85',
+        '#2563eb',
+      ],
+    },
+  })
+  map.addLayer({
+    id: 'tree-dots',
+    type: 'circle',
+    source: 'features',
+    filter: ['==', ['get', 'kind'], 'tree'],
+    paint: {
+      'circle-color': [
+        'match',
+        ['get', 'status'],
+        'alive', ['case', ['==', ['get', 'origin'], 'planted'], '#22c55e', '#15803d'],
+        'struggling', '#d99a16',
+        'dead', '#7b8c85',
+        '#16a34a',
+      ],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3.5, 15, 7, 18, 10],
+      'circle-stroke-color': ring,
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 15, 2.5],
+    },
+  })
 }
 
 export function MapView({
@@ -272,6 +321,9 @@ export function MapView({
   selectedWard,
   onSelectWard,
   focusBounds,
+  features,
+  layers,
+  onSelectFeature,
 }: MapViewProps) {
   const city = useCity()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -289,9 +341,9 @@ export function MapView({
   const reportsById = useMemo(() => new Map(reports.map((r) => [r.id, r])), [reports])
 
   // Latest props for map event handlers registered once per map instance.
-  const latest = useRef({ onSelectReport, onMapClick, onDragStart, onSelectEvent, onSelectWard, reportsById, paddingBottom })
+  const latest = useRef({ onSelectReport, onMapClick, onDragStart, onSelectEvent, onSelectWard, onSelectFeature, reportsById, paddingBottom })
   useLayoutEffect(() => {
-    latest.current = { onSelectReport, onMapClick, onDragStart, onSelectEvent, onSelectWard, reportsById, paddingBottom }
+    latest.current = { onSelectReport, onMapClick, onDragStart, onSelectEvent, onSelectWard, onSelectFeature, reportsById, paddingBottom }
   })
 
   const framed = useRef(false)
@@ -347,12 +399,17 @@ export function MapView({
           const hit = map.queryRenderedFeatures(e.point, { layers: ['clusters', 'points'] })
           const onMarker = (e.originalEvent.target as HTMLElement | null)?.closest('.rt-marker')
           if (hit.length > 0 || onMarker) return
+          const feature = map.queryRenderedFeatures(e.point, { layers: ['bin-dots', 'tree-dots'] })[0]
+          if (feature) {
+            latest.current.onSelectFeature?.(String(feature.properties?.id))
+            return
+          }
           const ward = latest.current.onSelectWard ? map.queryRenderedFeatures(e.point, { layers: ['ward-fill'] })[0] : undefined
           if (ward && ward.id !== undefined) latest.current.onSelectWard?.(Number(ward.id))
           else latest.current.onMapClick?.()
         })
         map.on('dragstart', () => latest.current.onDragStart?.())
-        for (const layer of ['clusters', 'points']) {
+        for (const layer of ['clusters', 'points', 'bin-dots', 'tree-dots']) {
           map.on('mouseenter', layer, () => map && (map.getCanvas().style.cursor = 'pointer'))
           map.on('mouseleave', layer, () => map && (map.getCanvas().style.cursor = ''))
         }
@@ -395,6 +452,26 @@ export function MapView({
     const hexVisibility = wards && wards.features.length > 0 ? 'none' : 'visible'
     for (const id of ['hex-fill', 'hex-line']) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', hexVisibility)
   }, [ready, wards])
+
+  // Bins & trees data, and which layers are on.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map) return
+    ;(map.getSource('features') as GeoJSONSource | undefined)?.setData(features ?? EMPTY)
+  }, [ready, features])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map) return
+    const show = layers ?? { trash: true, bins: true, trees: true }
+    const set = (id: string, on: boolean) => map.getLayer(id) && map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')
+    for (const id of TRASH_LAYERS) {
+      if (id.startsWith('hex') && wards && wards.features.length > 0) continue // wards handle the hex fallback
+      set(id, show.trash)
+    }
+    set('bin-dots', show.bins)
+    set('tree-dots', show.trees)
+  }, [ready, layers, wards])
 
   useEffect(() => {
     const map = mapRef.current

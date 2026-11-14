@@ -9,6 +9,10 @@ import { MapSummaryPill } from '../components/map/MapSummaryPill'
 import { WardCard } from '../components/map/WardCard'
 import { MapIntro } from '../components/map/MapIntro'
 import { useCityWards } from '../hooks/useCityWards'
+import { useMapFeatures } from '../hooks/useMapFeatures'
+import { featuresToGeoJSON, type FeatureKind } from '../lib/mapFeatures'
+import { PinFeatureModal } from '../components/features/PinFeatureModal'
+import { FeatureCard } from '../components/features/FeatureCard'
 import { formatEventWhen, hasPin, relativeDays } from '../lib/events'
 import { useReportStats } from '../hooks/useReportStats'
 import { useCity } from '../lib/CityContext'
@@ -100,6 +104,14 @@ export function HomePage() {
 
   const realReports = useMemo(() => allReports.filter((r) => !isDemoReport(r)), [allReports])
   const { wards, summaries: wardSummaries } = useCityWards(city.slug, realReports)
+  const { features: mapFeatures, ready: featuresReady, reload: reloadFeatures } = useMapFeatures(city.slug)
+  const featuresGeo = useMemo(() => featuresToGeoJSON(mapFeatures), [mapFeatures])
+  const [layers, setLayers] = useState({ trash: true, bins: true, trees: true })
+  const [pinKind, setPinKind] = useState<FeatureKind | null>(null)
+  const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null)
+  const selectedFeature = mapFeatures.find((f) => f.id === selectedFeatureId) ?? null
+  const binCount = mapFeatures.filter((f) => f.kind === 'bin').length
+  const treeCount = mapFeatures.filter((f) => f.kind === 'tree').length
   const [selectedWardId, setSelectedWardId] = useState<number | null>(null)
   const [focusBounds, setFocusBounds] = useState<[number, number, number, number] | null>(null)
   const selectedWard = selectedWardId !== null ? (wardSummaries[selectedWardId] ?? null) : null
@@ -311,6 +323,13 @@ export function HomePage() {
             selectedWard={selectedWard?.name ?? null}
             onSelectWard={selectWard}
             focusBounds={focusBounds}
+            features={featuresGeo}
+            layers={layers}
+            onSelectFeature={(id) => {
+              setSelectedWardId(null)
+              setSelectedReport(null)
+              setSelectedFeatureId(id)
+            }}
             selectedId={selectedReport?.id}
             focusAt={focusAt}
             paddingBottom={sheetPad}
@@ -332,6 +351,7 @@ export function HomePage() {
           onVerify={openClear}
           onOpenPanel={(id) => setActivePanel(id)}
           onAdmin={() => setAdminDrawerOpen(true)}
+          onPin={(kind) => setPinKind(kind)}
         />
         <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
           {city.label} · {city.country}
@@ -345,11 +365,34 @@ export function HomePage() {
             onFlyTo={(lat, lng) => setFocusAt({ lat, lng, zoom: 15 })}
           />
         </div>
+        {/* Layer toggles: Trash · Bins · Trees */}
+        <div className="pointer-events-auto absolute inset-x-0 top-[calc(env(safe-area-inset-top)+8.4rem)] z-[1060] flex justify-center gap-1.5 md:inset-x-auto md:right-[4.75rem] md:top-[5.4rem]">
+          {(
+            [
+              ['trash', '📍', 'Trash', null],
+              ['bins', '🗑️', 'Bins', binCount],
+              ['trees', '🌳', 'Trees', treeCount],
+            ] as const
+          ).map(([key, icon, label, n]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={layers[key]}
+              onClick={() => setLayers((l) => ({ ...l, [key]: !l[key] }))}
+              className={`inline-flex min-h-9 items-center gap-1 rounded-full border px-3 text-xs font-bold shadow-[0_8px_20px_rgba(6,59,50,.12)] backdrop-blur ${
+                layers[key] ? 'border-[#063b32] bg-[#063b32] text-white' : 'border-white/80 bg-white/90 text-[#5d746e]'
+              }`}
+            >
+              {icon} {label}
+              {typeof n === 'number' && featuresReady ? <span className="opacity-70">· {n}</span> : null}
+            </button>
+          ))}
+        </div>
         {nextEvent && sheet === 'peek' && !selectedReport ? (
           <button
             type="button"
             onClick={() => openEvent(nextEvent)}
-            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+8.4rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
+            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+11.2rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0b8c76] text-sm">🧹</span>
             <span className="min-w-0">
@@ -401,6 +444,16 @@ export function HomePage() {
         onZoom={(w) => setFocusBounds([...w.bbox])}
         onSelectReport={(r) => selectReport(r)}
       />
+      <PinFeatureModal
+        kind={pinKind}
+        onClose={() => setPinKind(null)}
+        onSaved={(at) => {
+          void reloadFeatures()
+          setLayers((l) => ({ ...l, bins: true, trees: true }))
+          setPulseAt({ latitude: at.lat, longitude: at.lng })
+        }}
+      />
+      <FeatureCard feature={selectedFeature} onClose={() => setSelectedFeatureId(null)} onUpdated={() => void reloadFeatures()} />
       <MapIntro city={city} wards={wardSummaries.length} open={stats.active} onReport={openQuickReport} />
       <EventDetailSheet
         event={selectedEvent}
