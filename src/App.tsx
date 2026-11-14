@@ -136,7 +136,7 @@ function App() {
           ))}
           <Route path="/:city" element={<CityGate />}>
             <Route index element={<CommandCenterPage />} />
-            <Route path="map" element={<HomePage />} />
+            <Route path="map" element={<CityMapPage />} />
             <Route path="report/:id" element={<ReportPage />} />
             <Route path="me" element={<ImpactMePage />} />
             <Route path="cleanups" element={<Lazy><CleanupsPage /></Lazy>} />
@@ -174,3 +174,9 @@ function App() {
 }
 
 export default App
+
+/** Remount the map page per city so nothing (focus, ward, framing) carries over from the last city. */
+function CityMapPage() {
+  const { city } = useParams()
+  return <HomePage key={city} />
+}

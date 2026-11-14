@@ -356,7 +356,8 @@ export function HomePage() {
         <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
           {city.label} · {city.country}
         </p>
-        <div className="pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+5.1rem)] z-[1061] flex justify-center md:inset-x-6 md:top-[5.4rem]">
+        {/* Summary pill with the layer toggles directly under it (one column, so they never overlap). */}
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+5.1rem)] z-[1061] flex flex-col items-center gap-2 md:inset-x-6 md:top-[5.4rem]">
           <MapSummaryPill
             reports={realReports}
             cleanups={upcoming.length}
@@ -364,9 +365,8 @@ export function HomePage() {
             rankingLabel="Worst wards right now"
             onFlyTo={(lat, lng) => setFocusAt({ lat, lng, zoom: 15 })}
           />
-        </div>
-        {/* Layer toggles: Trash · Bins · Trees */}
-        <div className="pointer-events-auto absolute inset-x-0 top-[calc(env(safe-area-inset-top)+8.4rem)] z-[1060] flex justify-center gap-1.5 md:inset-x-auto md:right-[4.75rem] md:top-[5.4rem]">
+          {/* Layer toggles: Trash · Bins · Trees */}
+          <div className="pointer-events-auto flex justify-center gap-1.5">
           {(
             [
               ['trash', '📍', 'Trash', null],
@@ -387,6 +387,7 @@ export function HomePage() {
               {typeof n === 'number' && featuresReady ? <span className="opacity-70">· {n}</span> : null}
             </button>
           ))}
+          </div>
         </div>
         {nextEvent && sheet === 'peek' && !selectedReport ? (
           <button

@@ -432,17 +432,19 @@ export function MapView({
     ;(map.getSource('hexes') as GeoJSONSource | undefined)?.setData(hexbinReports(open, 700))
 
     // First time we have data for this map: frame every open spot so the story is visible at a glance.
-    if (!framed.current && open.length > 1) {
+    // Only frame spots in this city (~60 km), so a stale list from the last city can't drag the view away.
+    const local = open.filter((r) => Math.abs(r.latitude - city.center.lat) < 0.55 && Math.abs(r.longitude - city.center.lng) < 0.55)
+    if (!framed.current && local.length > 1) {
       framed.current = true
       const bounds = new maplibregl.LngLatBounds()
-      for (const r of open) bounds.extend([r.longitude, r.latitude])
+      for (const r of local) bounds.extend([r.longitude, r.latitude])
       map.fitBounds(bounds, {
         padding: { top: 200, bottom: 150 + latest.current.paddingBottom, left: 80, right: 90 },
         maxZoom: 14.5,
         duration: 0,
       })
     }
-  }, [ready, reports])
+  }, [ready, reports, city.center.lat, city.center.lng])
 
   // Ward polygons (with counts). When wards are available they tell the city-zoom story, so hide the hexes.
   useEffect(() => {
