@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-import { SiteFooter } from '../components/site/SiteNav'
 import {
   ActionLink,
   PageIntro,
@@ -173,7 +172,6 @@ export function RaceLeaderboardPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </PublicShell>
   )
 }

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SignInButton } from '../components/auth/SignInButton'
 import { RaceTicket3D } from '../components/site/art/RaceTicket3D'
-import { SiteFooter } from '../components/site/SiteNav'
 import { ActionLink, PageIntro, PublicShell, SectionLabel, StatusChip } from '../components/site/PagePrimitives'
 import { useAuth } from '../hooks/useAuth'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -188,7 +187,6 @@ export function ImpactMePage() {
           )}
         </section>
       </main>
-      <SiteFooter />
     </PublicShell>
   )
 }

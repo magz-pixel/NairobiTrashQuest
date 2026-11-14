@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SignInButton } from '../components/auth/SignInButton'
 import { AmazingTrashRaceCard } from '../components/cleanups/AmazingTrashRaceCard'
-import { SiteFooter } from '../components/site/SiteNav'
 import { ActionLink, PageIntro, PublicShell, SectionLabel, StatusChip } from '../components/site/PagePrimitives'
 import { useAuth } from '../hooks/useAuth'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -168,7 +167,6 @@ export function CleanupsPage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
     </PublicShell>
   )
 }
