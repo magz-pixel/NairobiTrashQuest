@@ -6,11 +6,18 @@ import './styles/sky.css'
 import './styles/map.css'
 import App from './App.tsx'
 import { initMonitoring } from './lib/monitoring'
+import { reloadForNewBuild } from './lib/staleBuild'
 // Side-effect import: start listening for Chrome's install prompt before any page renders.
 import './lib/pwa'
 import { registerSW } from 'virtual:pwa-register'
 
 initMonitoring()
+
+// Vite fires this when a lazily loaded file from an older deploy is gone. Load the new build.
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault()
+  reloadForNewBuild()
+})
 
 // Ensure mobile clients recover cleanly after deploys (service worker cache).
 
