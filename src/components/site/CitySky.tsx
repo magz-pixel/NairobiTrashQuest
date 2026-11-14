@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { skyImage, skyPhase, type SkyPhase } from '../../lib/sky'
+import { skyImage, skyPhase, skyPortraitSrcSet, type SkyPhase } from '../../lib/sky'
 
 /**
  * City skyline backdrop: golden-hour photo per city, tinted to the city's local time,
@@ -49,15 +49,20 @@ export function CitySky({
         {cities.map((slug, i) => {
           const lg = skyImage(slug, 'lg')
           const sm = skyImage(slug, 'sm')
+          const portrait = skyPortraitSrcSet(slug)
           if (!lg || !sm) return <div key={slug} className="city-sky__fallback" data-on={i === index} />
           if (i !== 0 && !warm) return null
           return (
             <picture key={slug}>
-              <source media="(max-width: 767px)" srcSet={sm} />
+              {portrait ? (
+                <source media="(max-width: 767px)" srcSet={portrait} sizes="100vw" />
+              ) : (
+                <source media="(max-width: 767px)" srcSet={sm} />
+              )}
               <img
                 src={lg}
                 alt=""
-                className="city-sky__img"
+                className={`city-sky__img${portrait ? ' city-sky__img--portrait' : ''}`}
                 data-on={i === index % cities.length}
                 fetchPriority={i === 0 ? 'high' : 'low'}
                 loading={i === 0 ? 'eager' : 'lazy'}

@@ -40,3 +40,20 @@
 @media (prefers-reduced-motion: reduce) {
   .rt-pulse span { animation: none; opacity: 0.5; }
 }
+
+/* Hub East Africa map: glass city labels on the dark basemap */
+.rt-region-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  background: rgba(6, 30, 40, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font: 700 12px 'Plus Jakarta Sans', system-ui, sans-serif;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+.rt-region-label .dot { width: 7px; height: 7px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25); }
+.rt-region-label b { margin-left: 2px; padding: 1px 7px; border-radius: 999px; background: rgba(249, 115, 22, 0.9); font-size: 11px; }

@@ -14,7 +14,8 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         // Never make phones pre-download experiments or admin-only bulk; they load on demand if opened.
-        globIgnores: ['**/MapboxTestPage-*', '**/MapView-*', '**/node_modules/**'],
+        // The map engine (maplibre chunk) needs network for tiles anyway, so it loads on first map visit.
+        globIgnores: ['**/MapboxTestPage-*', '**/maplibre-*', '**/node_modules/**'],
       },
       manifest: {
         id: '/',
@@ -54,6 +55,17 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // One stable chunk for MapLibre (shared by the trash map and the hub's East Africa map),
+        // so the PWA precache can exclude it by name.
+        manualChunks(id) {
+          if (id.includes('node_modules/maplibre-gl')) return 'maplibre'
+        },
+      },
+    },
+  },
   server: {
     host: '0.0.0.0',
     allowedHosts: true,

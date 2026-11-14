@@ -11,6 +11,15 @@ const CITY_TZ: Record<string, string> = {
   'dar-es-salaam': 'Africa/Dar_es_Salaam',
 }
 
+/** Cities with a portrait (phone) skyline. Add a slug here after dropping <slug>-portrait-{750,1080}.webp in public/sky. */
+const PORTRAIT_SLUGS = new Set(['nairobi'])
+
+/** srcSet for the phone-shaped skyline, or null to fall back to the landscape crop. */
+export function skyPortraitSrcSet(slug: string): string | null {
+  if (!PORTRAIT_SLUGS.has(slug)) return null
+  return `/sky/${slug}-portrait-750.webp 750w, /sky/${slug}-portrait-1080.webp 1080w`
+}
+
 export function skyImage(slug: string, size: 'lg' | 'sm'): string | null {
   if (!SKY_SLUGS.has(slug)) return null
   return `/sky/${slug}-${size === 'lg' ? 1920 : 1080}.webp`
