@@ -1,69 +1,78 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { SignInButton } from '../components/auth/SignInButton'
-import { AmazingTrashRaceCard } from '../components/cleanups/AmazingTrashRaceCard'
-import { ActionLink, PageIntro, PublicShell, SectionLabel, StatusChip } from '../components/site/PagePrimitives'
-import { useAuth } from '../hooks/useAuth'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { isRaceLive, type Event } from '../types/database'
-import { useCity, useCityPath } from '../lib/CityContext'
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { SignInButton } from "../components/auth/SignInButton";
+import { AmazingTrashRaceCard } from "../components/cleanups/AmazingTrashRaceCard";
+import {
+  ActionLink,
+  PageIntro,
+  PublicShell,
+  SectionLabel,
+  StatusChip,
+} from "../components/site/PagePrimitives";
+import { useAuth } from "../hooks/useAuth";
+import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import { isRaceLive, type Event } from "../types/database";
+import { useCity, useCityPath } from "../lib/CityContext";
 export function CleanupsPage() {
-  const { user, profile } = useAuth()
-  const raceLive = isRaceLive()
-  const city = useCity()
-  const path = useCityPath()
-  const citySlug = city.slug
-  const [events, setEvents] = useState<Event[]>([])
-  const [myGoing, setMyGoing] = useState<Set<string>>(new Set())
-  const [loading, setLoading] = useState(true)
-  const [status, setStatus] = useState<string | null>(null)
+  const { user, profile } = useAuth();
+  const raceLive = isRaceLive();
+  const city = useCity();
+  const path = useCityPath();
+  const citySlug = city.slug;
+  const [events, setEvents] = useState<Event[]>([]);
+  const [myGoing, setMyGoing] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<string | null>(null);
   const load = useCallback(async () => {
-    setLoading(true)
-    setStatus(null)
+    setLoading(true);
+    setStatus(null);
     if (!isSupabaseConfigured) {
-      setEvents([])
-      setLoading(false)
-      return
+      setEvents([]);
+      setLoading(false);
+      return;
     }
     const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('city', citySlug)
-      .gte('event_date', new Date(Date.now() - 86400000).toISOString())
-      .order('event_date', { ascending: true })
+      .from("events")
+      .select("*")
+      .eq("city", citySlug)
+      .gte("event_date", new Date(Date.now() - 86400000).toISOString())
+      .order("event_date", { ascending: true });
     if (error) {
-      setStatus(error.message)
-      setEvents([])
-    } else setEvents((data ?? []) as Event[])
+      setStatus(error.message);
+      setEvents([]);
+    } else setEvents((data ?? []) as Event[]);
     if (user) {
       const { data: rsvps } = await supabase
-        .from('event_rsvps')
-        .select('event_id')
-        .eq('user_id', user.id)
-        .in('status', ['going', 'attended'])
-      setMyGoing(new Set((rsvps ?? []).map((r) => r.event_id as string)))
-    } else setMyGoing(new Set())
-    setLoading(false)
-  }, [user, citySlug])
+        .from("event_rsvps")
+        .select("event_id")
+        .eq("user_id", user.id)
+        .in("status", ["going", "attended"]);
+      setMyGoing(new Set((rsvps ?? []).map((r) => r.event_id as string)));
+    } else setMyGoing(new Set());
+    setLoading(false);
+  }, [user, citySlug]);
   useEffect(() => {
-    void load()
-  }, [load])
+    void load();
+  }, [load]);
   const rsvp = async (eventId: string) => {
     if (!user) {
-      setStatus('Sign in to RSVP.')
-      return
+      setStatus("Sign in to RSVP.");
+      return;
     }
-    setStatus(null)
+    setStatus(null);
     const { error } = await supabase
-      .from('event_rsvps')
-      .upsert({ event_id: eventId, user_id: user.id, status: 'going' }, { onConflict: 'event_id,user_id' })
+      .from("event_rsvps")
+      .upsert(
+        { event_id: eventId, user_id: user.id, status: "going" },
+        { onConflict: "event_id,user_id" },
+      );
     if (error) {
-      setStatus(error.message + ' — run migration 010 if table is missing.')
-      return
+      setStatus(error.message + " — run migration 010 if table is missing.");
+      return;
     }
-    setMyGoing((prev) => new Set(prev).add(eventId))
-    setStatus('You’re on the list. See you on cleanup day!')
-  }
+    setMyGoing((prev) => new Set(prev).add(eventId));
+    setStatus("You’re on the list. See you on cleanup day!");
+  };
   return (
     <PublicShell>
       <main>
@@ -88,75 +97,83 @@ export function CleanupsPage() {
             </div>
           }
         />
-        <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-12">
-          <div className="fn-panel-dark rounded-[2rem] bg-[#063b32] p-6 text-white sm:p-10">
-            <div className="flex flex-wrap items-start justify-between gap-6">
-              <div className="max-w-xl">
-                <SectionLabel>Featured field action</SectionLabel>
-                <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.03em]">
-                  Amazing Trash Race · Season 2
-                </h2>
-                <p className="mt-4 leading-7 text-teal-100/75">
-                  Squads, hotspots, checkpoints, and a public scorecard for the people doing the work.
-                </p>
-              </div>
-              {raceLive ? <StatusChip tone="gold">Register now</StatusChip> : null}
-            </div>
-            <div className="mt-8">
-              <AmazingTrashRaceCard />
-            </div>
-          </div>
-        </section>
-        <section className="bg-[#e5f0eb] px-5 py-16 sm:px-8 lg:px-12">
+        <section className="bg-[#e5f0eb] px-5 py-10 sm:py-16 sm:px-8 lg:px-12">
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <SectionLabel>On the calendar</SectionLabel>
                 <h2 className="fn-display mt-3 text-4xl font-extrabold tracking-[-.03em] text-[#063b32]">
-                  Other cleanups
+                  Upcoming cleanups
                 </h2>
               </div>
               {profile?.is_admin && (
-                <Link to={path('/cleanups/manage')} className="font-bold text-[#0b8c76]">
+                <Link
+                  to={path("/cleanups/manage")}
+                  className="font-bold text-[#0b8c76]"
+                >
                   Post a cleanup →
                 </Link>
               )}
             </div>
-            {status && <p className="mt-5 rounded-xl bg-white p-4 text-sm text-[#8b6207] shadow-sm">{status}</p>}
-            {loading && <p className="mt-8 text-[#617972]">Loading the next field days…</p>}
+            {status && (
+              <p className="mt-5 rounded-xl bg-white p-4 text-sm text-[#8b6207] shadow-sm">
+                {status}
+              </p>
+            )}
+            {loading && (
+              <p className="mt-8 text-[#617972]">
+                Loading the next field days…
+              </p>
+            )}
             {!loading && events.length === 0 && (
               <div className="mt-8 rounded-[1.5rem] bg-white p-8 text-[#617972] shadow-[var(--shadow-card)]">
-                No extra weekly cleanups posted yet. Season 2 is featured above.
+                No cleanups posted for {city.label} yet. Organising one? Post it and neighbours can join from the map.
               </div>
             )}
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               {events.map((ev) => (
-                <article key={ev.id} className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
+                <article
+                  key={ev.id}
+                  className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[.14em] text-[#ef8268]">
                         {new Date(ev.event_date).toLocaleDateString()}
                       </p>
-                      <h3 className="fn-display mt-2 text-2xl font-extrabold text-[#063b32]">{ev.title}</h3>
+                      <h3 className="fn-display mt-2 text-2xl font-extrabold text-[#063b32]">
+                        {ev.title}
+                      </h3>
                     </div>
                     <span className="text-xl">◎</span>
                   </div>
                   <p className="mt-3 text-sm font-bold text-[#0b8c76]">
                     {ev.location}
                     {ev.latitude != null && ev.longitude != null ? (
-                      <Link to={`${path('/map')}?event=${ev.id}`} className="ml-2 text-xs underline">
+                      <Link
+                        to={`${path("/map")}?event=${ev.id}`}
+                        className="ml-2 text-xs underline"
+                      >
                         See on map →
                       </Link>
                     ) : null}
                   </p>
-                  {ev.description && <p className="mt-3 leading-6 text-[#617972]">{ev.description}</p>}
+                  {ev.description && (
+                    <p className="mt-3 leading-6 text-[#617972]">
+                      {ev.description}
+                    </p>
+                  )}
                   <div className="mt-6">
                     {!user ? (
                       <SignInButton variant="dark" label="Sign in to RSVP" />
                     ) : myGoing.has(ev.id) ? (
                       <StatusChip>You're signed up</StatusChip>
                     ) : (
-                      <button type="button" onClick={() => void rsvp(ev.id)} className="fn-action fn-action-dark">
+                      <button
+                        type="button"
+                        onClick={() => void rsvp(ev.id)}
+                        className="fn-action fn-action-dark"
+                      >
                         I’ll be there <span>→</span>
                       </button>
                     )}
@@ -166,7 +183,32 @@ export function CleanupsPage() {
             </div>
           </div>
         </section>
+        {/* The race only shows while registration is open, after the cleanups people can join now. */}
+        {raceLive ? (
+        <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-12">
+          <div className="fn-panel-dark rounded-[2rem] bg-[#063b32] p-6 text-white sm:p-10">
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div className="max-w-xl">
+                <SectionLabel>Featured field action</SectionLabel>
+                <h2 className="fn-display mt-4 text-4xl font-extrabold tracking-[-.03em]">
+                  Amazing Trash Race · Season 2
+                </h2>
+                <p className="mt-4 leading-7 text-teal-100/75">
+                  Squads, hotspots, checkpoints, and a public scorecard for the
+                  people doing the work.
+                </p>
+              </div>
+              {raceLive ? (
+                <StatusChip tone="gold">Register now</StatusChip>
+              ) : null}
+            </div>
+            <div className="mt-8">
+              <AmazingTrashRaceCard />
+            </div>
+          </div>
+        </section>
+        ) : null}
       </main>
     </PublicShell>
-  )
+  );
 }

@@ -393,7 +393,7 @@ export function HomePage() {
           <button
             type="button"
             onClick={() => openEvent(nextEvent)}
-            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+11.2rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
+            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+11.2rem)] z-[1060] hidden md:inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0b8c76] text-sm">🧹</span>
             <span className="min-w-0">
