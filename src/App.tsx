@@ -9,6 +9,7 @@ import { HubPage } from './pages/HubPage'
 import { ImpactMePage } from './pages/ImpactMePage'
 import { InstallPage } from './pages/InstallPage'
 import { BottomTabBar } from './components/layout/BottomTabBar'
+import { OfflineQueueBanner } from './components/layout/OfflineQueueBanner'
 import { lastCity } from './lib/pwa'
 import { MissionPage } from './pages/MissionPage'
 import { ReportPage } from './pages/ReportPage'
@@ -122,6 +123,7 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <RouteMeta />
+        <OfflineQueueBanner />
         <Routes>
           <Route path="/" element={<HubPage />} />
           <Route path="/app" element={<AppLaunch />} />
