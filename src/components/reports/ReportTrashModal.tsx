@@ -417,13 +417,12 @@ export function ReportTrashModal({
                 variant="ghost"
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload file
+                From gallery
               </Button>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
               />

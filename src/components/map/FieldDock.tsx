@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import {
   formatWasteTypes,
+  type Event,
   type Report,
   type ReportStats,
   type SeverityFilter,
@@ -11,6 +12,7 @@ import { useCity } from '../../lib/CityContext'
 import { daysSince, severityLabel } from '../../lib/wards'
 import { isCleanupUnderReview } from '../../lib/cleanupReview'
 import { ReportListView } from './ReportListView'
+import { formatEventWhen, relativeDays } from '../../lib/events'
 
 export type SheetHeight = 'peek' | 'half' | 'full'
 
@@ -30,6 +32,53 @@ interface FieldBoardProps {
   onSelectWard: (ward: WardBox | null) => void
   onSelect: (report: Report) => void
   onReport: () => void
+  events?: Event[]
+  going?: Map<string, number>
+  onSelectEvent?: (event: Event) => void
+}
+
+/** Horizontal cards above the hotspot list: the next cleanups in this city. */
+function UpcomingCleanupsStrip({
+  events,
+  going,
+  onSelectEvent,
+}: {
+  events: Event[]
+  going?: Map<string, number>
+  onSelectEvent: (event: Event) => void
+}) {
+  if (events.length === 0) return null
+  return (
+    <section aria-label="Upcoming cleanups" className="mb-3">
+      <p className="px-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0b8c76]">
+        🧹 Upcoming cleanups
+      </p>
+      <div className="mt-2 flex snap-x gap-2 overflow-x-auto pb-1">
+        {events.map((e) => {
+          const n = going?.get(e.id)
+          return (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => onSelectEvent(e)}
+              className="w-[15.5rem] shrink-0 snap-start rounded-2xl border border-[#cfe9df] bg-[#effaf5] p-3 text-left transition hover:border-[#0b8c76] active:scale-[.98]"
+            >
+              <p className="text-[11px] font-extrabold uppercase tracking-[.08em] text-[#ef8268]">
+                {relativeDays(e.event_date)}
+              </p>
+              <p className="mt-1 line-clamp-1 font-extrabold text-[#063b32]">{e.title}</p>
+              <p className="mt-0.5 line-clamp-1 text-xs text-[#5d746e]">
+                {formatEventWhen(e.event_date)} · {e.location}
+              </p>
+              <p className="mt-2 text-xs font-bold text-[#0b8c76]">
+                {typeof n === 'number' && n > 0 ? `${n} going · ` : ''}Join →
+              </p>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
 }
 
 const STATUS_PILLS: { value: StatusFilter; label: string }[] = [
@@ -61,6 +110,9 @@ function FieldBoard({
   onSelectWard,
   onSelect,
   onReport: _onReport,
+  events = [],
+  going,
+  onSelectEvent,
   density = 'rail',
   hideHeading = false,
   scrollWithParent = false,
@@ -181,6 +233,9 @@ function FieldBoard({
             : 'min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-6'
         }
       >
+        {onSelectEvent ? (
+          <UpcomingCleanupsStrip events={events} going={going} onSelectEvent={onSelectEvent} />
+        ) : null}
         <ReportListView reports={reports} selectedId={selectedId} onSelect={onSelect} />
       </div>
     </div>

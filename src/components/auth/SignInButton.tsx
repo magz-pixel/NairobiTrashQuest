@@ -20,7 +20,7 @@ export function SignInButton({
   const [open, setOpen] = useState(false)
   const styles =
     variant === 'dark'
-      ? 'rounded-lg bg-[var(--fn-clear,#00f2fe)] px-4 py-2 text-sm font-bold text-[#021a1a]'
+      ? 'inline-flex min-h-11 items-center justify-center rounded-full bg-gold-400 px-5 text-sm font-extrabold text-emerald-950 transition hover:bg-gold-300 active:scale-[.98]'
       : 'rounded-lg bg-[var(--brand-teal)] px-4 py-2 text-sm font-semibold text-white'
 
   return (

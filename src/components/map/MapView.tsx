@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
-import type { RaceHotspot, Report } from '../../types/database'
+import type { Event, RaceHotspot, Report } from '../../types/database'
 import { useCity } from '../../lib/CityContext'
 import { ClusterLayer } from './ClusterLayer'
+import { EventLayer } from './EventLayer'
 import { HotspotLayer } from './HotspotLayer'
 import { MapControls } from './MapControls'
 import { ReportPulseLayer } from './ReportPulseLayer'
@@ -17,6 +18,9 @@ export interface MapFocusTarget {
 interface MapViewProps {
   reports: Report[]
   hotspots?: RaceHotspot[]
+  events?: Event[]
+  selectedEventId?: string | null
+  onSelectEvent?: (event: Event) => void
   selectedId?: string | null
   focusAt?: MapFocusTarget | null
   paddingBottom?: number
@@ -70,6 +74,9 @@ function MapFocus({
 export function MapView({
   reports,
   hotspots = [],
+  events = [],
+  selectedEventId,
+  onSelectEvent,
   selectedId,
   focusAt,
   paddingBottom = 0,
@@ -100,6 +107,9 @@ export function MapView({
       />
       <ClusterLayer reports={reports} selectedId={selectedId} onSelectReport={onSelectReport} />
       <HotspotLayer hotspots={hotspots} />
+      {onSelectEvent ? (
+        <EventLayer events={events} selectedId={selectedEventId} onSelect={onSelectEvent} />
+      ) : null}
       {pulseAt && (
         <ReportPulseLayer
           latitude={pulseAt.latitude}
