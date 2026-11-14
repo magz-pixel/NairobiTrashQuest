@@ -1,27 +1,46 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
-import { createBounty, money, STATUS_COPY, useBounty, QUICK_AMOUNTS } from '../../lib/bounties'
+import { createBounty, money, STATUS_COPY, suggestTarget, useBounty } from '../../lib/bounties'
 import { BountyProgressBar } from './BountyProgressBar'
 import { ClaimSheet } from './ClaimSheet'
 import { PledgeSheet } from './PledgeSheet'
 
 /** Bounty block inside a hotspot's detail sheet. Shows a "coming soon" preview until migration 025 runs. */
-export function BountyPanel({ reportId, place, city, currency }: { reportId: string; place: string; city: string; currency: string }) {
+export function BountyPanel({
+  reportId,
+  place,
+  city,
+  currency,
+  severity,
+  seenCount,
+}: {
+  reportId: string
+  place: string
+  city: string
+  currency: string
+  severity: number
+  seenCount: number
+}) {
+  // Per-spot estimate from severity + confirmations, not one generic number for every hotspot.
+  const suggested = suggestTarget({ severity_score: severity, seen_count: seenCount }, currency)
   const { user, profile } = useAuth()
   const { bounty, backers, ready, reload } = useBounty(reportId)
   const [pledgeOpen, setPledgeOpen] = useState(false)
   const [claimOpen, setClaimOpen] = useState(false)
 
   if (ready === null) return null
-  if (ready === false) return <Preview currency={currency} />
+  if (ready === false) return <Preview currency={currency} suggested={suggested} />
 
   if (!bounty) {
     return profile?.is_admin && user ? (
-      <AdminStart reportId={reportId} city={city} currency={currency} userId={user.id} onDone={reload} />
+      <AdminStart reportId={reportId} city={city} currency={currency} userId={user.id} onDone={reload} suggested={suggested} />
     ) : (
       <section className="mt-5 rounded-2xl border border-dashed border-[#cfe1da] p-4 text-sm text-[#5d746e]">
         <p className="font-extrabold text-[#063b32]">💰 No bounty on this spot yet</p>
-        <p className="mt-1">Confirm it with “Seen it too”. The most-confirmed spots get a cleanup target and open for pledges.</p>
+        <p className="mt-1">
+          Estimated cost to clean: <b className="text-[#063b32]">about {money(currency, suggested)}</b>, based on its severity and how many neighbours confirmed it.
+        </p>
+        <p className="mt-1">Confirm it with “Seen it too”. The most-confirmed spots get a bounty and open for pledges.</p>
       </section>
     )
   }
@@ -79,8 +98,8 @@ export function BountyPanel({ reportId, place, city, currency }: { reportId: str
 }
 
 /** Before the database is ready: an honest preview so people can see where this is going. */
-function Preview({ currency }: { currency: string }) {
-  const target = (QUICK_AMOUNTS[currency] ?? QUICK_AMOUNTS.KES)[3] * 15
+function Preview({ currency, suggested }: { currency: string; suggested: number }) {
+  const target = suggested
   return (
     <section className="relative mt-5 overflow-hidden rounded-3xl bg-[#063b32] p-5 text-white">
       <div className="flex items-center justify-between">
@@ -89,7 +108,7 @@ function Preview({ currency }: { currency: string }) {
       </div>
       <p className="mt-2 text-sm text-white/80">Back this spot with M-Pesa. When the target is hit, a verified local crew claims it, cleans it, and gets paid.</p>
       <div className="mt-3 opacity-80">
-        <BountyProgressBar raised={target * 0.62} pending={target * 0.08} target={target} currency={currency} dark />
+        <BountyProgressBar raised={0} target={target} currency={currency} dark />
       </div>
       <button type="button" disabled className="mt-4 w-full rounded-full bg-[#fbbf24]/60 py-3 font-extrabold text-[#063b32]">
         Pledging opens soon
@@ -98,8 +117,8 @@ function Preview({ currency }: { currency: string }) {
   )
 }
 
-function AdminStart({ reportId, city, currency, userId, onDone }: { reportId: string; city: string; currency: string; userId: string; onDone: () => void }) {
-  const [target, setTarget] = useState((QUICK_AMOUNTS[currency] ?? QUICK_AMOUNTS.KES)[3] * 15)
+function AdminStart({ reportId, city, currency, userId, onDone, suggested }: { reportId: string; city: string; currency: string; userId: string; onDone: () => void; suggested: number }) {
+  const [target, setTarget] = useState(suggested)
   const [msg, setMsg] = useState<string | null>(null)
   return (
     <section className="mt-5 rounded-2xl border border-[#f5d78e] bg-[#fff8e8] p-4">

@@ -8,12 +8,15 @@ export function BountyProgressBar({
   target,
   currency,
   dark = false,
+  goalText = 'the bounty opens at',
 }: {
   raised: number
   pending?: number
   target: number
   currency: string
   dark?: boolean
+  /** Words before the target, e.g. 'goal' for campaigns. */
+  goalText?: string
 }) {
   const pct = Math.min(100, (raised / Math.max(1, target)) * 100)
   const pendPct = Math.min(100 - pct, (pending / Math.max(1, target)) * 100)
@@ -69,7 +72,7 @@ export function BountyProgressBar({
       <p className={`mt-1.5 text-xs ${dark ? 'text-white/70' : 'text-[#5d746e]'}`}>
         {left > 0 ? (
           <>
-            <b>{money(currency, left)}</b> to go · the bounty opens at {money(currency, target)}
+            <b>{money(currency, left)}</b> to go · {goalText} {money(currency, target)}
             {pending > 0 ? ` · ${money(currency, pending)} awaiting payment` : ''}
           </>
         ) : (
