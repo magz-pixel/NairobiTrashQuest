@@ -18,6 +18,7 @@ import { Button } from '../ui/Button'
 import { CrowdfundPanel } from '../crowdfund/CrowdfundPanel'
 import { ContributeModal } from '../crowdfund/ContributeModal'
 import { AccountabilityFlow } from './AccountabilityFlow'
+import { ReportDiscussion } from '../reports/ReportDiscussion'
 import { isCleanupUnderReview } from '../../lib/cleanupReview'
 
 interface ReportDetailSheetProps {
@@ -303,6 +304,8 @@ export function ReportDetailSheet({
               reportId={report.id}
               isDemo={demo}
             />
+
+            {!demo ? <ReportDiscussion reportId={report.id} /> : null}
 
             <ContributeModal
               open={contributeOpen}

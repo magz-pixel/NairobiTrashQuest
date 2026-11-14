@@ -53,6 +53,7 @@ export function QuickReportModal({
 }: QuickReportModalProps) {
   const city = useCity()
   const [file, setFile] = useState<File | null>(null)
+  const [extraFiles, setExtraFiles] = useState<File[]>([])
   const [preview, setPreview] = useState<string | null>(null)
   const [severity, setSeverity] = useState(6)
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
@@ -201,6 +202,16 @@ export function QuickReportModal({
       if (error) throw error
       recordReportSubmit()
 
+      // Extra photos: best effort, never block the main report (needs migration 024).
+      for (const extra of extraFiles) {
+        try {
+          const url = await uploadReportImage('anonymous', `${reportId}-${crypto.randomUUID().slice(0, 8)}`, extra)
+          await supabase.from('report_photos').insert({ report_id: reportId, url, user_id: null })
+        } catch {
+          /* ignore */
+        }
+      }
+
       setStatus(
         nextStatus === 'pending'
           ? 'Submitted! Pending review before it appears on the map.'
@@ -276,6 +287,41 @@ export function QuickReportModal({
           }}
         />
       </div>
+      {file ? (
+        <div className="mb-3">
+          <p className="mb-1 text-xs font-semibold text-[var(--text-primary)]">More photos (optional, up to 2)</p>
+          <div className="flex flex-wrap gap-2">
+            {extraFiles.map((f, i) => (
+              <span key={i} className="relative">
+                <img src={URL.createObjectURL(f)} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                <button
+                  type="button"
+                  aria-label="Remove photo"
+                  onClick={() => setExtraFiles((xs) => xs.filter((_, j) => j !== i))}
+                  className="absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/70 text-xs text-white"
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+            {extraFiles.length < 2 ? (
+              <label className="grid h-16 w-16 cursor-pointer place-items-center rounded-lg border border-dashed border-[var(--border-subtle)] text-2xl text-[var(--text-muted)]">
+                +
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    e.target.value = ''
+                    if (f) setExtraFiles((xs) => [...xs, f].slice(0, 2))
+                  }}
+                />
+              </label>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <div className="mb-3">
         <SeverityPicker value={severity} onChange={setSeverity} />
       </div>
