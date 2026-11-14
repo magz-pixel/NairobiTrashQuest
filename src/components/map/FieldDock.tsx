@@ -35,6 +35,8 @@ interface FieldBoardProps {
   events?: Event[]
   going?: Map<string, number>
   onSelectEvent?: (event: Event) => void
+  /** Only passed for admins: shows a "post the next cleanup" prompt when nothing is scheduled. */
+  onPostEvent?: () => void
 }
 
 /** Horizontal cards above the hotspot list: the next cleanups in this city. */
@@ -42,12 +44,29 @@ function UpcomingCleanupsStrip({
   events,
   going,
   onSelectEvent,
+  onPostEvent,
 }: {
   events: Event[]
   going?: Map<string, number>
   onSelectEvent: (event: Event) => void
+  onPostEvent?: () => void
 }) {
-  if (events.length === 0) return null
+  if (events.length === 0) {
+    if (!onPostEvent) return null
+    return (
+      <button
+        type="button"
+        onClick={onPostEvent}
+        className="mb-3 flex w-full items-center gap-3 rounded-2xl border border-dashed border-[#0b8c76]/50 bg-[#effaf5] p-3 text-left"
+      >
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#0b8c76] text-white">＋</span>
+        <span>
+          <span className="block text-sm font-extrabold text-[#063b32]">No cleanups scheduled</span>
+          <span className="block text-xs text-[#5d746e]">Post the next one so people can join from the map →</span>
+        </span>
+      </button>
+    )
+  }
   return (
     <section aria-label="Upcoming cleanups" className="mb-3">
       <p className="px-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0b8c76]">
@@ -113,6 +132,7 @@ function FieldBoard({
   events = [],
   going,
   onSelectEvent,
+  onPostEvent,
   density = 'rail',
   hideHeading = false,
   scrollWithParent = false,
@@ -234,7 +254,12 @@ function FieldBoard({
         }
       >
         {onSelectEvent ? (
-          <UpcomingCleanupsStrip events={events} going={going} onSelectEvent={onSelectEvent} />
+          <UpcomingCleanupsStrip
+            events={events}
+            going={going}
+            onSelectEvent={onSelectEvent}
+            onPostEvent={onPostEvent}
+          />
         ) : null}
         <ReportListView reports={reports} selectedId={selectedId} onSelect={onSelect} />
       </div>

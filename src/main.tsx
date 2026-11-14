@@ -18,6 +18,14 @@ registerSW({
     window.location.reload()
   },
   onRegisteredSW(_swUrl, registration) {
+    // Installed apps sit in the background for days; check for a new deploy whenever the
+    // app comes back to the foreground (at most every 10 minutes) instead of only on cold start.
+    let lastCheck = Date.now()
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastCheck < 10 * 60 * 1000) return
+      lastCheck = Date.now()
+      void registration?.update().catch(() => {})
+    })
     registration?.addEventListener('updatefound', () => {
       const worker = registration.installing
       worker?.addEventListener('statechange', () => {

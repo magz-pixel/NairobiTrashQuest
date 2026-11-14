@@ -31,7 +31,11 @@ const RaceRegisterPage = lazy(() =>
   import('./pages/RaceRegisterPage').then((m) => ({ default: m.RaceRegisterPage })),
 )
 
-const MapboxTestPage = lazy(() => import('./pages/spike/MapboxTestPage'))
+/**
+ * Mapbox routing experiment (~490 KB gzipped). Dev only: in production builds this is `null`,
+ * so the chunk is never built and installed phones don't download it on every update.
+ */
+const MapboxTestPage = import.meta.env.DEV ? lazy(() => import('./pages/spike/MapboxTestPage')) : null
 
 const LEGACY_TO_NAIROBI = [
   '/map',
@@ -136,20 +140,22 @@ function App() {
             <Route path="funds/manage" element={<Lazy><FundsManagePage /></Lazy>} />
             <Route path="mission" element={<MissionPage />} />
           </Route>
-          <Route
-            path="/spike/mapbox-test"
-            element={
-              <Suspense
-                fallback={
-                  <div className="flex min-h-[100dvh] items-center justify-center text-sm text-teal-700">
-                    Loading Mapbox spike…
-                  </div>
-                }
-              >
-                <MapboxTestPage />
-              </Suspense>
-            }
-          />
+          {MapboxTestPage ? (
+            <Route
+              path="/spike/mapbox-test"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="flex min-h-[100dvh] items-center justify-center text-sm text-teal-700">
+                      Loading Mapbox spike…
+                    </div>
+                  }
+                >
+                  <MapboxTestPage />
+                </Suspense>
+              }
+            />
+          ) : null}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

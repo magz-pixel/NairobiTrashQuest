@@ -75,9 +75,14 @@ function ManageInner() {
 
   if (!profile?.is_admin) {
     return (
-      <p className="fn-warn">
-        Admin only. Set <code>profiles.is_admin = true</code> for your account.
-      </p>
+      <div className="fn-warn space-y-2">
+        <p>
+          <strong>Organisers only.</strong> You're signed in as{' '}
+          <strong>{profile?.username ?? user?.email ?? 'this account'}</strong>, which can join cleanups but not post
+          them yet.
+        </p>
+        <p>Ask a Ramani-Taka admin to make this account an organiser, then refresh this page.</p>
+      </div>
     )
   }
 
