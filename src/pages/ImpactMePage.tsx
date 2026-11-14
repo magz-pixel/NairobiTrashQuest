@@ -7,6 +7,7 @@ import { useAuth } from '../hooks/useAuth'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { AMAZING_TRASH_RACE_S2, type Event, type RaceRegistration } from '../types/database'
 import { useCityPath } from '../lib/CityContext'
+import { MyActivity } from '../components/profile/MyActivity'
 interface EventRsvp {
   id: string
   event_id: string
@@ -128,6 +129,10 @@ export function ImpactMePage() {
                   Sign out
                 </button>
               </section>
+              <MyActivity
+                userId={user.id}
+                cleanupsAttended={rsvps.filter((r) => r.status === 'going' || r.status === 'attended').length}
+              />
               <div className="grid gap-5 lg:grid-cols-2">
                 <section className="rounded-[1.5rem] bg-white p-6 shadow-[var(--shadow-card)]">
                   <SectionLabel>Community days</SectionLabel>
