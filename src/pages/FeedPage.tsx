@@ -6,6 +6,7 @@ import { useReports } from '../hooks/useReports'
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents'
 import { useCity, useCityPath } from '../lib/CityContext'
 import { getLocale } from '../lib/i18n'
+import { useCityBounties } from '../lib/bounties'
 
 function share(text: string, url: string) {
   if (navigator.share) void navigator.share({ text, url }).catch(() => {})
@@ -24,15 +25,16 @@ export function FeedPage() {
   const lang = getLocale()
   const { allReports, loading } = useReports('all', 'all', city.slug)
   const { events, going, mine, toggleGoing } = useUpcomingEvents(city.slug)
+  const bounties = useCityBounties(city.slug)
   const [filter, setFilter] = useState<FeedCategory | 'all'>('all')
   const [active, setActive] = useState(0)
   const rail = useRef<HTMLDivElement>(null)
 
   const items = useMemo(() => {
-    const live = buildLiveFeed(allReports, events, going, city.currency.code)
+    const live = buildLiveFeed(allReports, events, going, city.currency.code, bounties)
     const all = assembleFeed(live, city.slug)
     return filter === 'all' ? all : all.filter((i) => i.type === filter)
-  }, [allReports, events, going, city.currency.code, city.slug, filter])
+  }, [allReports, events, going, city.currency.code, city.slug, filter, bounties])
 
   const actions: CardActions = {
     path,
@@ -65,8 +67,8 @@ export function FeedPage() {
           ← {city.chapterName}
         </Link>
         <p className="text-sm font-extrabold">{lang === 'sw' ? 'Habari' : 'Action & Proof'}</p>
-        <Link to={path('/map')} className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
-          Map
+        <Link to={path('/bounties')} className="rounded-full bg-[#fbbf24] px-3 py-1.5 text-xs font-extrabold text-[#063b32]">
+          💰 Bounties
         </Link>
       </header>
 

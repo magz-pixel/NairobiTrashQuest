@@ -41,6 +41,8 @@ interface MapViewProps {
   pulseAt?: { latitude: number; longitude: number } | null
   /** Ward boundaries with open/cleared counts (see useCityWards). Replaces the hexagons when present. */
   wards?: GeoJSON.FeatureCollection | null
+  /** Money chips over hotspots with a bounty (migration 025). */
+  bountyPins?: { reportId: string; lat: number; lng: number; label: string; open: boolean }[]
   selectedWard?: string | null
   onSelectWard?: (wardId: number) => void
   onPulseDone?: () => void
@@ -318,6 +320,7 @@ export function MapView({
   pulseAt,
   onPulseDone,
   wards,
+  bountyPins,
   selectedWard,
   onSelectWard,
   focusBounds,
@@ -503,6 +506,26 @@ export function MapView({
     })
     return () => markers.forEach((m) => m.remove())
   }, [ready, events, selectedEventId, onSelectEvent])
+
+  // Bounty chips: "💰 62%" while raising, pulsing "💰 KES 15,000" once claimable.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map || !bountyPins?.length) return
+    const markers = bountyPins.map((b) => {
+      const el = document.createElement('button')
+      el.type = 'button'
+      el.className = `rt-bounty-chip${b.open ? ' is-open' : ''}`
+      el.textContent = `💰 ${b.label}`
+      el.setAttribute('aria-label', `Bounty: ${b.label}`)
+      el.addEventListener('click', (ev) => {
+        ev.stopPropagation()
+        const r = latest.current.reportsById.get(b.reportId)
+        if (r) latest.current.onSelectReport(r)
+      })
+      return new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -14] }).setLngLat([b.lng, b.lat]).addTo(map)
+    })
+    return () => markers.forEach((m) => m.remove())
+  }, [ready, bountyPins])
 
   // Race hotspot chips.
   useEffect(() => {

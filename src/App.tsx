@@ -23,6 +23,7 @@ const FundsPage = lazy(() => import('./pages/FundsPage').then((m) => ({ default:
 const FundsManagePage = lazy(() =>
   import('./pages/FundsManagePage').then((m) => ({ default: m.FundsManagePage })),
 )
+const BountiesPage = lazy(() => import('./pages/BountiesPage').then((m) => ({ default: m.BountiesPage })))
 const FeedPage = lazy(() => import('./pages/FeedPage').then((m) => ({ default: m.FeedPage })))
 const RaceAdminPage = lazy(() => import('./pages/RaceAdminPage').then((m) => ({ default: m.RaceAdminPage })))
 const RaceLeaderboardPage = lazy(() =>
@@ -149,6 +150,7 @@ function App() {
             <Route path="funds/manage" element={<Lazy><FundsManagePage /></Lazy>} />
             <Route path="mission" element={<MissionPage />} />
             <Route path="feed" element={<Lazy><FeedPage /></Lazy>} />
+            <Route path="bounties" element={<Lazy><BountiesPage /></Lazy>} />
           </Route>
           {MapboxTestPage ? (
             <Route

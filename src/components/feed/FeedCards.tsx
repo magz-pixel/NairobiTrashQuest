@@ -122,8 +122,8 @@ function BountyCard({ item, actions }: { item: BountyItem; actions: CardActions 
           </p>
         </div>
         <div className="mt-4 flex gap-2">
-          <Link to={actions.path('/funds')} className={primary}>
-            Fund hotspot
+          <Link to={item.reportId ? actions.path(`/report/${item.reportId}`) : actions.path('/bounties')} className={primary}>
+            {item.raised >= item.target ? 'Claim bounty' : 'Fund hotspot'}
           </Link>
           <Link to={mapHref} className={secondary}>
             View on map

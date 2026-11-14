@@ -1,3 +1,4 @@
+import { money, useCityBounties } from '../lib/bounties'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -94,18 +95,25 @@ export function HomePage() {
     return () => mq.removeEventListener('change', sync)
   }, [])
 
-  useEffect(() => {
-    setActiveWard(null)
-    setSelectedReport(null)
-    setDetailsOpen(false)
-    setFocusAt(null)
-    setSheet('peek')
-  }, [city.slug])
+  // City changes remount this page (see CityMapPage in App.tsx), so no reset effect is needed.
 
   const realReports = useMemo(() => allReports.filter((r) => !isDemoReport(r)), [allReports])
   const { wards, summaries: wardSummaries } = useCityWards(city.slug, realReports)
   const { features: mapFeatures, ready: featuresReady, reload: reloadFeatures } = useMapFeatures(city.slug)
   const featuresGeo = useMemo(() => featuresToGeoJSON(mapFeatures), [mapFeatures])
+  const cityBounties = useCityBounties(city.slug)
+  const bountyPins = useMemo(() => {
+    const byId = new Map(realReports.map((r) => [r.id, r]))
+    return [...cityBounties.values()]
+      .filter((b) => b.status === 'funding' || b.status === 'open')
+      .flatMap((b) => {
+        const r = byId.get(b.report_id)
+        if (!r) return []
+        const open = b.status === 'open'
+        const label = open ? money(b.currency, b.target_amount) : `${Math.min(99, Math.round((b.raised / b.target_amount) * 100))}%`
+        return [{ reportId: r.id, lat: r.latitude, lng: r.longitude, label, open }]
+      })
+  }, [cityBounties, realReports])
   const [layers, setLayers] = useState({ trash: true, bins: true, trees: true })
   const [pinKind, setPinKind] = useState<FeatureKind | null>(null)
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null)
@@ -320,6 +328,7 @@ export function HomePage() {
             selectedEventId={selectedEventId}
             onSelectEvent={openEvent}
             wards={wards}
+            bountyPins={bountyPins}
             selectedWard={selectedWard?.name ?? null}
             onSelectWard={selectWard}
             focusBounds={focusBounds}

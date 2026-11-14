@@ -19,6 +19,7 @@ import { CrowdfundPanel } from '../crowdfund/CrowdfundPanel'
 import { ContributeModal } from '../crowdfund/ContributeModal'
 import { AccountabilityFlow } from './AccountabilityFlow'
 import { ReportDiscussion } from '../reports/ReportDiscussion'
+import { BountyPanel } from '../bounty/BountyPanel'
 import { isCleanupUnderReview } from '../../lib/cleanupReview'
 
 interface ReportDetailSheetProps {
@@ -305,6 +306,9 @@ export function ReportDetailSheet({
               isDemo={demo}
             />
 
+            {!demo ? (
+              <BountyPanel reportId={report.id} place={report.area_name ?? city.label} city={city.slug} currency={city.currency.code} />
+            ) : null}
             {!demo ? <ReportDiscussion reportId={report.id} /> : null}
 
             <ContributeModal

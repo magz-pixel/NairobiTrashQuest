@@ -10,6 +10,7 @@
  * Anything with `demo: true` shows a small "Example" badge so nobody mistakes it for real data.
  * Delete demo items city by city as real content arrives.
  */
+import type { BountyProgress } from '../lib/bounties'
 import type { Event, Report } from '../types/database'
 
 /* ------------------------------------------------------------------ types */
@@ -109,8 +110,37 @@ export function hasFundingMomentum(r: Pick<Report, 'funding_raised_tzs' | 'fundi
  * Turns Supabase rows into feed items. This is the plug-in point for real data:
  * add new sources here (e.g. fund_entries, race_weight_logs) and the UI picks them up.
  */
-export function buildLiveFeed(reports: Report[], events: Event[], going: Map<string, number>, currency: string): FeedItem[] {
+export function buildLiveFeed(
+  reports: Report[],
+  events: Event[],
+  going: Map<string, number>,
+  currency: string,
+  bounties: Map<string, BountyProgress> = new Map(),
+): FeedItem[] {
   const out: FeedItem[] = []
+  const byId = new Map(reports.map((r) => [r.id, r]))
+
+  // B1. Real bounties (migration 025): raising money or open to claim, with any momentum.
+  for (const b of bounties.values()) {
+    const r = byId.get(b.report_id)
+    if (!r || !(b.status === 'open' || (b.status === 'funding' && (b.raised + b.pending >= BOUNTY_RULE.minRaised || b.backers >= BOUNTY_RULE.minBackers)))) continue
+    out.push({
+      type: 'bounty',
+      id: `bounty-${r.id}`,
+      city: r.city,
+      featured: b.status === 'open',
+      at: b.created_at,
+      place: r.area_name ?? 'Open hotspot',
+      lat: r.latitude,
+      lng: r.longitude,
+      raised: b.raised,
+      target: b.target_amount,
+      backers: b.backers,
+      currency: b.currency,
+      reportId: r.id,
+      image: r.image_url,
+    })
+  }
 
   // A. Cleared spots that have both photos.
   for (const r of reports) {
@@ -130,6 +160,7 @@ export function buildLiveFeed(reports: Report[], events: Event[], going: Map<str
 
   // B. Open hotspots with funding momentum (TODO: switch to a per-report pledges table when it exists).
   const funded = reports
+    .filter((r) => !bounties.has(r.id))
     .filter((r) => (r.status === 'active' || r.status === 'flagged') && hasFundingMomentum(r))
     .sort((a, b) => (b.funding_raised_tzs ?? 0) - (a.funding_raised_tzs ?? 0))
     .slice(0, BOUNTY_RULE.maxCards)
