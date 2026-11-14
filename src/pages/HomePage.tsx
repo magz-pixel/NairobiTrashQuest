@@ -5,6 +5,7 @@ import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents'
 import { EventDetailSheet } from '../components/events/EventDetailSheet'
+import { MapSummaryPill } from '../components/map/MapSummaryPill'
 import { formatEventWhen, hasPin, relativeDays } from '../lib/events'
 import { useReportStats } from '../hooks/useReportStats'
 import { useCity } from '../lib/CityContext'
@@ -281,11 +282,18 @@ export function HomePage() {
         <p className="pointer-events-none absolute bottom-4 left-4 z-[1040] hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-[#063b32]/55 md:block">
           {city.label} · {city.country}
         </p>
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(env(safe-area-inset-top)+5.1rem)] z-[1061] flex justify-center md:inset-x-6 md:top-[5.4rem]">
+          <MapSummaryPill
+            reports={realReports}
+            cleanups={upcoming.length}
+            onFlyTo={(lat, lng) => setFocusAt({ lat, lng, zoom: 15 })}
+          />
+        </div>
         {nextEvent && sheet === 'peek' && !selectedReport ? (
           <button
             type="button"
             onClick={() => openEvent(nextEvent)}
-            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+4.75rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
+            className="pointer-events-auto absolute left-3 top-[calc(env(safe-area-inset-top)+8.4rem)] z-[1060] inline-flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border border-[#cfe9df] bg-white/95 py-1.5 pl-1.5 pr-3.5 text-left shadow-[0_10px_30px_rgba(6,59,50,.18)] backdrop-blur md:left-[24.5rem] md:top-4"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0b8c76] text-sm">🧹</span>
             <span className="min-w-0">
