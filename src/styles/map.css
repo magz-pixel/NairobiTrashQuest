@@ -57,3 +57,4 @@
 }
 .rt-region-label .dot { width: 7px; height: 7px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.25); }
 .rt-region-label b { margin-left: 2px; padding: 1px 7px; border-radius: 999px; background: rgba(249, 115, 22, 0.9); font-size: 11px; }
+@keyframes rt-slide-progress { from { width: 0; } to { width: 100%; } }

@@ -11,6 +11,8 @@ interface LiveRegion {
   cleared: number
   upcomingCleanups: number
   feed: FeedItem[]
+  /** Kilograms weighed in at race/cleanup weigh-ins (race_weight_logs), all Nairobi so far. */
+  kgLogged: number
 }
 
 function ago(iso: string) {
@@ -28,7 +30,7 @@ export function useRegionData() {
     if (!isSupabaseConfigured) return
     let cancelled = false
     void (async () => {
-      const [reportsRes, eventsRes] = await Promise.all([
+      const [reportsRes, eventsRes, kgRes] = await Promise.all([
         supabase
           .from('reports')
           .select('id,latitude,longitude,severity_score,status,city,area_name,created_at,cleared_at')
@@ -41,6 +43,7 @@ export function useRegionData() {
           .gte('event_date', new Date().toISOString())
           .order('event_date', { ascending: true })
           .limit(20),
+        supabase.from('race_weight_logs').select('kg'),
       ])
       if (cancelled) return
       const rows = (reportsRes.data ?? []) as {
@@ -91,6 +94,7 @@ export function useRegionData() {
         cleared: rows.filter((r) => r.status === 'verified_cleared').length,
         upcomingCleanups: events.length,
         feed,
+        kgLogged: ((kgRes.data ?? []) as { kg: number }[]).reduce((sum, r) => sum + Number(r.kg || 0), 0),
       })
     })()
     return () => {

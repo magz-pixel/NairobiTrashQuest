@@ -8,7 +8,7 @@ import maplibregl, { type GeoJSONSource, type Map as MLMap } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useNavigate } from 'react-router-dom'
 import { brandedStyle } from '../../lib/mapStyle'
-import { cityPath, getActiveCities } from '../../lib/cities'
+import { cityPath, getActiveCities, getCity } from '../../lib/cities'
 import type { RegionPoint } from '../../lib/demoRegion'
 
 const REGION_BOUNDS: [[number, number], [number, number]] = [
@@ -30,10 +30,13 @@ function toGeoJSON(points: RegionPoint[]): GeoJSON.FeatureCollection<GeoJSON.Poi
 export default function RegionHeatmap({
   points,
   counts,
+  focus = null,
 }: {
   points: RegionPoint[]
   /** Open spots per city slug, shown on the city labels. */
   counts: Record<string, number>
+  /** City slug to fly to (zoomed in, still macro), or null for all of East Africa. */
+  focus?: string | null
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MLMap | null>(null)
@@ -124,6 +127,19 @@ export default function RegionHeatmap({
     if (!ready) return
     ;(mapRef.current?.getSource('region') as GeoJSONSource | undefined)?.setData(toGeoJSON(points))
   }, [ready, points])
+
+  // Slideshow: fly to the selected city, or back out to the whole region.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map) return
+    if (!focus) {
+      map.fitBounds(REGION_BOUNDS, { padding: 24, duration: 1600 })
+      return
+    }
+    const c = getCity(focus)
+    const phone = map.getContainer().clientWidth < 520
+    map.flyTo({ center: [c.center.lng, c.center.lat], zoom: phone ? 10.2 : 10.8, duration: 2200, essential: true })
+  }, [ready, focus])
 
   // City labels: tap to open that city's map.
   useEffect(() => {
