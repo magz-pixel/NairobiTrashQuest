@@ -12,7 +12,6 @@ import { PrivacyPage } from './pages/PrivacyPage'
 import { BottomTabBar } from './components/layout/BottomTabBar'
 import { OfflineQueueBanner } from './components/layout/OfflineQueueBanner'
 import { lastCity } from './lib/pwa'
-import { MissionPage } from './pages/MissionPage'
 import { ReportPage } from './pages/ReportPage'
 
 const CleanupsPage = lazy(() => import('./pages/CleanupsPage').then((m) => ({ default: m.CleanupsPage })))
@@ -74,7 +73,6 @@ const ROUTE_TITLES: [string, string][] = [
   ['/race', 'Race'],
   ['/funds/manage', 'Fund console'],
   ['/funds', 'Public ledger'],
-  ['/mission', 'Mission'],
   ['/map', 'Trash map'],
   ['/me', 'My impact'],
   ['/feed', 'Feed'],
@@ -156,7 +154,9 @@ function App() {
             <Route path="race/admin" element={<Lazy><RaceAdminPage /></Lazy>} />
             <Route path="funds" element={<Lazy><FundsPage /></Lazy>} />
             <Route path="funds/manage" element={<Lazy><FundsManagePage /></Lazy>} />
-            <Route path="mission" element={<MissionPage />} />
+            {/* The old Mission page became /story (global). Keep old links working. */}
+            <Route path="mission" element={<Navigate to="/story" replace />} />
+            <Route path="story" element={<Navigate to="/story" replace />} />
             <Route path="feed" element={<Lazy><FeedPage /></Lazy>} />
             <Route path="bounties" element={<Lazy><BountiesPage /></Lazy>} />
           </Route>
