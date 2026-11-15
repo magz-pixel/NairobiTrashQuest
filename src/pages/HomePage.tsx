@@ -1,3 +1,4 @@
+import { AppSideRail } from '../components/layout/BottomTabBar'
 import { money, useCityBounties } from '../lib/bounties'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
@@ -312,6 +313,7 @@ export function HomePage() {
 
   return (
     <div className="map-experience flex h-[calc(100dvh-4.25rem-env(safe-area-inset-bottom))] w-full md:h-[100dvh] overflow-hidden bg-[#dce8e1]" data-sheet={sheet}>
+      <AppSideRail />
       <FieldRail {...board} />
       <div className="relative min-h-0 min-w-0 flex-1">
         <Suspense

@@ -69,6 +69,27 @@ function ManageInner() {
     return () => window.clearTimeout(t)
   }, [selected, loadRsvps])
 
+  // Removes the cleanup from the map and lists; its RSVPs go with it (on delete cascade). Needs migration 027.
+  const deleteCleanup = async (eventId: string) => {
+    const ev = events.find((e) => e.id === eventId)
+    const going = rsvps.length
+    const ok = window.confirm(
+      `Delete "${ev?.title ?? 'this cleanup'}"?
+
+It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP${going === 1 ? '' : 's'} are removed` : ''}. This can't be undone.`,
+    )
+    if (!ok) return
+    const { error, count } = await supabase.from('events').delete({ count: 'exact' }).eq('id', eventId)
+    if (error || !count) {
+      setStatus(error?.message ?? 'Delete was blocked. Run migration 027 in Supabase so admins can delete cleanups.')
+      return
+    }
+    setSelected(null)
+    setRsvps([])
+    setStatus('Cleanup deleted.')
+    void loadEvents()
+  }
+
   if (loading) {
     return <p className="text-sm text-[#5d746e]">Checking admin access…</p>
   }
@@ -228,6 +249,15 @@ function ManageInner() {
             ))}
           </select>
         </label>
+        {selected ? (
+          <button
+            type="button"
+            onClick={() => void deleteCleanup(selected)}
+            className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-[#f2c4bb] bg-white px-4 text-sm font-bold text-[#a44738] hover:bg-[#fff4f1]"
+          >
+            Delete this cleanup
+          </button>
+        ) : null}
         <label className="fn-label mt-3">
           XP per person
           <input
