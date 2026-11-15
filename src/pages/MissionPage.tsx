@@ -18,6 +18,10 @@ export function MissionPage() {
               <ActionLink to={path('/map')} tone="gold">
                 See the field map
               </ActionLink>
+              <Link to="/story" className="fn-action fn-action-light">
+                <span>Read our full story</span>
+                <b aria-hidden>→</b>
+              </Link>
               <ActionLink to="/race" tone="light">
                 Join the race
               </ActionLink>

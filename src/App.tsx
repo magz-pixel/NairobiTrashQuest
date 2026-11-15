@@ -24,6 +24,7 @@ const FundsManagePage = lazy(() =>
   import('./pages/FundsManagePage').then((m) => ({ default: m.FundsManagePage })),
 )
 const BountiesPage = lazy(() => import('./pages/BountiesPage').then((m) => ({ default: m.BountiesPage })))
+const StoryPage = lazy(() => import('./pages/StoryPage').then((m) => ({ default: m.StoryPage })))
 const FeedPage = lazy(() => import('./pages/FeedPage').then((m) => ({ default: m.FeedPage })))
 const RaceAdminPage = lazy(() => import('./pages/RaceAdminPage').then((m) => ({ default: m.RaceAdminPage })))
 const RaceLeaderboardPage = lazy(() =>
@@ -79,7 +80,13 @@ const ROUTE_TITLES: [string, string][] = [
   ['/feed', 'Feed'],
   ['/privacy', 'Privacy policy'],
   ['/install', 'Get the app'],
+  ['/story', 'Our story'],
 ]
+
+/** Pages with their own meta description (default is "<title> on Ramani-Taka."). */
+const ROUTE_DESCRIPTIONS: Record<string, string> = {
+  '/story': "How Ramani-Taka started, what we've learned, and where we're going.",
+}
 
 function RouteMeta() {
   const { pathname } = useLocation()
@@ -89,7 +96,7 @@ function RouteMeta() {
     document.title = match ? `${match[1]} · Ramani-Taka` : 'Ramani-Taka'
     const description = document.querySelector('meta[name="description"]')
     if (description && match) {
-      description.setAttribute('content', `${match[1]} on Ramani-Taka.`)
+      description.setAttribute('content', ROUTE_DESCRIPTIONS[pathname] ?? `${match[1]} on Ramani-Taka.`)
     }
   }, [pathname])
   return null
@@ -132,6 +139,7 @@ function App() {
           <Route path="/app" element={<AppLaunch />} />
           <Route path="/install" element={<InstallPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/story" element={<Lazy><StoryPage /></Lazy>} />
           {LEGACY_TO_NAIROBI.map((path) => (
             <Route key={path} path={path} element={<Navigate to={`/nairobi${path}`} replace />} />
           ))}

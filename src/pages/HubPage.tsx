@@ -168,6 +168,27 @@ export function HubPage() {
           }}
         </CitySky>
 
+        {/* Quiet pointer to /story. Must not compete with "Report a spot". */}
+        <section className="mx-auto max-w-7xl px-5 pt-8 sm:px-8 lg:px-12">
+          <div className="flex flex-col gap-3 rounded-[1.5rem] border border-[#063b32]/10 bg-[#fffdf7] p-4 sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex shrink-0 -space-x-2" aria-hidden>
+              <img src="/story/arnold-magezi.webp" alt="" width={40} height={40} loading="lazy" className="h-10 w-10 rounded-full border-2 border-white object-cover object-top" />
+              <img src="/story/edwin-macharia.webp" alt="" width={40} height={40} loading="lazy" className="h-10 w-10 rounded-full border-2 border-white object-cover object-top" />
+            </div>
+            <p className="flex-1 text-sm leading-6 text-[#12332d]">
+              New here? Read how a basketball coach, a TikTok cleaner and one trash pile started Ramani-Taka.
+            </p>
+            <div className="flex shrink-0 items-center gap-4">
+              <Link to="/story" className="inline-flex min-h-11 items-center text-sm font-extrabold text-[#0b8c76]">
+                Read our story →
+              </Link>
+              <Link to="/story?lang=sw" lang="sw" className="inline-flex min-h-11 items-center text-xs font-bold text-[#617972] underline">
+                Soma kwa Kiswahili
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <RegionSection />
 
         <section className="relative mx-auto max-w-7xl px-5 pb-6 pt-14 sm:px-8 lg:px-12">
