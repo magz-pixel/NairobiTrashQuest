@@ -68,18 +68,18 @@ export const ORIGIN = {
   chapters: [
     {
       n: '01',
-      title: { en: 'The coach', sw: 'Kocha' },
+      title: { en: 'The entrepreneur', sw: 'Mjasiriamali' },
       body: {
-        en: "In February 2026, Arnold Magezi, a Ugandan developer, came to Kenya with AIESEC to coach basketball in public schools for six weeks. He'd spent years chasing one question: how do you reward people for doing good? First it was a cryptocurrency idea. Then XPNC, a game where you volunteer in real life to level up. Every version taught him the same thing: the idea needs real people on real streets.",
-        sw: 'Mwezi Februari 2026, Arnold Magezi, msanidi programu kutoka Uganda, alikuja Kenya kupitia AIESEC kufundisha mpira wa kikapu katika shule za umma kwa wiki sita. Kwa miaka mingi amekuwa akitafuta jibu la swali moja: unawezaje kumtuza mtu kwa kutenda wema? Kwanza lilikuwa wazo la sarafu ya kidijitali. Kisha XPNC, mchezo ambapo unajitolea katika maisha halisi ili kupanda ngazi. Kila hatua ilimfundisha jambo moja: wazo hili linahitaji watu halisi kwenye mitaa halisi.',
+        en: "In February 2026, Arnold Magezi, a Ugandan entrepreneur passionate about social tech for good, came to Kenya to volunteer with AIESEC. Volunteering has always been how he recharges, and how he meets people doing work that matters. He'd spent years chasing one question: how do you reward people for doing good? His first answer was XPNC, a game where you volunteer in real life to level up. It taught him one thing: the idea needs real people on real streets.",
+        sw: 'Mwezi Februari 2026, Arnold Magezi, mjasiriamali kutoka Uganda mwenye shauku ya teknolojia ya kijamii kwa manufaa ya wote, alikuja Kenya kujitolea na AIESEC. Kujitolea kumekuwa njia yake ya kujipumzisha na kukutana na watu wanaofanya kazi yenye maana. Kwa miaka mingi amekuwa akitafuta jibu la swali moja: unawezaje kumtuza mtu kwa kutenda wema? Jibu lake la kwanza lilikuwa XPNC, mchezo ambapo unajitolea katika maisha halisi ili kupanda ngazi. Lilimfundisha jambo moja: wazo hili linahitaji watu halisi kwenye mitaa halisi.',
       },
     },
     {
       n: '02',
-      title: { en: 'The cleaner', sw: 'Msafishaji' },
+      title: { en: 'The environmental steward', sw: 'Mlinzi wa mazingira' },
       body: {
-        en: "Across the city, Edwin Macharia was already doing the work. As Fix Nairobi, he'd pick a neglected corner, clean it, and post the before-and-after on TikTok. No budget, no sponsor. Just gloves, bags and a phone.",
-        sw: 'Upande mwingine wa jiji, Edwin Macharia alikuwa tayari anafanya kazi hiyo. Kwa jina la Fix Nairobi, alichagua kona iliyosahaulika, akaisafisha, na kuweka video ya kabla na baada kwenye TikTok. Hakuna bajeti, hakuna mfadhili. Glavu tu, mifuko na simu.',
+        en: "Across the city, Edwin Macharia, an environmental steward and activist in his community, was already leading the work. As Fix Nairobi, he'd rally neighbours to restore a neglected corner, then share the before-and-after on TikTok to inspire others. No budget, no sponsor. Just commitment, gloves and a phone.",
+        sw: 'Upande mwingine wa jiji, Edwin Macharia, mlinzi na mwanaharakati wa mazingira katika jamii yake, alikuwa tayari anaongoza kazi hiyo. Kwa jina la Fix Nairobi, aliwakusanya majirani kurejesha kona iliyosahaulika, kisha akashiriki video ya kabla na baada kwenye TikTok kuwatia moyo wengine. Hakuna bajeti, hakuna mfadhili. Kujitolea tu, glavu na simu.',
       },
     },
     {
@@ -107,8 +107,8 @@ export const FOUNDERS = {
       alt: 'Portrait of Arnold Magezi',
       role: { en: 'Co-founder · Technical Lead', sw: 'Mwanzilishi mwenza · Kiongozi wa Teknolojia' },
       bio: {
-        en: 'Developer and social entrepreneur from Uganda, working where Web3 and AI meet civic life. He builds the map, the reward systems and the data behind Ramani-Taka.',
-        sw: 'Msanidi programu na mjasiriamali wa kijamii kutoka Uganda, anayefanya kazi mahali ambapo Web3 na AI zinakutana na maisha ya kiraia. Anajenga ramani, mifumo ya zawadi na data inayoendesha Ramani-Taka.',
+        en: 'Social entrepreneur and developer from Uganda, passionate about technology for good. He builds the map, the reward systems and the data behind Ramani-Taka.',
+        sw: 'Mjasiriamali wa kijamii na msanidi programu kutoka Uganda, mwenye shauku ya teknolojia kwa manufaa ya wote. Anajenga ramani, mifumo ya zawadi na data inayoendesha Ramani-Taka.',
       },
       quote: {
         en: '"I want to build a self-circulating ecosystem of goodness, where people who care for their city and for each other get rewarded for it."',
@@ -156,7 +156,7 @@ export const TIMELINE = {
     {
       date: { en: 'Feb 2026', sw: 'Feb 2026' },
       title: { en: 'Arriving in Kenya with AIESEC', sw: 'Kuwasili Kenya na AIESEC' },
-      body: { en: 'Arnold comes to coach basketball in Kenyan public schools for six weeks.', sw: 'Arnold anakuja kufundisha mpira wa kikapu katika shule za umma za Kenya kwa wiki sita.' },
+      body: { en: 'Arnold comes to Kenya to volunteer with AIESEC.', sw: 'Arnold anakuja Kenya kujitolea na AIESEC.' },
     },
     {
       date: { en: 'Mar 2026', sw: 'Mac 2026' },

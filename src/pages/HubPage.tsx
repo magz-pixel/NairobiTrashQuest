@@ -176,7 +176,7 @@ export function HubPage() {
               <img src="/story/edwin-macharia.webp" alt="" width={40} height={40} loading="lazy" className="h-10 w-10 rounded-full border-2 border-white object-cover object-top" />
             </div>
             <p className="flex-1 text-sm leading-6 text-[#12332d]">
-              New here? Read how a basketball coach, a TikTok cleaner and one trash pile started Ramani-Taka.
+              New here? Read how a social-tech entrepreneur, a community environmentalist and one trash pile started Ramani-Taka.
             </p>
             <div className="flex shrink-0 items-center gap-4">
               <Link to="/story" className="inline-flex min-h-11 items-center text-sm font-extrabold text-[#0b8c76]">
