@@ -4,6 +4,10 @@
  * Failure/cancel → pledge 'failed'.
  * Matching is by CheckoutRequestID, which mpesa-stk-push stored in provider_ref.
  * Safaricom always expects a 200 with ResultCode 0, even if we couldn't match the payment.
+ *
+ * Safaricom doesn't sign callbacks, so the callback URL carries a secret token:
+ *   MPESA_CALLBACK_URL=https://<project>.functions.supabase.co/mpesa-callback?token=<MPESA_CALLBACK_TOKEN>
+ * Requests without the right token are ignored, so nobody can forge a 'payment confirmed'.
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
@@ -11,6 +15,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 const ok = () => new Response(JSON.stringify({ ResultCode: 0, ResultDesc: 'Accepted' }), { headers: { 'Content-Type': 'application/json' } })
 
 serve(async (req) => {
+  const token = Deno.env.get('MPESA_CALLBACK_TOKEN')
+  if (!token || new URL(req.url).searchParams.get('token') !== token) return ok()
   try {
     const body = await req.json()
     const cb = body?.Body?.stkCallback

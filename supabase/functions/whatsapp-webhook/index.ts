@@ -21,7 +21,8 @@ serve(async (req) => {
 
   try {
     const webhookSecret = Deno.env.get('WHATSAPP_WEBHOOK_SECRET')
-    if (webhookSecret && req.headers.get('x-webhook-secret') !== webhookSecret) {
+    // Fail closed: if the secret isn't configured, nobody can post reports through this endpoint.
+    if (!webhookSecret || req.headers.get('x-webhook-secret') !== webhookSecret) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

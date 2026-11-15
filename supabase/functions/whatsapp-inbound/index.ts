@@ -139,6 +139,25 @@ async function createReportViaWebhook(
   return payload as { ok: boolean; report_id?: string }
 }
 
+/**
+ * Twilio request validation: base64(HMAC-SHA1(authToken, url + sorted key/value pairs)).
+ * Set TWILIO_WEBHOOK_URL to the exact URL configured in Twilio (the public function URL).
+ */
+async function validTwilioSignature(req: Request, form: URLSearchParams, authToken: string): Promise<boolean> {
+  const given = req.headers.get('X-Twilio-Signature')
+  if (!given) return false
+  const url = Deno.env.get('TWILIO_WEBHOOK_URL') || req.url
+  const keys = [...new Set(form.keys())].sort()
+  const data = url + keys.map((k) => k + (form.get(k) ?? '')).join('')
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(authToken), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data)))
+  const expected = btoa(String.fromCharCode(...sig))
+  if (expected.length !== given.length) return false
+  let diff = 0
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ given.charCodeAt(i)
+  return diff === 0
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -161,7 +180,15 @@ serve(async (req) => {
   }
 
   try {
-    const form = new URLSearchParams(await req.text())
+    const raw = await req.text()
+    const form = new URLSearchParams(raw)
+    // Only accept requests Twilio really sent (X-Twilio-Signature), so nobody can post fake reports.
+    if (!(await validTwilioSignature(req, form, authToken))) {
+      return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
     const from = form.get('From')?.trim() ?? ''
     const to = form.get('To')?.trim() ?? ''
     const numMedia = Number.parseInt(form.get('NumMedia') ?? '0', 10) || 0
