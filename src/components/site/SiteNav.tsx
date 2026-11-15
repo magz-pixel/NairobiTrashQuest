@@ -224,15 +224,6 @@ export function SiteNav({ transparentOverHero = false }: SiteNavProps) {
                 </button>
               </li>
             )}
-            <li>
-              <Link
-                to="/story"
-                onClick={closeMenu}
-                className="inline-flex min-h-[44px] w-full items-center rounded-md px-3 py-2.5 text-sm text-teal-100/80 hover:bg-white/5 hover:text-white"
-              >
-                Our story
-              </Link>
-            </li>
             {!isStandalone() ? (
               <li>
                 <Link
@@ -331,10 +322,10 @@ function ChapterFooter() {
                 Put a spot on the map <span className="ml-3 text-lg">→</span>
               </Link>
               <Link
-                to={path('/mission')}
+                to="/story"
                 className="inline-flex min-h-12 items-center rounded-full border border-white/20 px-6 text-sm font-bold text-white transition hover:bg-white/10"
               >
-                Read our mission
+                Read our story
               </Link>
             </div>
           </div>
@@ -364,7 +355,6 @@ function ChapterFooter() {
           <div>
             <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white/40">Explore</p>
             <div className="mt-4 grid gap-3 text-sm text-teal-100/75">
-              <Link to={path('/mission')} className="hover:text-white">Our mission</Link>
               <Link to="/story" className="hover:text-white">Our story</Link>
               <Link to={path('/map')} className="hover:text-white">Trash map</Link>
               <Link to={path('/cleanups')} className="hover:text-white">Cleanups</Link>

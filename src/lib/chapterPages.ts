@@ -45,10 +45,11 @@ export const CHAPTER_PAGES: ChapterPage[] = [
     inNav: true,
   },
   {
-    href: '/mission',
-    label: 'Mission',
-    short: 'Mission',
-    blurb: 'Why this chapter exists and how the work runs.',
+    // Global page: /:city/story redirects to /story.
+    href: '/story',
+    label: 'Our story',
+    short: 'Story',
+    blurb: 'How Ramani-Taka started and where it is going.',
     inNav: true,
   },
   {

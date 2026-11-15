@@ -100,7 +100,7 @@ export function ChapterPageChips({ slug }: { slug: string }) {
 
 export function ChapterEscapeLinks({ slug }: { slug: string }) {
   const essentials = CHAPTER_NAV.filter((page) =>
-    ['/map', '/cleanups', '/race', '/funds', '/mission'].includes(page.href),
+    ['/map', '/cleanups', '/race', '/funds', '/story'].includes(page.href),
   )
   return (
     <nav aria-label="Chapter pages" className="pointer-events-auto flex flex-wrap items-center gap-1.5">

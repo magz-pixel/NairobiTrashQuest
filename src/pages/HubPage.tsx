@@ -269,10 +269,10 @@ export function HubPage() {
                 Report your first spot
               </button>
               <Link
-                to={cityPath(home, '/mission')}
+                to="/story"
                 className="inline-flex min-h-12 items-center rounded-full border border-white/25 px-6 text-sm font-bold text-white hover:bg-white/10"
               >
-                Our mission →
+                Our story →
               </Link>
             </div>
           </div>

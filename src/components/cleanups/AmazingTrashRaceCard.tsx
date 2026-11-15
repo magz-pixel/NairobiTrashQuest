@@ -87,8 +87,8 @@ export function AmazingTrashRaceCard() {
         <p className="mt-2 text-sm leading-6 text-[#36564e]">
           Amazing Trash Race Season 2 was a Nairobi event. Get notified when this chapter announces its own.
         </p>
-        <Link to={path('/mission')} className="mt-4 inline-flex min-h-11 items-center text-sm font-extrabold text-[#0b8c76]">
-          Follow the mission →
+        <Link to="/story" className="mt-4 inline-flex min-h-11 items-center text-sm font-extrabold text-[#0b8c76]">
+          Read our story →
         </Link>
       </article>
     )
