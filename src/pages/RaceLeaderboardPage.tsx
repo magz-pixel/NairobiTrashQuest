@@ -1,3 +1,4 @@
+import { fetchPublicRegistrations } from '../lib/racePublic'
 import { useCallback, useEffect, useState } from 'react'
 import {
   ActionLink,
@@ -48,11 +49,7 @@ export function RaceLeaderboardPage() {
     } else {
       const [{ data: w, error }, { data: regs, error: rErr }, { data: cleared, error: hErr }] = await Promise.all([
         supabase.from('race_weight_logs').select('*').eq('event_slug', AMAZING_TRASH_RACE_S2),
-        supabase
-          .from('race_registrations')
-          .select('team_name')
-          .eq('event_slug', AMAZING_TRASH_RACE_S2)
-          .eq('city', city.slug),
+        fetchPublicRegistrations(AMAZING_TRASH_RACE_S2, city.slug),
         supabase
           .from('race_hotspots')
           .select('cleared_by_team_name, point_value')

@@ -1,3 +1,4 @@
+import { fetchPublicRegistrations } from '../lib/racePublic'
 import { useCallback, useEffect, useState } from 'react'
 import { AuthGate } from '../components/auth/AuthGate'
 import { OpsFrame } from '../components/site/PagePrimitives'
@@ -53,10 +54,7 @@ function MarshalInner() {
           .eq('event_slug', AMAZING_TRASH_RACE_S2)
           .order('created_at', { ascending: false })
           .limit(40),
-        supabase
-          .from('race_registrations')
-          .select('team_name')
-          .eq('event_slug', AMAZING_TRASH_RACE_S2),
+        fetchPublicRegistrations(AMAZING_TRASH_RACE_S2),
         supabase
           .from('race_hotspots')
           .select('*')
