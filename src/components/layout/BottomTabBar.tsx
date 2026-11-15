@@ -14,19 +14,24 @@ function Icon({ d }: { d: string }) {
   )
 }
 
+/** Screens that count as "the app" and get app navigation. */
+const APP_SCREENS = /\/(map|feed|cleanups|me|bounties)$|\/report\//
+
 /**
- * Phone bottom tab bar: Map · Cleanups · ＋Report · Feed · Me. Hidden on desktop and on the
- * map page itself (which has its own Report button and bottom sheet).
+ * Phone bottom tab bar: Map · Cleanups · ＋Report · Feed · Me. Hidden on desktop. On the map page
+ * the map shrinks to sit above it (see HomePage), so it needs no spacer there.
  */
 export function BottomTabBar() {
   const path = useCityPath()
   const { pathname } = useLocation()
-  if (/\/map$/.test(pathname)) return null
+  const onMap = /\/map$/.test(pathname)
+  // App screens only (opened from "Open map"). Website pages (city home, story, funds, race) keep the site nav.
+  if (!APP_SCREENS.test(pathname)) return null
 
   return (
     <>
       {/* Spacer so page content isn't hidden behind the bar (the full-screen feed handles its own). */}
-      {!/\/feed$/.test(pathname) ? <div className="h-[calc(4.25rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden /> : null}
+      {!onMap && !/\/feed$/.test(pathname) ? <div className="h-[calc(4.25rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden /> : null}
       <nav
         aria-label="App"
         className="fixed inset-x-0 bottom-0 z-[1200] flex items-end border-t border-[#e5efeb] bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_rgba(6,59,50,.08)] backdrop-blur md:hidden"
@@ -55,5 +60,36 @@ export function BottomTabBar() {
         </NavLink>
       </nav>
     </>
+  )
+}
+
+const RAIL = [
+  { to: '/map', label: 'Map', d: 'M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3zM9 3v15M15 6v15' },
+  { to: '/feed', label: 'Feed', d: 'M4 4h16v6H4zM4 14h16v6H4z' },
+  { to: '/bounties', label: 'Bounties', d: 'M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5 2.2 3 5 3.5 5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5' },
+  { to: '/cleanups', label: 'Cleanups', d: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z' },
+  { to: '/me', label: 'Me', d: 'M20 21a8 8 0 1 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
+]
+
+/** Desktop version of the tab bar: a slim rail on the left edge of the map. */
+export function AppSideRail() {
+  const path = useCityPath()
+  return (
+    <nav aria-label="App" className="hidden w-[76px] shrink-0 flex-col items-center gap-1 border-r border-[#d9e9e4] bg-white py-4 md:flex">
+      {RAIL.map((item) => (
+        <NavLink
+          key={item.to}
+          to={path(item.to)}
+          className={({ isActive }) =>
+            `flex w-16 flex-col items-center gap-1 rounded-2xl py-2.5 text-[11px] font-bold transition ${
+              isActive ? 'bg-[#e5f0eb] text-[#063b32]' : 'text-[#7b8c85] hover:bg-[#f3f7f4] hover:text-[#063b32]'
+            }`
+          }
+        >
+          <Icon d={item.d} />
+          {item.label}
+        </NavLink>
+      ))}
+    </nav>
   )
 }
