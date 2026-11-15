@@ -1,6 +1,7 @@
+import { fetchPublicRegistrations } from '../../lib/racePublic'
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { isSupabaseConfigured, supabase } from '../../lib/supabase'
+import { isSupabaseConfigured } from '../../lib/supabase'
 import { useCity, useCityPath } from '../../lib/CityContext'
 import {
   AMAZING_TRASH_RACE_S2,
@@ -47,17 +48,13 @@ export function AmazingTrashRaceCard() {
       rows = loadLocalRaceRegistrations().filter((r) => r.city === city.slug)
       usingLocal = true
     } else {
-      const { data, error } = await supabase
-        .from('race_registrations')
-        .select('*')
-        .eq('event_slug', AMAZING_TRASH_RACE_S2)
-        .eq('city', city.slug)
-        .order('created_at', { ascending: false })
+      // Public view: first name + initial and squad only, never contact details.
+      const { data, error } = await fetchPublicRegistrations(AMAZING_TRASH_RACE_S2, city.slug)
       if (error || !data) {
         rows = loadLocalRaceRegistrations().filter((r) => r.city === city.slug)
         usingLocal = true
       } else {
-        rows = data as RaceRegistration[]
+        rows = data.map((r) => ({ ...r, full_name: r.display_name, ticket_code: '' })) as unknown as RaceRegistration[]
       }
     }
 
@@ -178,7 +175,6 @@ export function AmazingTrashRaceCard() {
                   <span className="font-medium text-white">{r.full_name}</span>
                   <span className="text-xs text-teal-100/65">
                     {r.team_name?.trim() || 'Unassigned'}
-                    <span className="ml-2 font-mono text-teal-100/40">{r.ticket_code}</span>
                   </span>
                 </li>
               ))}
