@@ -1,5 +1,6 @@
 -- 030_whatsapp_reporting.sql
--- WhatsApp reporting, made safe to open to the public. Needs 016 (pending table) and 029 (rate limiter).
+-- WhatsApp reporting, made safe to open to the public. Needs 029 (rate limiter).
+-- Also creates the half-report table from 016 in case 016 was never run.
 -- Safe to run twice.
 
 -- Numbers that send spam or abuse. Stored as the same one-way hash the function uses:
@@ -12,6 +13,16 @@ create table if not exists public.whatsapp_blocked_numbers (
   created_at timestamptz not null default now()
 );
 alter table public.whatsapp_blocked_numbers enable row level security; -- service role + SQL editor only
+
+create table if not exists public.whatsapp_pending_reports (
+  phone_number text primary key, -- now a one-way hash of the number, never the number itself
+  image_url text,
+  latitude double precision,
+  longitude double precision,
+  updated_at timestamptz not null default now()
+);
+alter table public.whatsapp_pending_reports enable row level security;
+revoke all on table public.whatsapp_pending_reports from anon, authenticated;
 
 -- Pending half-reports are now keyed by a phone hash, never the raw number. Clear any old raw rows.
 delete from public.whatsapp_pending_reports where phone_number like 'whatsapp:%' or phone_number like '+%';
