@@ -1,5 +1,37 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
+
+/*
+ * Abuse limits (each Gemini call costs money). Uses public.rate_limit_hit from migration 029.
+ * Per caller (IP): 30 checks/hour. Whole app: 3,000 checks/day. Images: ~4 MB max.
+ */
+const PER_IP_PER_HOUR = 30
+const GLOBAL_PER_DAY = 3000
+const MAX_BASE64_CHARS = 5_600_000 // ≈ 4 MB image
+
+async function underLimits(req: Request): Promise<boolean> {
+  const url = Deno.env.get('SUPABASE_URL')
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!url || !key) return true
+  const db = createClient(url, key)
+  // Our own functions (e.g. whatsapp-inbound) call with the service key: they apply their own
+  // per-phone limits, so only the global daily cap applies to them.
+  const trusted = req.headers.get('Authorization') === `Bearer ${key}`
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'unknown'
+  const check = async (bucket: string, k: string, max: number, secs: number) => {
+    const { data, error } = await db.rpc('rate_limit_hit', { p_bucket: bucket, p_key: k, p_max: max, p_window_seconds: secs })
+    return error ? true : data !== false // if 029 isn't run yet, don't block real users
+  }
+  if (!trusted && !(await check('ai-ip', ip, PER_IP_PER_HOUR, 3600))) return false
+  return check('ai-global', 'all', GLOBAL_PER_DAY, 86400)
+}
+
+/** Only fetch "before" photos from our own Supabase storage (no fetching arbitrary URLs). */
+function isOwnStorageUrl(u: URL): boolean {
+  const base = Deno.env.get('SUPABASE_URL')
+  return Boolean(base) && u.origin === new URL(base!).origin && u.pathname.startsWith('/storage/v1/object/public/')
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -74,7 +106,7 @@ async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType
       cause: err,
     })
   }
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+  if (parsed.protocol !== 'https:' || !isOwnStorageUrl(parsed)) {
     throw new HttpError(400, 'Could not load the before photo. The image URL is not valid.')
   }
 
@@ -140,6 +172,10 @@ serve(async (req) => {
       return jsonResponse({ error: 'GEMINI_API_KEY secret is not set' }, 500)
     }
 
+    if (!(await underLimits(req))) {
+      return jsonResponse({ error: 'Too many photo checks right now. Please try again in a little while.' }, 429)
+    }
+
     let body: Record<string, unknown>
     try {
       body = await req.json()
@@ -151,6 +187,11 @@ serve(async (req) => {
     const modelName = Deno.env.get('GEMINI_MODEL')?.trim() || DEFAULT_MODEL
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: modelName })
+
+    for (const k of ['imageBase64', 'clearedImageBase64']) {
+      const v = body[k]
+      if (typeof v === 'string' && v.length > MAX_BASE64_CHARS) return jsonResponse({ error: 'Photo is too large.' }, 413)
+    }
 
     if (body.mode === 'clear') {
       if (typeof body.beforeImageUrl !== 'string' || !body.beforeImageUrl.trim()) {
