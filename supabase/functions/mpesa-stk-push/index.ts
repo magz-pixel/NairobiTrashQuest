@@ -5,7 +5,7 @@
  * Setup (once you have a Daraja app: https://developer.safaricom.co.ke):
  *   supabase secrets set MPESA_ENV=sandbox MPESA_CONSUMER_KEY=... MPESA_CONSUMER_SECRET=... \
  *     MPESA_SHORTCODE=174379 MPESA_PASSKEY=... \
- *     MPESA_CALLBACK_URL=https://momkbsgfypjfujkhrtxb.functions.supabase.co/mpesa-callback
+ *     MPESA_CALLBACK_TOKEN=<long random string> \n *     MPESA_CALLBACK_URL=https://momkbsgfypjfujkhrtxb.functions.supabase.co/mpesa-callback?token=<same string>
  *   supabase functions deploy mpesa-stk-push
  *   supabase functions deploy mpesa-callback --no-verify-jwt
  * Until those secrets exist this function answers { configured: false } and the app falls back

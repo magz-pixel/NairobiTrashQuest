@@ -11,6 +11,15 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Only the scheduler may trigger a send. Without this anyone on the internet could email every subscriber.
+  const cronSecret = Deno.env.get('DIGEST_CRON_SECRET')
+  if (!cronSecret || req.headers.get('x-cron-secret') !== cronSecret) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -32,8 +41,8 @@ serve(async (req) => {
     const active = reports?.filter((r) => r.status === 'active').length ?? 0
     const resolved = reports?.filter((r) => r.status === 'verified_cleared').length ?? 0
 
-    const subject = 'Nairobi Trash Locator — Monday cleanup digest'
-    const body = `This week on the map: ${active} unresolved hotspots, ${resolved} verified cleanups.\n\nOpen the map: https://nairobi-trash-quest.vercel.app\n\nData licensed CC-BY.`
+    const subject = 'Ramani-Taka: your Monday cleanup digest'
+    const body = `This week on the map: ${active} unresolved hotspots, ${resolved} verified cleanups.\n\nOpen the map: https://ramani-taka.co.ke\n\nData licensed CC-BY.`
 
     let sent = 0
     if (resendKey && subs?.length) {
