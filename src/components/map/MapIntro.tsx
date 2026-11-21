@@ -21,13 +21,16 @@ export function MapIntro({
   wards,
   open,
   onReport,
+  skip = false,
 }: {
   city: CityConfig
   wards: number
   open: number
   onReport: () => void
+  /** Arrived with a purpose (shared spot, cleanup, ward or report link): don't block it with the intro. */
+  skip?: boolean
 }) {
-  const [visible, setVisible] = useState(() => !seen(city.slug))
+  const [visible, setVisible] = useState(() => !skip && !seen(city.slug))
 
   const dismiss = () => {
     try {

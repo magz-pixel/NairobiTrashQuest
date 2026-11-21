@@ -1,8 +1,8 @@
 import { AppSideRail } from '../components/layout/BottomTabBar'
 import { money, useCityBounties } from '../lib/bounties'
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useReports } from '../hooks/useReports'
 import { useRaceHotspots } from '../hooks/useRaceHotspots'
 import { useUpcomingEvents } from '../hooks/useUpcomingEvents'
@@ -38,9 +38,11 @@ import type { WardBox } from '../lib/cities'
 import { useAuth } from '../hooks/useAuth'
 import type { Event, Report, SeverityFilter, StatusFilter } from '../types/database'
 import type { GameTab } from '../components/layout/GameShell'
+import { lazyRetry } from '../lib/lazyRetry'
+import { SectionBoundary } from '../components/ui/SectionBoundary'
 import type { MapFocusTarget } from '../components/map/MapView'
 
-const MapView = lazy(() =>
+const MapView = lazyRetry(() =>
   import('../components/map/MapView').then((m) => ({ default: m.MapView })),
 )
 
@@ -76,6 +78,16 @@ export function HomePage() {
   // Home-screen shortcut / shared links: /nairobi/map?action=report opens the quick report straight away.
   const [searchParams, setSearchParams] = useSearchParams()
   const [quickReportOpen, setQuickReportOpen] = useState(() => searchParams.get('action') === 'report')
+  // The tab bar's + links to ?action=report. useState above only covers arriving on the map; when
+  // the map is already open, the same page stays mounted, so react to each new navigation too.
+  const location = useLocation()
+  const [reportNavKey, setReportNavKey] = useState(location.key)
+  if (searchParams.get('action') === 'report' && location.key !== reportNavKey) {
+    setReportNavKey(location.key)
+    setActivePanel(null)
+    setSelectedReport(null)
+    setQuickReportOpen(true)
+  }
   const [reportOpen, setReportOpen] = useState(false)
   const [clearOpen, setClearOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
@@ -201,6 +213,20 @@ export function HomePage() {
     setSelectedEventId(eventParam)
   }
 
+  // Shared links: /nairobi/map?spot=<report id> flies to that hotspot and opens it.
+  const spotParam = searchParams.get('spot')
+  const [openedSpotParam, setOpenedSpotParam] = useState<string | null>(null)
+  if (spotParam && spotParam !== openedSpotParam && allReports.length > 0) {
+    setOpenedSpotParam(spotParam)
+    const r = allReports.find((x) => x.id === spotParam)
+    if (r) {
+      setSelectedReport(r)
+      setDetailsOpen(!isPhone)
+      if (isPhone) setSheet('half')
+      setFocusAt({ lat: r.latitude, lng: r.longitude, zoom: 16 })
+    }
+  }
+
   const openEvent = (event: Event) => {
     flushSync(() => {
       setSelectedWardId(null)
@@ -316,6 +342,19 @@ export function HomePage() {
       <AppSideRail />
       <FieldRail {...board} />
       <div className="relative min-h-0 min-w-0 flex-1">
+        <SectionBoundary
+          name="map"
+          fallback={(retry) => (
+            <div className="grid h-full place-items-center p-6 text-center">
+              <div>
+                <p className="font-bold text-[#063b32]">The map couldn’t load on this connection.</p>
+                <button type="button" onClick={retry} className="mt-3 min-h-11 rounded-full bg-[#063b32] px-5 text-sm font-bold text-white">
+                  Try again
+                </button>
+              </div>
+            </div>
+          )}
+        >
         <Suspense
           fallback={
             <div className="grid h-full place-items-center text-sm font-bold text-[#0b8c76]">
@@ -358,6 +397,7 @@ export function HomePage() {
             onDragStart={() => setActivePanel(null)}
           />
         </Suspense>
+        </SectionBoundary>
         <MapTopBar
           onVerify={openClear}
           onOpenPanel={(id) => setActivePanel(id)}
@@ -466,7 +506,13 @@ export function HomePage() {
         }}
       />
       <FeatureCard feature={selectedFeature} onClose={() => setSelectedFeatureId(null)} onUpdated={() => void reloadFeatures()} />
-      <MapIntro city={city} wards={wardSummaries.length} open={stats.active} onReport={openQuickReport} />
+      <MapIntro
+        city={city}
+        wards={wardSummaries.length}
+        open={stats.active}
+        onReport={openQuickReport}
+        skip={['spot', 'event', 'ward', 'action'].some((k) => searchParams.has(k))}
+      />
       <EventDetailSheet
         event={selectedEvent}
         goingCount={selectedEvent ? going.get(selectedEvent.id) : undefined}

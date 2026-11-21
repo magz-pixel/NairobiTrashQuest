@@ -41,6 +41,7 @@ export default function RegionHeatmap({
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MLMap | null>(null)
   const [ready, setReady] = useState(false)
+  const [unsupported, setUnsupported] = useState(false)
   const navigate = useNavigate()
   const navRef = useRef(navigate)
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function RegionHeatmap({
     let map: MLMap | null = null
     void brandedStyle('night').then((style) => {
       if (cancelled || !ref.current) return
+      try {
       map = new maplibregl.Map({
         container: ref.current,
         style,
@@ -65,6 +67,12 @@ export default function RegionHeatmap({
         cooperativeGestures: true,
         attributionControl: { compact: true },
       })
+      } catch (err) {
+        // Phones without WebGL 2 can't draw MapLibre maps. Keep the page alive; show a note instead.
+        console.warn('[hub map] unavailable', err)
+        setUnsupported(true)
+        return
+      }
       map.scrollZoom.disable()
       map.touchZoomRotate.disableRotation()
       map.once('style.load', () => {
@@ -160,5 +168,12 @@ export default function RegionHeatmap({
     return () => markers.forEach((m) => m.remove())
   }, [ready, counts])
 
+  if (unsupported) {
+    return (
+      <div className="grid h-full place-items-center p-6 text-center text-sm text-[#a9c9bf]">
+        This phone’s browser can’t draw the live map. The city maps still work: tap a city above.
+      </div>
+    )
+  }
   return <div ref={ref} className="map-canvas h-full w-full" />
 }
