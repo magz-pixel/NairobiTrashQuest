@@ -96,7 +96,7 @@ export async function uploadRaceHotspotImage(
 
   const { error } = await supabase.storage
     .from('race-hotspot-images')
-    .upload(path, compressed, { upsert: false, contentType: 'image/jpeg' })
+    .upload(path, compressed, { upsert: false, contentType: 'image/jpeg', cacheControl: '31536000' })
 
   if (error) throw error
 

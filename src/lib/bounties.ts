@@ -103,7 +103,8 @@ export function useCityBounties(city: string) {
     let cancelled = false
     const load = () => void fetchBountiesFor(city).then((m) => !cancelled && setBounties(m))
     load()
-    const id = window.setInterval(load, 60_000)
+    // Refresh only while the app is on screen (saves data and Supabase egress).
+    const id = window.setInterval(() => document.visibilityState === 'visible' && load(), 120_000)
     return () => {
       cancelled = true
       window.clearInterval(id)
@@ -144,7 +145,7 @@ export function useBounty(reportId: string) {
     void (async () => {
       if (!cancelled) await load()
     })()
-    const poll = window.setInterval(() => void load(), 30_000)
+    const poll = window.setInterval(() => document.visibilityState === 'visible' && void load(), 60_000)
     const channel = isSupabaseConfigured
       ? supabase
           .channel(`bounty-${reportId}-${Math.random().toString(36).slice(2)}`)

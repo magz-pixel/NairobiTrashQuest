@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../../lib/supabase'
@@ -145,7 +146,7 @@ export function WardCard({ ward, city, shareUrl, onClose, onZoom, onSelectReport
                         className="flex w-full items-center gap-3 rounded-xl border border-[#eee8dc] p-2 text-left hover:border-[#0b8c76]"
                       >
                         {r.image_url ? (
-                          <img src={r.image_url} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-lg object-cover" />
+                          <Thumb src={r.image_url} className="h-11 w-11 shrink-0 rounded-lg object-cover" />
                         ) : (
                           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-[#fff1ec]">📍</span>
                         )}

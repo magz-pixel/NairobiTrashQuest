@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { uploadPhoto } from '../../lib/uploads'
 import { supabase } from '../../lib/supabase'
 import { findNearestActiveReport } from '../../lib/geo'
 import { AiCheckUnavailableError, verifyClearedImage } from '../../lib/gemini'
@@ -83,16 +84,12 @@ export function ClearTrashModal({
         setStatus('Saving your photo for review…')
       }
 
-      const clearedPath = `${crypto.randomUUID()}.jpg`
-      const { error: uploadError } = await supabase.storage
-        .from('report-images')
-        .upload(clearedPath, file, { upsert: false, contentType: file.type })
+      // Shrunk, with a list thumbnail, cacheable (see uploadPhoto).
+      const { url: clearedUrl, error: uploadError } = await uploadPhoto('report-images', '', file)
 
       if (uploadError) throw uploadError
 
-      const { data: urlData } = supabase.storage
-        .from('report-images')
-        .getPublicUrl(clearedPath)
+      const urlData = { publicUrl: clearedUrl }
 
       if (aiUnavailable) {
         const { error: reviewError } = await supabase.rpc('submit_cleanup_for_review', {

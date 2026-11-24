@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isSupabaseConfigured, supabase } from '../../lib/supabase'
@@ -117,7 +118,7 @@ export function MyActivity({ userId, cleanupsAttended }: { userId: string; clean
             <li key={r.id}>
               <Link to={path(`/report/${r.id}`)} className="flex items-center gap-3 py-3 hover:bg-[#f8fbf9]">
                 {r.image_url ? (
-                  <img src={r.image_url} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                  <Thumb src={r.image_url} className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                 ) : (
                   <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#f3f7f4]">📍</span>
                 )}

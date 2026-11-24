@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { BountyItem, EventItem, FeedItem, ProofItem, WinsItem } from '../../data/feedItems'
@@ -94,7 +95,7 @@ function BountyCard({ item, actions }: { item: BountyItem; actions: CardActions 
     <Shell demo={item.demo} tone="gold">
       <div className="relative min-h-0 flex-1">
         {item.image ? (
-          <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          <Thumb src={item.image} className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_55%,rgba(217,72,59,.55),transparent_35%),repeating-linear-gradient(35deg,#163a33_0_2px,transparent_2px_26px),#0d2a25]" />
         )}
