@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { supabase } from '../../lib/supabase'
+import { eventReport, type EventReport } from '../../lib/organizers'
+import { CleanupRecap, OrganizerBadge } from '../organizers/OrganizerPieces'
 import { SignInButton } from '../auth/SignInButton'
 import type { Event } from '../../types/database'
 import {
@@ -192,6 +194,13 @@ export function EventDetailSheet({
                 📍 This cleanup clears a mapped hotspot. See the spot →
               </a>
             ) : null}
+            {event.expected_participants ? (
+              <p className="mt-3 text-center text-sm font-bold text-[#063b32]">
+                🙋 {goingCount ?? 0} going · {event.expected_participants} expected
+              </p>
+            ) : null}
+            <OrganizerBadge organizerId={event.organizer_id} />
+            <EventResults eventId={event.id} />
             <FlagEvent eventId={event.id} signedIn={signedIn} />
           </motion.div>
         </>
@@ -228,4 +237,17 @@ function FlagEvent({ eventId, signedIn }: { eventId: string; signedIn: boolean }
       Report this cleanup
     </button>
   )
+}
+
+/** Results the organiser documented after the cleanup (photos, turnout, haul). */
+function EventResults({ eventId }: { eventId: string }) {
+  const [r, setR] = useState<EventReport | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void eventReport(eventId).then((x) => !cancelled && setR(x))
+    return () => {
+      cancelled = true
+    }
+  }, [eventId])
+  return r ? <CleanupRecap report={r} /> : null
 }
