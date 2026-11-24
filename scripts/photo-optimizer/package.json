@@ -1,0 +1,10 @@
+{
+  "name": "ramani-photo-optimizer",
+  "private": true,
+  "type": "module",
+  "description": "One-time: shrink existing Supabase storage photos, add thumbnails and cache headers.",
+  "dependencies": {
+    "@supabase/supabase-js": "2.49.1",
+    "sharp": "0.33.5"
+  }
+}
