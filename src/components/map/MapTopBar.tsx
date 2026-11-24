@@ -1,3 +1,4 @@
+import { nextThemePref, setThemePref, THEME_LABEL, useThemePref } from '../../lib/theme'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
@@ -16,6 +17,7 @@ interface MapTopBarProps {
 }
 
 export function MapTopBar({ onVerify, onOpenPanel, onAdmin, onPin }: MapTopBarProps) {
+  const themePref = useThemePref()
   const city = useCity()
   const path = useCityPath()
   const switchCity = useCitySwitchPath()
@@ -213,6 +215,14 @@ export function MapTopBar({ onVerify, onOpenPanel, onAdmin, onPin }: MapTopBarPr
                 }}
               >
                 Language · {getLocale() === 'en' ? 'Kiswahili' : 'English'}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-[#12332d] hover:bg-emerald-50"
+                onClick={() => setThemePref(nextThemePref(themePref))}
+              >
+                {themePref === 'light' ? '☀️' : '🌙'} Map theme · {THEME_LABEL[themePref]}
               </button>
               {profile?.is_admin ? (
                 <Link

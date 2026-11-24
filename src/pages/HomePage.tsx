@@ -1,3 +1,4 @@
+import { useDarkMap } from '../lib/theme'
 import { AppSideRail } from '../components/layout/BottomTabBar'
 import { money, useCityBounties } from '../lib/bounties'
 import { Suspense, useEffect, useMemo, useState } from 'react'
@@ -127,6 +128,15 @@ export function HomePage() {
         return [{ reportId: r.id, lat: r.latitude, lng: r.longitude, label, open }]
       })
   }, [cityBounties, realReports])
+  // Dark map mode: style the map screen, and the app tab bar while this screen is open.
+  const darkMap = useDarkMap(city.slug)
+  useEffect(() => {
+    if (!darkMap) return
+    document.documentElement.dataset.mapDark = ''
+    return () => {
+      delete document.documentElement.dataset.mapDark
+    }
+  }, [darkMap])
   const [layers, setLayers] = useState({ trash: true, bins: true, trees: true })
   const [pinKind, setPinKind] = useState<FeatureKind | null>(null)
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null)
@@ -338,7 +348,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="map-experience flex h-[calc(100dvh-4.25rem-env(safe-area-inset-bottom))] w-full md:h-[100dvh] overflow-hidden bg-[#dce8e1]" data-sheet={sheet}>
+    <div data-dark={darkMap ? "" : undefined} className="map-experience flex h-[calc(100dvh-4.25rem-env(safe-area-inset-bottom))] w-full md:h-[100dvh] overflow-hidden bg-[#dce8e1]" data-sheet={sheet}>
       <AppSideRail />
       <FieldRail {...board} />
       <div className="relative min-h-0 min-w-0 flex-1">

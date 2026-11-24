@@ -6,6 +6,7 @@
  * Cleanups and race hotspots are HTML markers on top. Basemap is OpenFreeMap vector
  * tiles recoloured to the brand, dark at night (same clock as the CitySky backdrop).
  */
+import { useDarkMap } from '../../lib/theme'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import maplibregl, { type GeoJSONSource, type Map as MLMap, type MapLayerMouseEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -14,7 +15,6 @@ import { useCity } from '../../lib/CityContext'
 import { getCurrentPosition } from '../../lib/geo'
 import { brandedStyle, type MapMood } from '../../lib/mapStyle'
 import { hexbinReports, reportsToPoints } from '../../lib/hexbin'
-import { skyPhase } from '../../lib/sky'
 import { hasPin } from '../../lib/events'
 import { eventPinElement, hotspotChipElement, pulseElement } from './markerHtml'
 import { HotspotDetailSheet } from './HotspotDetailSheet'
@@ -333,7 +333,8 @@ export function MapView({
   const mapRef = useRef<MLMap | null>(null)
   const [retry, setRetry] = useState(0)
   const [hotspot, setHotspot] = useState<RaceHotspot | null>(null)
-  const mood: MapMood = skyPhase(city.slug) === 'night' ? 'night' : 'day'
+  // Dark map: the user's toggle (Auto = after sunset in this city, as before).
+  const mood: MapMood = useDarkMap(city.slug) ? 'night' : 'day'
   // Which map instance is ready / failed. Keyed so a city or mood change resets both without extra renders.
   const mapKey = `${city.slug}:${mood}:${retry}`
   const [readyKey, setReadyKey] = useState<string | null>(null)
