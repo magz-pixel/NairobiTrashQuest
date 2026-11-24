@@ -58,7 +58,7 @@ function reportsInWard(list: Report[], ward: WardBox | null) {
 }
 
 export function HomePage() {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const city = useCity()
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
@@ -334,7 +334,8 @@ export function HomePage() {
     events: upcoming,
     going,
     onSelectEvent: openEvent,
-    onPostEvent: profile?.is_admin ? () => navigate(`/${city.slug}/cleanups/manage`) : undefined,
+    // Anyone can organise a cleanup (migration 031 adds limits + community flagging).
+    onPostEvent: () => navigate(`/${city.slug}/cleanups/manage`),
   }
 
   return (

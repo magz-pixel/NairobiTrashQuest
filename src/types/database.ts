@@ -13,6 +13,8 @@ export interface Profile {
   total_impact_points: number
   badge_level: BadgeLevel
   is_admin?: boolean
+  /** Organiser verification (migration 031): only 'verified' can post cleanups. */
+  organizer_status?: 'pending' | 'verified' | 'declined' | null
   created_at: string
   updated_at: string
 }
@@ -93,6 +95,12 @@ export interface Event {
   organizer_id: string
   created_at: string
   city: string
+  /** Hotspot this cleanup will clear (migration 031). */
+  report_id?: string | null
+  /** Hidden after 3 community flags (migration 031). */
+  hidden?: boolean
+  /** Organiser's expected turnout (migration 031). */
+  expected_participants?: number | null
 }
 
 export type EventRsvpStatus = 'going' | 'attended' | 'cancelled'

@@ -1,5 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
+import { eventReport, type EventReport } from '../../lib/organizers'
+import { CleanupRecap, OrganizerBadge } from '../organizers/OrganizerPieces'
 import { SignInButton } from '../auth/SignInButton'
 import type { Event } from '../../types/database'
 import {
@@ -185,9 +189,65 @@ export function EventDetailSheet({
                 Invite friends
               </a>
             </div>
+            {event.report_id ? (
+              <a href={`/${event.city}/report/${event.report_id}`} className="mt-3 block rounded-xl bg-[#effaf5] px-3 py-2.5 text-sm font-bold text-[#063b32]">
+                📍 This cleanup clears a mapped hotspot. See the spot →
+              </a>
+            ) : null}
+            {event.expected_participants ? (
+              <p className="mt-3 text-center text-sm font-bold text-[#063b32]">
+                🙋 {goingCount ?? 0} going · {event.expected_participants} expected
+              </p>
+            ) : null}
+            <OrganizerBadge organizerId={event.organizer_id} />
+            <EventResults eventId={event.id} />
+            <FlagEvent eventId={event.id} signedIn={signedIn} />
           </motion.div>
         </>
       )}
     </AnimatePresence>
   )
+}
+
+/** Community moderation: 3 different people flagging a cleanup hides it until an admin reviews (031). */
+function FlagEvent({ eventId, signedIn }: { eventId: string; signedIn: boolean }) {
+  const { user } = useAuth()
+  const [state, setState] = useState<'idle' | 'asking' | 'done'>('idle')
+  const [msg, setMsg] = useState<string | null>(null)
+  if (!signedIn || !user) return null
+  const send = async (reason: string) => {
+    const { error } = await supabase.from('event_flags').insert({ event_id: eventId, user_id: user.id, reason })
+    setState('done')
+    setMsg(error && !/duplicate/i.test(error.message) ? 'Could not send the report. Please try again later.' : 'Thanks. Our team will take a look.')
+  }
+  if (state === 'done') return <p className="mt-3 text-center text-xs text-[#5d746e]">{msg}</p>
+  if (state === 'asking') {
+    return (
+      <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs">
+        {['Fake or spam', 'Wrong place or date', 'Unsafe'].map((r) => (
+          <button key={r} type="button" onClick={() => void send(r)} className="min-h-9 rounded-full border border-[#f2c4bb] px-3 font-bold text-[#a44738]">
+            {r}
+          </button>
+        ))}
+      </div>
+    )
+  }
+  return (
+    <button type="button" onClick={() => setState('asking')} className="mt-3 block w-full text-center text-xs font-bold text-[#a44738] underline">
+      Report this cleanup
+    </button>
+  )
+}
+
+/** Results the organiser documented after the cleanup (photos, turnout, haul). */
+function EventResults({ eventId }: { eventId: string }) {
+  const [r, setR] = useState<EventReport | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void eventReport(eventId).then((x) => !cancelled && setR(x))
+    return () => {
+      cancelled = true
+    }
+  }, [eventId])
+  return r ? <CleanupRecap report={r} /> : null
 }
