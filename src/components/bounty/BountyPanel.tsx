@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { cityPath } from '../../lib/cities'
+import { isSupabaseConfigured, supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-import { createBounty, money, STATUS_COPY, suggestTarget, useBounty } from '../../lib/bounties'
+import { createBounty, money, STATUS_COPY, suggestTarget, useBounty, type BountyProgress } from '../../lib/bounties'
 import { BountyProgressBar } from './BountyProgressBar'
 import { ClaimSheet } from './ClaimSheet'
 import { PledgeSheet } from './PledgeSheet'
@@ -41,6 +44,7 @@ export function BountyPanel({
           Estimated cost to clean: <b className="text-[#063b32]">about {money(currency, suggested)}</b>, based on its severity and how many neighbours confirmed it.
         </p>
         <p className="mt-1">Confirm it with “Seen it too”. The most-confirmed spots get a bounty and open for pledges.</p>
+        <HotspotCleanups reportId={reportId} city={city} place={place} light />
       </section>
     )
   }
@@ -91,6 +95,9 @@ export function BountyPanel({
         ) : null}
       </div>
 
+      {bounty.status === 'paid' && bounty.spend && bounty.spend.length > 0 ? <SpendBreakdown bounty={bounty} /> : null}
+      {bounty.status !== 'paid' && bounty.status !== 'cancelled' ? <HotspotCleanups reportId={reportId} city={city} place={place} /> : null}
+
       <PledgeSheet bounty={bounty} place={place} open={pledgeOpen} onClose={() => setPledgeOpen(false)} onDone={() => void reload()} />
       <ClaimSheet bounty={bounty} place={place} open={claimOpen} onClose={() => setClaimOpen(false)} onDone={() => void reload()} />
     </section>
@@ -140,5 +147,81 @@ function AdminStart({ reportId, city, currency, userId, onDone, suggested }: { r
       </div>
       {msg ? <p className="mt-2 text-xs text-[#a44738]">{msg}</p> : null}
     </section>
+  )
+}
+
+/** Public record of how a paid bounty's money was used (entered by an admin at payout). */
+function SpendBreakdown({ bounty }: { bounty: BountyProgress }) {
+  const lines = bounty.spend ?? []
+  const total = lines.reduce((t, l) => t + Number(l.amount || 0), 0)
+  return (
+    <div className="mt-4 rounded-2xl bg-white/10 p-3">
+      <p className="text-[11px] font-extrabold uppercase tracking-[.14em] text-[#fbbf24]">Where the money went</p>
+      <ul className="mt-2 space-y-1 text-sm">
+        {lines.map((l) => (
+          <li key={l.label} className="flex justify-between gap-3">
+            <span className="text-white/80">{l.label}</span>
+            <span className="font-bold tabular-nums">{money(bounty.currency, Number(l.amount))}</span>
+          </li>
+        ))}
+        <li className="flex justify-between gap-3 border-t border-white/15 pt-1 font-extrabold">
+          <span>Total</span>
+          <span className="tabular-nums">{money(bounty.currency, total)}</span>
+        </li>
+      </ul>
+      {bounty.spend_note ? <p className="mt-2 text-xs text-white/70">{bounty.spend_note}</p> : null}
+    </div>
+  )
+}
+
+/**
+ * Edwin's step 6: rally the community around a hotspot. Lists upcoming cleanups linked to this spot
+ * and offers "Organise a cleanup here" (any signed-in user; needs migration 031 for the link).
+ */
+function HotspotCleanups({ reportId, city, place, light = false }: { reportId: string; city: string; place: string; light?: boolean }) {
+  const [events, setEvents] = useState<{ id: string; title: string; event_date: string }[]>([])
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    let cancelled = false
+    void supabase
+      .from('events')
+      .select('id,title,event_date')
+      .eq('report_id', reportId)
+      .gte('event_date', new Date().toISOString())
+      .order('event_date')
+      .then(({ data, error }) => {
+        if (!cancelled && !error) setEvents((data ?? []) as typeof events)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [reportId])
+
+  const organise = `${cityPath(city, '/cleanups/manage')}?report=${reportId}&place=${encodeURIComponent(place)}`
+  return (
+    <div className={`mt-4 rounded-2xl p-3 ${light ? 'bg-[#effaf5] text-[#063b32]' : 'bg-white/10'}`}>
+      {events.length > 0 ? (
+        <ul className="mb-2 space-y-1">
+          {events.map((e) => (
+            <li key={e.id}>
+              <Link to={`${cityPath(city, '/map')}?event=${e.id}`} className="text-sm font-bold underline">
+                🧹 {e.title} · {new Date(e.event_date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <Link
+        to={organise}
+        className={`inline-flex min-h-11 w-full items-center justify-center rounded-full px-4 text-sm font-extrabold ${
+          light ? 'bg-[#063b32] text-white' : 'bg-white text-[#063b32]'
+        }`}
+      >
+        🧹 Organise a cleanup here
+      </Link>
+      <p className={`mt-1 text-center text-[11px] ${light ? 'text-[#5d746e]' : 'text-white/60'}`}>
+        Pick a date, invite neighbours, and it shows on the map for everyone.
+      </p>
+    </div>
   )
 }

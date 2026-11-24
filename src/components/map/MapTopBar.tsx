@@ -224,16 +224,14 @@ export function MapTopBar({ onVerify, onOpenPanel, onAdmin, onPin }: MapTopBarPr
               >
                 {themePref === 'light' ? '☀️' : '🌙'} Map theme · {THEME_LABEL[themePref]}
               </button>
-              {profile?.is_admin ? (
-                <Link
-                  role="menuitem"
-                  to={cityPath(city.slug, '/cleanups/manage')}
-                  className="block px-4 py-2.5 text-sm font-bold text-[#0b8c76] hover:bg-emerald-50"
-                  onClick={() => setMoreOpen(false)}
-                >
-                  ➕ Post a cleanup
-                </Link>
-              ) : null}
+              <Link
+                role="menuitem"
+                to={cityPath(city.slug, '/cleanups/manage')}
+                className="block px-4 py-2.5 text-sm font-bold text-[#0b8c76] hover:bg-emerald-50"
+                onClick={() => setMoreOpen(false)}
+              >
+                ➕ Organise a cleanup
+              </Link>
               {profile?.is_admin && onAdmin ? (
                 <button
                   type="button"

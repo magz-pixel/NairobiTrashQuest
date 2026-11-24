@@ -14,7 +14,7 @@ import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { isRaceLive, type Event } from "../types/database";
 import { useCity, useCityPath } from "../lib/CityContext";
 export function CleanupsPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const raceLive = isRaceLive();
   const city = useCity();
   const path = useCityPath();
@@ -106,7 +106,8 @@ export function CleanupsPage() {
                   Upcoming cleanups
                 </h2>
               </div>
-              {profile?.is_admin && (
+              {/* Anyone can organise; the console asks people to sign in first. */}
+              {(
                 <Link
                   to={path("/cleanups/manage")}
                   className="font-bold text-[#0b8c76]"

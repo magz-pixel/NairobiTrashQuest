@@ -19,12 +19,34 @@ export interface BountyProgress {
   pending: number
   backers: number
   claimed_by: string | null
+  /** How the money was spent (migration 031), e.g. [{ label: 'Bags', amount: 1200 }]. */
+  spend?: SpendLine[] | null
+  spend_note?: string | null
   claimed_at: string | null
   claim_expires_at: string | null
   opened_at: string | null
   paid_at: string | null
   created_at: string
 }
+export interface SpendLine {
+  label: string
+  amount: number
+}
+
+/** Default lines the admin fills in at payout. */
+export const SPEND_TEMPLATE = ['Crew pay', 'Bags & gloves', 'Transport / haulage', 'Water & food', 'Other']
+
+/** Approve or reject cleanup proof. Approving also marks the hotspot cleaned (migration 031). */
+export async function reviewClaim(claimId: string, approve: boolean, spend?: SpendLine[], note?: string) {
+  const { error } = await supabase.rpc('approve_bounty_claim', {
+    p_claim: claimId,
+    p_approve: approve,
+    p_spend: spend && spend.length ? spend : null,
+    p_note: note?.trim() || null,
+  })
+  if (error) throw error
+}
+
 export interface Backer {
   name: string
   amount: number

@@ -65,7 +65,7 @@ function Lazy({ children }: { children: ReactNode }) {
 }
 
 const ROUTE_TITLES: [string, string][] = [
-  ['/cleanups/manage', 'Cleanup console'],
+  ['/cleanups/manage', 'Organise a cleanup'],
   ['/cleanups', 'Cleanups'],
   ['/race/leaderboard', 'Leaderboard'],
   ['/race/marshal', 'Marshal login'],
