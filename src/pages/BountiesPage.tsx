@@ -1,3 +1,4 @@
+import { Thumb } from '../components/ui/Thumb'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BountyProgressBar } from '../components/bounty/BountyProgressBar'
@@ -102,7 +103,7 @@ export function BountiesPage() {
             rows.map(({ b, r }) => (
               <Link key={b.id} to={path(`/report/${b.report_id}`)} className="block overflow-hidden rounded-3xl bg-[#0f2420]">
                 <div className="flex gap-3 p-4">
-                  {r?.image_url ? <img src={r.image_url} alt="" loading="lazy" className="h-16 w-16 shrink-0 rounded-2xl object-cover" /> : null}
+                  {r?.image_url ? <Thumb src={r.image_url} className="h-16 w-16 shrink-0 rounded-2xl object-cover" /> : null}
                   <div className="min-w-0 flex-1">
                     <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-extrabold ${STATUS_COPY[b.status].tone}`}>{STATUS_COPY[b.status].label}</span>
                     <p className="mt-1 truncate text-lg font-extrabold">{r?.area_name ?? 'Hotspot'}</p>

@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { formatWasteTypes, type Report } from '../../types/database'
 import { useCity } from '../../lib/CityContext'
 import { daysSince, severityLabel } from '../../lib/wards'
@@ -35,7 +36,7 @@ export function ReportListView({ reports, selectedId, onSelect }: ReportListView
                   : 'border-[#e5efeb] bg-white text-[#12332d] hover:border-[#0b8c76]/40'
               }`}
             >
-              <img
+              <Thumb
                 src={r.image_url}
                 alt=""
                 className="h-14 w-14 shrink-0 rounded-xl object-cover md:h-[4.25rem] md:w-[4.25rem]"

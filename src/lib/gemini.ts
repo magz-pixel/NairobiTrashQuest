@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { reportClientError } from './monitoring'
+import { uploadPhoto } from './uploads'
 import type { ClearVerification, TrashAnalysis } from '../types/database'
 
 export const PHOTO_UPLOAD_FAILED_MESSAGE =
@@ -211,27 +212,21 @@ export async function uploadReportImage(
   _reportId: string,
   file: File,
 ): Promise<string> {
-  const ext = file.name.split('.').pop() ?? 'jpg'
   // Path must match storage RLS: anon inserts require folder "anonymous"
   // (migration 004). Authenticated inserts allow any path (migration 001).
   // Use the real session — not the unused userId argument.
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  const path = session
-    ? `${crypto.randomUUID()}.${ext}`
-    : `anonymous/${crypto.randomUUID()}.${ext}`
-
-  const { error } = await supabase.storage
-    .from('report-images')
-    .upload(path, file, { upsert: false, contentType: file.type })
+  const folder = session ? '' : 'anonymous'
+  // Shrinks the photo, adds a list thumbnail and makes it cacheable (see uploadPhoto).
+  const { url, error } = await uploadPhoto('report-images', folder, file)
 
   if (error) {
     console.error('report-images upload failed', error)
-    reportClientError(error, { source: 'uploadReportImage', path })
+    reportClientError(error, { source: 'uploadReportImage', folder })
     throw new Error(PHOTO_UPLOAD_FAILED_MESSAGE)
   }
 
-  const { data } = supabase.storage.from('report-images').getPublicUrl(path)
-  return data.publicUrl
+  return url
 }

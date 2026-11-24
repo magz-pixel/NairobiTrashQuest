@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { BountyProgress, BountyStatus } from '../../lib/bounties'
@@ -94,7 +95,7 @@ export function BountyGallery({
           {rows.map(({ b, r }) => (
             <Link key={b.id} to={reportPath(b.report_id)} className="group overflow-hidden rounded-[1.5rem] bg-white shadow-[var(--shadow-card)] transition hover:-translate-y-0.5">
               <div className="relative h-40 bg-[#0f2420]">
-                {r?.image_url ? <img src={r.image_url} alt="" loading="lazy" className="h-full w-full object-cover" /> : null}
+                {r?.image_url ? <Thumb src={r.image_url} className="h-full w-full object-cover" /> : null}
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_50%,rgba(6,18,15,.75))]" />
                 <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${STATUS_COPY[b.status].tone}`}>{STATUS_COPY[b.status].label}</span>
                 {r ? (

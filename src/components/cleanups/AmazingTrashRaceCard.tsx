@@ -72,7 +72,8 @@ export function AmazingTrashRaceCard() {
 
   useEffect(() => {
     void load()
-    const id = window.setInterval(() => void load(), 15000)
+    // Was every 15 s; the race is between seasons. Refresh every 2 min, only while visible.
+    const id = window.setInterval(() => document.visibilityState === 'visible' && void load(), 120_000)
     return () => window.clearInterval(id)
   }, [load])
 

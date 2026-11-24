@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { useRef } from 'react'
 import {
   formatWasteTypes,
@@ -316,7 +317,7 @@ function MobileSpotCard({
   return (
     <article className="mx-3 mb-3 overflow-hidden rounded-2xl border border-[#e5efeb] bg-[#f7fbf9] shadow-[0_10px_28px_rgba(6,59,50,.08)]">
       <div className="relative">
-        <img src={report.image_url} alt="" className="h-28 w-full object-cover" />
+        <Thumb src={report.image_url} className="h-28 w-full object-cover" />
         <button
           type="button"
           onClick={onClose}

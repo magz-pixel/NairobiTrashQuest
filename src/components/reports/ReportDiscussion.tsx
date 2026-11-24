@@ -1,3 +1,4 @@
+import { Thumb } from '../ui/Thumb'
 import { useCallback, useEffect, useState } from 'react'
 import { isSupabaseConfigured, supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
@@ -99,7 +100,7 @@ export function ReportDiscussion({ reportId }: { reportId: string }) {
           <div className="-mx-1 mt-2 flex snap-x gap-2 overflow-x-auto px-1 pb-1">
             {photos.map((p) => (
               <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="shrink-0 snap-start">
-                <img src={p.url} alt="Extra photo of this spot" loading="lazy" className="h-28 w-36 rounded-xl object-cover" />
+                <Thumb src={p.url} alt="Extra photo of this spot" className="h-28 w-36 rounded-xl object-cover" />
               </a>
             ))}
           </div>
