@@ -124,7 +124,20 @@ function findDemoReport(id: string): Report | null {
 }
 
 /** One report by id. Does not filter by the city in the URL. */
+/** Plain-language message for a failed fetch (the raw Supabase text is not meant for visitors). */
+export function friendlyFetchError(message: string): string {
+  if (/egress|quota|restricted|402|payment/i.test(message)) {
+    return 'Ramani-Taka is briefly unavailable while we upgrade our servers. Please try again in a little while.'
+  }
+  if (/timed out|timeout/i.test(message)) return 'This is taking too long. Check your connection and try again.'
+  if (/failed to fetch|network|load failed/i.test(message)) return 'No connection. Check your data or Wi-Fi and try again.'
+  return 'We could not load this hotspot right now. Please try again.'
+}
+
+const REPORT_TIMEOUT_MS = 12_000
+
 export function useReport(id: string | undefined) {
+  const [attempt, setAttempt] = useState(0)
   const [report, setReport] = useState<Report | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -159,23 +172,25 @@ export function useReport(id: string | undefined) {
       }
     }
 
-    supabase
-      .from('reports')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle()
-      .then(({ data, error: fetchError }) => {
-        if (fetchError) {
-          finish(null, fetchError.message)
-          return
-        }
+    // Never leave a shared link on "Loading…": time out, and turn any failure into a message.
+    const timer = window.setTimeout(() => finish(null, friendlyFetchError('timeout')), REPORT_TIMEOUT_MS)
+    void (async () => {
+      try {
+        const { data, error: fetchError } = await supabase.from('reports').select('*').eq('id', id).maybeSingle()
+        window.clearTimeout(timer)
+        if (fetchError) return finish(null, friendlyFetchError(fetchError.message))
         finish(data ? normalizeReport(data as Record<string, unknown>) : null)
-      })
+      } catch (err) {
+        window.clearTimeout(timer)
+        finish(null, friendlyFetchError(err instanceof Error ? err.message : String(err)))
+      }
+    })()
 
     return () => {
       cancelled = true
+      window.clearTimeout(timer)
     }
-  }, [id])
+  }, [id, attempt])
 
-  return { report, loading, notFound, error }
+  return { report, loading, notFound, error, retry: () => setAttempt((n) => n + 1) }
 }

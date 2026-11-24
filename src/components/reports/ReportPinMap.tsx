@@ -14,23 +14,28 @@ export function ReportPinMap({
   lat,
   lng,
   onChange,
+  readOnly = false,
+  className = 'h-40',
 }: {
   lat: number
   lng: number
-  onChange: (lat: number, lng: number) => void
+  onChange?: (lat: number, lng: number) => void
+  /** Show-only map (shared hotspot pages): fixed pin. */
+  readOnly?: boolean
+  className?: string
 }) {
   const handlers = useMemo(
     () => ({
       dragend(event: L.LeafletEvent) {
         const point = event.target.getLatLng() as L.LatLng
-        onChange(point.lat, point.lng)
+        onChange?.(point.lat, point.lng)
       },
     }),
     [onChange],
   )
 
   return (
-    <div className="h-40 overflow-hidden rounded-lg">
+    <div className={`${className} overflow-hidden rounded-lg`}>
       <MapContainer
         center={[lat, lng]}
         zoom={16}
@@ -40,7 +45,7 @@ export function ReportPinMap({
         attributionControl
       >
         <TileLayer attribution={MAP_TILE_ATTRIBUTION} url={MAP_TILE_URL} maxZoom={MAP_MAX_ZOOM} />
-        <Marker position={[lat, lng]} icon={pinIcon} draggable eventHandlers={handlers} />
+        <Marker position={[lat, lng]} icon={pinIcon} draggable={!readOnly} eventHandlers={readOnly ? undefined : handlers} />
       </MapContainer>
     </div>
   )

@@ -8,7 +8,7 @@ import { isCitySlug } from '../lib/cities'
 
 export function ReportPage() {
   const { id, city: citySlug } = useParams()
-  const { report, loading, notFound, error } = useReport(id)
+  const { report, loading, notFound, error, retry } = useReport(id)
   const navigate = useNavigate()
   const path = useCityPath()
   const wrongCity = Boolean(report && isCitySlug(report.city) && report.city !== citySlug)
@@ -31,14 +31,23 @@ export function ReportPage() {
     <PublicShell footer={false}>
       <main className="relative min-h-[100dvh] bg-[#dce8e1]">
         {loading ? (
-          <p className="px-5 pt-28 text-sm font-bold text-[#0b8c76]">Loading report…</p>
+          <div className="flex flex-col items-center gap-3 px-5 pt-28 text-center" role="status">
+            <span className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#0b8c76]/25 border-t-[#0b8c76]" aria-hidden />
+            <p className="text-sm font-bold text-[#0b8c76]">Loading this hotspot…</p>
+          </div>
         ) : null}
         {!loading && error ? (
           <div className="mx-auto max-w-md px-5 pt-28">
-            <p className="text-sm font-semibold text-[#8b6207]">{error}</p>
-            <Link to={path('/map')} className="mt-4 inline-block text-sm font-bold text-[#0b8c76]">
-              Back to the map
-            </Link>
+            <h1 className="text-xl font-extrabold tracking-tight text-[#063b32]">Couldn’t open this hotspot</h1>
+            <p className="mt-2 text-sm leading-6 text-[#36564e]">{error}</p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button type="button" onClick={retry} className="min-h-11 rounded-full bg-[#063b32] px-5 text-sm font-bold text-white">
+                Try again
+              </button>
+              <Link to={path('/map')} className="inline-flex min-h-11 items-center text-sm font-bold text-[#0b8c76]">
+                Open the map
+              </Link>
+            </div>
           </div>
         ) : null}
         {!loading && notFound ? (
@@ -56,6 +65,7 @@ export function ReportPage() {
           <ReportDetailSheet
             key={report.id}
             report={report}
+            showLocationMap
             onClose={() => navigate(path('/map'))}
           />
         ) : null}

@@ -20,6 +20,8 @@ import { ContributeModal } from '../crowdfund/ContributeModal'
 import { AccountabilityFlow } from './AccountabilityFlow'
 import { ReportDiscussion } from '../reports/ReportDiscussion'
 import { BountyPanel } from '../bounty/BountyPanel'
+import { Link } from 'react-router-dom'
+import { ReportPinMap } from '../reports/ReportPinMap'
 import { isCleanupUnderReview } from '../../lib/cleanupReview'
 
 interface ReportDetailSheetProps {
@@ -28,6 +30,8 @@ interface ReportDetailSheetProps {
   onVerify?: () => void
   onUpdated?: () => void
   userLoggedIn?: boolean
+  /** Shared-link page: show a small map centred on the spot, plus a link to the full map. */
+  showLocationMap?: boolean
 }
 
 export function ReportDetailSheet({
@@ -36,6 +40,7 @@ export function ReportDetailSheet({
   onVerify,
   onUpdated,
   userLoggedIn,
+  showLocationMap = false,
 }: ReportDetailSheetProps) {
   const { user } = useAuth()
   const city = useCity()
@@ -201,6 +206,19 @@ export function ReportDetailSheet({
                 A cleanup photo was submitted and is waiting for admin review. The hotspot stays on
                 the map until it is approved.
               </p>
+            ) : null}
+            {showLocationMap ? (
+              <div className="mt-3">
+                {/* Map centred on the spot. Leaflet raster tiles: works in WhatsApp's in-app browser
+                    and on phones without WebGL, and is light on data. */}
+                <ReportPinMap lat={report.latitude} lng={report.longitude} readOnly className="h-44" />
+                <Link
+                  to={`${cityPath(reportCity, '/map')}?spot=${report.id}`}
+                  className="mt-2 inline-flex min-h-11 items-center text-xs font-bold text-[var(--brand-teal)]"
+                >
+                  See it on the full map →
+                </Link>
+              </div>
             ) : null}
             <div className="mt-2 flex flex-wrap gap-2">
               <a

@@ -1,11 +1,13 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { lazyRetry } from '../../lib/lazyRetry'
+import { SectionBoundary } from '../ui/SectionBoundary'
 import { Link } from 'react-router-dom'
 import { DEMO_FEED, demoRegionPoints, type FeedItem, type RegionPoint } from '../../lib/demoRegion'
 import { useRegionData } from '../../hooks/useRegionData'
 import { cityPath, getActiveCities, getCity } from '../../lib/cities'
 import { CITY_FACTS, HISTORIC_KG_REMOVED } from '../../lib/cityFacts'
 
-const RegionHeatmap = lazy(() => import('./RegionHeatmap'))
+const RegionHeatmap = lazyRetry(() => import('./RegionHeatmap'))
 
 type Mode = 'demo' | 'live'
 /** 'region' = all of East Africa, otherwise a city slug. */
@@ -207,9 +209,23 @@ export function RegionSection() {
             className="relative h-[440px] overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0c2622] shadow-[0_30px_80px_rgba(0,0,0,.35)] sm:h-[480px] lg:h-[620px]"
           >
             {near ? (
-              <Suspense fallback={<div className="grid h-full place-items-center text-sm text-[#a9c9bf]">Loading map…</div>}>
-                <RegionHeatmap points={points} counts={counts} focus={isRegion ? null : view} />
-              </Suspense>
+              <SectionBoundary
+                name="hub-map"
+                fallback={(retry) => (
+                  <div className="grid h-full place-items-center p-6 text-center text-sm text-[#a9c9bf]">
+                    <div>
+                      <p>The map couldn’t load on this connection.</p>
+                      <button type="button" onClick={retry} className="mt-3 min-h-11 rounded-full bg-white/15 px-5 font-bold text-white">
+                        Try again
+                      </button>
+                    </div>
+                  </div>
+                )}
+              >
+                <Suspense fallback={<div className="grid h-full place-items-center text-sm text-[#a9c9bf]">Loading map…</div>}>
+                  <RegionHeatmap points={points} counts={counts} focus={isRegion ? null : view} />
+                </Suspense>
+              </SectionBoundary>
             ) : null}
             <span
               className={`pointer-events-none absolute right-4 top-4 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[.14em] ${
