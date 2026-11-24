@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AuthGate } from '../components/auth/AuthGate'
 import { OpsFrame } from '../components/site/PagePrimitives'
 import { useAuth } from '../hooks/useAuth'
@@ -19,26 +20,46 @@ interface RsvpRow {
 function ManageInner() {
   const { user, profile, loading } = useAuth()
   const city = useCity()
+  const isAdmin = Boolean(profile?.is_admin)
+  // "Organise a cleanup here" on a hotspot links here with ?report=<id>&place=<name>.
+  const [params] = useSearchParams()
+  const reportId = params.get('report')
+  const place = params.get('place')
   const [events, setEvents] = useState<Event[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   const [rsvps, setRsvps] = useState<RsvpRow[]>([])
   const [status, setStatus] = useState<string | null>(null)
-  const [title, setTitle] = useState('')
-  const [location, setLocation] = useState('')
+  const [title, setTitle] = useState(() => (place ? `Cleanup at ${place}` : ''))
+  const [location, setLocation] = useState(() => place ?? '')
   const [description, setDescription] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null)
   const [points, setPoints] = useState(50)
 
+  // Admins manage every cleanup in the city; everyone else manages the ones they organise.
   const loadEvents = useCallback(async () => {
-    const { data } = await supabase
-      .from('events')
-      .select('*')
-      .eq('city', city.slug)
-      .order('event_date', { ascending: false })
-      .limit(40)
+    let q = supabase.from('events').select('*').eq('city', city.slug)
+    if (!isAdmin && user) q = q.eq('organizer_id', user.id)
+    const { data } = await q.order('event_date', { ascending: false }).limit(40)
     setEvents((data ?? []) as Event[])
-  }, [city.slug])
+  }, [city.slug, isAdmin, user])
+
+  // Pre-place the meeting pin on the hotspot being cleaned.
+  useEffect(() => {
+    if (!reportId || !isSupabaseConfigured) return
+    let cancelled = false
+    void supabase
+      .from('reports')
+      .select('latitude,longitude')
+      .eq('id', reportId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled && data) setPin({ lat: data.latitude as number, lng: data.longitude as number })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [reportId])
 
   const loadRsvps = useCallback(async (eventId: string) => {
     const { data, error } = await supabase
@@ -91,36 +112,27 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
   }
 
   if (loading) {
-    return <p className="text-sm text-[#5d746e]">Checking admin access…</p>
-  }
-
-  if (!profile?.is_admin) {
-    return (
-      <div className="fn-warn space-y-2">
-        <p>
-          <strong>Organisers only.</strong> You're signed in as{' '}
-          <strong>{profile?.username ?? user?.email ?? 'this account'}</strong>, which can join cleanups but not post
-          them yet.
-        </p>
-        <p>Ask a Ramani-Taka admin to make this account an organiser, then refresh this page.</p>
-      </div>
-    )
+    return <p className="text-sm text-[#5d746e]">Loading your account…</p>
   }
 
   const createEvent = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !title.trim() || !eventDate) return
     setStatus(null)
-    const { error } = await supabase.from('events').insert({
+    const row = {
       title: title.trim(),
-      description: description.trim() || `Weekly ${city.chapterName} cleanup`,
+      description: description.trim() || (place ? `Community cleanup of the ${place} hotspot` : `${city.chapterName} community cleanup`),
       location: location.trim() || city.label,
       event_date: new Date(eventDate).toISOString(),
       organizer_id: user.id,
       latitude: pin?.lat ?? null,
       longitude: pin?.lng ?? null,
       city: city.slug,
-    })
+    }
+    const linked: Record<string, unknown> = reportId ? { ...row, report_id: reportId } : row
+    let { error } = await supabase.from('events').insert(linked)
+    // Before migration 031 the report link column doesn't exist: post without it.
+    if (error && reportId && /report_id/.test(error.message)) ({ error } = await supabase.from('events').insert(row))
     if (error) {
       setStatus(error.message)
       return
@@ -156,8 +168,12 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
 
       <form onSubmit={createEvent} className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-[#063b32]">
-          Post a cleanup
+          {place ? `Organise a cleanup at ${place}` : 'Post a cleanup'}
         </h2>
+        <p className="text-sm text-[#5d746e]">
+          Anyone can organise a cleanup. It appears on the map and feed so neighbours can join. Keep it real: cleanups
+          flagged by 3 people are hidden until we review them.
+        </p>
         <input
           required
           value={title}
@@ -232,8 +248,11 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
 
       <div className="rounded-[1.5rem] border border-[#d9e9e4] bg-white p-5 shadow-[var(--shadow-card)]">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-[#063b32]">
-          Award points
+          {isAdmin ? 'Your cleanups & attendance' : 'Your cleanups'}
         </h2>
+        {!isAdmin ? (
+          <p className="mt-1 text-xs text-[#71867f]">Pick one of your cleanups to see who's coming, or delete it.</p>
+        ) : null}
         <label className="fn-label mt-3">
           Cleanup
           <select
@@ -258,6 +277,7 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
             Delete this cleanup
           </button>
         ) : null}
+        {isAdmin ? (
         <label className="fn-label mt-3">
           XP per person
           <input
@@ -269,6 +289,7 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
             className="fn-field"
           />
         </label>
+        ) : null}
         {selected && (
           <ul className="mt-4 space-y-2">
             {rsvps.length === 0 && (
@@ -286,7 +307,7 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
                     <span className="font-bold text-[#0b8c76]"> · +{r.points_awarded}</span>
                   )}
                 </span>
-                {r.points_awarded === 0 && (
+                {isAdmin && r.points_awarded === 0 && (
                   <button
                     type="button"
                     onClick={() => void award(r.user_id)}
@@ -307,9 +328,9 @@ It disappears from the map, feed and cleanups page${going ? `, and ${going} RSVP
 export function CleanupsManagePage() {
   return (
     <OpsFrame
-      title="Cleanup admin"
-      eyebrow="Field ops"
-      description="Post weekly cleanups and award attendance points."
+      title="Organise a cleanup"
+      eyebrow="Community"
+      description="Post a cleanup anyone can join, invite neighbours, and manage your events."
       backTo="/cleanups"
     >
       <AuthGate>

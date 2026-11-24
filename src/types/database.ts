@@ -93,6 +93,10 @@ export interface Event {
   organizer_id: string
   created_at: string
   city: string
+  /** Hotspot this cleanup will clear (migration 031). */
+  report_id?: string | null
+  /** Hidden after 3 community flags (migration 031). */
+  hidden?: boolean
 }
 
 export type EventRsvpStatus = 'going' | 'attended' | 'cancelled'

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { BountyProgressBar } from '../components/bounty/BountyProgressBar'
 import { useAuth } from '../hooks/useAuth'
 import { useReports } from '../hooks/useReports'
-import { money, STATUS_COPY, useCityBounties, type BountyStatus } from '../lib/bounties'
+import { money, reviewClaim, SPEND_TEMPLATE, STATUS_COPY, useCityBounties, type BountyStatus, type SpendLine } from '../lib/bounties'
 import { useCity, useCityPath } from '../lib/CityContext'
 import { supabase } from '../lib/supabase'
 
@@ -162,12 +162,16 @@ function AdminQueue() {
     await supabase.from('bounty_pledges').update({ status, confirmed_at: status === 'confirmed' ? new Date().toISOString() : null }).eq('id', id)
     void load()
   }
-  const review = async (c: Review, ok: boolean) => {
-    await supabase.from('bounty_claims').update({ status: ok ? 'approved' : 'rejected', reviewed_at: new Date().toISOString() }).eq('id', c.id)
-    await supabase
-      .from('hotspot_bounties')
-      .update(ok ? { status: 'paid', paid_at: new Date().toISOString() } : { status: 'open', claimed_by: null, claimed_at: null, claim_expires_at: null })
-      .eq('id', c.bounty_id)
+  const [msg, setMsg] = useState<string | null>(null)
+  // One server call approves the proof, pays the bounty, records spending and marks the spot cleaned.
+  const review = async (c: Review, ok: boolean, spend?: SpendLine[], note?: string) => {
+    setMsg(null)
+    try {
+      await reviewClaim(c.id, ok, spend, note)
+      setMsg(ok ? 'Approved. The spot is now marked cleaned on the map.' : 'Rejected. The bounty is open to claim again.')
+    } catch (e) {
+      setMsg(e instanceof Error ? `${e.message} (run migration 031 if this says the function is missing)` : 'Could not save.')
+    }
     void load()
   }
 
@@ -189,18 +193,55 @@ function AdminQueue() {
         ))}
       </ul>
       <h2 className="mt-6 text-xl font-extrabold">Cleanup proof to review ({reviews.length})</h2>
+      <p className="text-xs text-[#5d746e]">Approving pays the bounty, marks the hotspot cleaned with this after-photo, and publishes how the money was spent.</p>
+      {msg ? <p className="mt-2 text-sm font-bold text-[#087766]">{msg}</p> : null}
       <ul className="mt-3 space-y-2">
         {reviews.map((c) => (
           <li key={c.id} className="rounded-xl bg-[#f3f7f4] p-3 text-sm">
             {c.proof_image_url ? <img src={c.proof_image_url} alt="After photo" className="h-40 w-full rounded-lg object-cover" /> : null}
             <p className="mt-2">{c.note ?? 'No note'} · payout via {c.payout_method ?? 'mpesa'}</p>
-            <div className="mt-2 flex gap-2">
-              <button type="button" onClick={() => void review(c, true)} className="rounded-lg bg-[#0b8c76] px-3 py-1.5 text-xs font-bold text-white">Approve & mark paid</button>
-              <button type="button" onClick={() => void review(c, false)} className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#a44738]">Reject, reopen</button>
-            </div>
+            <SpendForm onApprove={(spend, note) => void review(c, true, spend, note)} onReject={() => void review(c, false)} />
           </li>
         ))}
       </ul>
     </section>
+  )
+}
+
+/** Approve with a spending breakdown (how the bounty money was used), or reject. */
+function SpendForm({ onApprove, onReject }: { onApprove: (spend: SpendLine[], note: string) => void; onReject: () => void }) {
+  const [amounts, setAmounts] = useState<Record<string, string>>({})
+  const [note, setNote] = useState('')
+  const lines = SPEND_TEMPLATE.map((label) => ({ label, amount: Number(amounts[label] || 0) })).filter((l) => l.amount > 0)
+  const total = lines.reduce((s, l) => s + l.amount, 0)
+  return (
+    <div className="mt-3 space-y-2">
+      <p className="text-xs font-extrabold uppercase tracking-[.12em] text-[#5d746e]">How was the money spent?</p>
+      <div className="grid grid-cols-2 gap-2">
+        {SPEND_TEMPLATE.map((label) => (
+          <label key={label} className="text-xs text-[#5d746e]">
+            {label}
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={amounts[label] ?? ''}
+              onChange={(e) => setAmounts((a) => ({ ...a, [label]: e.target.value }))}
+              className="fn-field mt-1 py-2 text-sm"
+            />
+          </label>
+        ))}
+      </div>
+      <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note, e.g. 14 bags, county truck collected at 4pm" className="fn-field text-sm" />
+      <p className="text-xs text-[#5d746e]">Total: {total.toLocaleString()}</p>
+      <div className="flex gap-2">
+        <button type="button" onClick={() => onApprove(lines, note)} className="rounded-lg bg-[#0b8c76] px-3 py-2 text-xs font-bold text-white">
+          Approve, mark cleaned & paid
+        </button>
+        <button type="button" onClick={onReject} className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-[#a44738]">
+          Reject, reopen
+        </button>
+      </div>
+    </div>
   )
 }
