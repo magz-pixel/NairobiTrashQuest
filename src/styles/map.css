@@ -68,3 +68,35 @@
 
 .rt-bounty-chip { padding: 3px 8px; border-radius: 999px; border: 2px solid #fff; background: #fbbf24; color: #063b32; font: 800 11px 'Plus Jakarta Sans', system-ui, sans-serif; box-shadow: 0 6px 16px rgba(6,59,50,.3); white-space: nowrap; cursor: pointer; }
 .rt-bounty-chip.is-open { background: #0b8c76; color: #fff; animation: rt-glow 1.8s ease-in-out infinite; }
+
+/* ───────────── Dark map mode (Map theme toggle, or Auto after sunset) ─────────────
+   Scoped to the map screen (.map-experience[data-dark]) and the app tab bar while it's open
+   (html[data-map-dark]). Recolours the light surfaces and ink the map UI uses; gold buttons
+   keep their dark text for contrast. */
+.map-experience[data-dark] { --dk-bg: #0b1f1b; --dk-surface: #12302a; --dk-surface-2: #183a33; --dk-line: rgba(255,255,255,.12); --dk-ink: #e6f2ee; --dk-muted: #9fbab2; background: var(--dk-bg); color-scheme: dark; }
+.map-experience[data-dark] .bg-white,
+.map-experience[data-dark] [class*="bg-white/9"],
+.map-experience[data-dark] .bg-\[\#f7fbf9\],
+.map-experience[data-dark] .bg-\[\#f4f7f2\],
+.map-experience[data-dark] .bg-\[\#f3f7f4\],
+.map-experience[data-dark] .bg-\[\#dce8e1\] { background-color: var(--dk-surface) !important; }
+.map-experience[data-dark] .bg-\[\#effaf5\],
+.map-experience[data-dark] .bg-\[\#d9e9e4\],
+.map-experience[data-dark] .bg-\[\#e5f0eb\] { background-color: var(--dk-surface-2) !important; }
+.map-experience[data-dark] :is(.text-\[\#063b32\], .text-\[\#12332d\]):not([class*="bg-gold"]):not([class*="bg-[#fbbf24]"]) { color: var(--dk-ink) !important; }
+.map-experience[data-dark] :is(.text-\[\#5d746e\], .text-\[\#6a827b\], .text-\[\#71867f\], .text-\[\#9ab0a8\], .text-\[\#617972\]) { color: var(--dk-muted) !important; }
+.map-experience[data-dark] .text-\[\#0b8c76\] { color: #5eead4 !important; }
+.map-experience[data-dark] :is(.border-\[\#d9e9e4\], .border-\[\#e5efeb\], .border-\[\#cfe9df\], [class*="border-white/"]) { border-color: var(--dk-line) !important; }
+.map-experience[data-dark] .hover\:bg-emerald-50:hover { background-color: var(--dk-surface-2) !important; }
+.map-experience[data-dark] :is(input, textarea, select) { background: var(--dk-surface-2); color: var(--dk-ink); border-color: var(--dk-line); }
+.map-experience[data-dark] .fn-field { background: var(--dk-surface-2); color: var(--dk-ink); border-color: var(--dk-line); }
+
+html[data-map-dark] nav[aria-label="App"] { background: rgba(11,31,27,.96) !important; border-color: rgba(255,255,255,.1) !important; color-scheme: dark; }
+html[data-map-dark] nav[aria-label="App"] .text-\[\#063b32\] { color: #e6f2ee !important; }
+html[data-map-dark] nav[aria-label="App"] .text-\[\#7b8c85\] { color: #8aa7a0 !important; }
+html[data-map-dark] nav[aria-label="App"] .ring-white { --tw-ring-color: #0b1f1b; }
+html[data-map-dark] body { background: #0b1f1b; }
+.map-experience[data-dark] .maplibregl-ctrl-attrib { background: rgba(11,31,27,.85) !important; color: #9fbab2; }
+.map-experience[data-dark] .maplibregl-ctrl-attrib a { color: #cfe6df; }
+.map-experience[data-dark] .maplibregl-ctrl-attrib-button { filter: invert(1); }
+.map-experience[data-dark] :is(.bg-\[\#e7f4ef\], .bg-\[\#cfe1da\], .bg-\[\#eef6f2\], .bg-\[\#f8fbf9\]) { background-color: var(--dk-surface-2) !important; }
